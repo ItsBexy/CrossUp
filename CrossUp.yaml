@@ -1,0 +1,11 @@
+name: CrossUp
+author: ItsBexy
+description: |-
+  This plugin provides customizations for the look and feel of the Cross Hotbar.
+  
+  -Split up the left/right hotbars
+  -Display Expanded Hold Controls Separately
+  -Customize colors and element positions
+punchline: Customize the Cross Hotbar!
+repo_url: 
+dalamud_api_level: 6
