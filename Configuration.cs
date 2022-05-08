@@ -24,7 +24,6 @@ namespace CrossUp
         public Vector2 SetTextOffset { get; set; } = new(0f, 0f);
         public Vector2 ChangeSetOffset { get; set; } = new(0f, 0f);
 
-        // the below exist just to make saving less cumbersome
 
         [NonSerialized]
         private DalamudPluginInterface? pluginInterface;

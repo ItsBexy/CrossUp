@@ -154,7 +154,16 @@ namespace CrossUp
         public void ExBarActivate(int barID)    // runs when a bar is selected to be one of the borrowed bars in CrossUp configs
         {
             XivCommon.Functions.Chat.SendMessage($"/hotbar display " + (barID + 1) + " on"); // show the borrowed bar if it was hidden
-            ArrangeAndFill(0, 0, true, true);
+
+            var baseEx = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            var nodesEx = baseEx->UldManager.NodeList;
+
+            for (var i=12;i<=20;i++)
+            {
+                nodesEx[i]->Flags_2 |= 0xD;
+            }
+
+            UpdateBarState(true, true);
             return;
         }
 
@@ -187,19 +196,20 @@ namespace CrossUp
             int anchorX = (int)(nodesXHB[0]->X + (146 * scale));
             int anchorY = (int)(nodesXHB[0]->Y + (70 * scale));
 
-            if (Configuration.SepExBar) ArrangeExBars(state, prevState, scale, anchorX, anchorY, forceArrange);
+            bool arrangeEX = cfg.SepExBar && cfg.borrowBarL > 0 && cfg.borrowBarR > 0;
+            if (arrangeEX) ArrangeExBars(state, prevState, scale, anchorX, anchorY, forceArrange);
 
-            int lX = cfg.SepExBar ? cfg.lX : 0;
-            int lY = cfg.SepExBar ? cfg.lY : 0;
-            int rX = cfg.SepExBar ? cfg.rX : 0;
-            int rY = cfg.SepExBar ? cfg.rY : 0;
+            int lX = arrangeEX ? cfg.lX : 0;
+            int lY = arrangeEX ? cfg.lY : 0;
+            int rX = arrangeEX ? cfg.rX : 0;
+            int rY = arrangeEX ? cfg.rY : 0;
 
-            bool hideDivider = cfg.Split > 0 || cfg.SepExBar == true;
+            bool hideDivider = cfg.Split > 0 || cfg.SepExBar;
 
             // NOTE: hardcoding a lot of default coordinate values for nodes in here. should probably consolidate those into a handy index and then just reference
 
             NodeEdit.SetSize(nodesXHB[7],(ushort)(hideDivider?0:9),(ushort)(hideDivider ? 0 : 76));
-            NodeEdit.SetPos(nodesXHB[26], 284f + cfg.PadlockOffset.X + (cfg.Split), 152f + cfg.PadlockOffset.Y);
+            NodeEdit.SetPos(nodesXHB[26], 284f + cfg.PadlockOffset.X + cfg.Split, 152f + cfg.PadlockOffset.Y);
             NodeEdit.SetPos(nodesXHB[27], 146F + cfg.Split + cfg.ChangeSetOffset.X, cfg.ChangeSetOffset.Y);
             NodeEdit.SetPos(nodesXHB[21], 230F + cfg.Split + cfg.SetTextOffset.X, 170F + cfg.SetTextOffset.Y);
 
@@ -228,7 +238,7 @@ namespace CrossUp
                         NodeEdit.SetSize(nodesXHB[5], (ushort)(cfg.selectHide || (mixBar && cfg.Split > 0) ? 0 : 166), 140);
                         NodeEdit.SetSize(nodesXHB[6], (ushort)(cfg.selectHide || (mixBar && cfg.Split > 0) ? 0 : 166), 140);
 
-                        if (prevState == 3 && cfg.SepExBar && !mixBar)
+                        if (prevState == 3 && arrangeEX && !mixBar)
                         {
                             NodeEdit.SetPos(nodesXHB[8], 9999F, 9999F); //extremely lazy way to hide these :p
                             NodeEdit.SetPos(nodesXHB[9], 9999F, 9999F);
@@ -251,7 +261,7 @@ namespace CrossUp
                         NodeEdit.SetSize(nodesXHB[5], (ushort)(cfg.selectHide || (mixBar && cfg.Split > 0) ? 0 : 166), 140);
                         NodeEdit.SetSize(nodesXHB[6], (ushort)(cfg.selectHide || (mixBar && cfg.Split > 0) ? 0 : 166), 140);
 
-                        if (prevState == 4 && cfg.SepExBar && !mixBar)
+                        if (prevState == 4 && arrangeEX && !mixBar)
                         {
                             NodeEdit.SetPos(nodesXHB[10], 9999F, 9999F);
                             NodeEdit.SetPos(nodesXHB[11], 9999F, 9999F);
@@ -300,6 +310,8 @@ namespace CrossUp
 
             SetKeybindVis(lId, false);
             SetKeybindVis(rId, false);
+            SetDragDropNodeVis(lId, true);
+            SetDragDropNodeVis(rId, true);
 
             var baseExL = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[lId], 1);
             var baseExR = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[rId], 1);
@@ -621,12 +633,22 @@ namespace CrossUp
         {
             var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
             var nodes = baseHotbar->UldManager.NodeList;
-            for (var i=12;i<=20;i++)
+            for (var i=9;i<=20;i++)
             {
                 var keyTextNode = nodes[i]->GetComponent()->UldManager.NodeList[1];
                 NodeEdit.SetVis(keyTextNode,show);
             }
 
+            return;
+        }
+        private void SetDragDropNodeVis(int barID, bool show) {
+            var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            var nodes = baseHotbar->UldManager.NodeList;
+            for (var i = 9; i <= 20; i++)
+            {
+                var dragDropNode = nodes[i]->GetComponent()->UldManager.NodeList[0];
+                NodeEdit.SetVis(dragDropNode, show);
+            }
             return;
         }
         public void SetSelectColor(bool revert = false) //apply highlight colour chosen in CrossUp settings
