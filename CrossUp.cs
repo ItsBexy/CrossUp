@@ -100,9 +100,6 @@ namespace CrossUp
         // HOOKS AND EVENTS
         private void OnMainCommand(string command, string args)
         {
-            var barBaseXHB = (AddonActionBarBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
-            var xBar = (AddonActionCross*)barBaseXHB;
-
             this.CrossUpUI.SettingsVisible = true;
         }
         private void FrameworkUpdate(DalamudFramework framework)
@@ -301,6 +298,9 @@ namespace CrossUp
             int lId = this.Configuration.borrowBarL;
             int rId = this.Configuration.borrowBarR;
 
+            SetKeybindVis(lId, false);
+            SetKeybindVis(rId, false);
+
             var baseExL = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[lId], 1);
             var baseExR = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[rId], 1);
             var nodesExL = baseExL->UldManager.NodeList;
@@ -317,7 +317,7 @@ namespace CrossUp
             NodeEdit.SetVarious(nodesExL[0], new NodeEdit.NodeProps
             {
                 Scale = scale,
-                X = (float)(anchorX + lX * scale),
+                X = (float)(anchorX + lX * scale +cfg.Split),
                 Y = (float)(anchorY + lY * scale),
                 OriginX = 0,
                 OriginY = 0,
@@ -329,7 +329,7 @@ namespace CrossUp
             NodeEdit.SetVarious(nodesExR[0], new NodeEdit.NodeProps
             {
                 Scale = scale,
-                X = (float)(anchorX + rX * scale),
+                X = (float)(anchorX + rX * scale + cfg.Split),
                 Y = (float)(anchorY + rY * scale),
                 OriginX = 0,
                 OriginY = 0,
@@ -366,23 +366,23 @@ namespace CrossUp
                         SlotRangeVis(16, 31, false);
                         SetLastEightVis(nodesExL, nodesExR, false);
 
-                        PlaceExButton(nodesExL[20], 0, cfg.Split, 0, state, true); //left EXHB
-                        PlaceExButton(nodesExL[19], 1, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[18], 2, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[17], 3, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[16], 4, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[15], 5, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[14], 6, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[13], 7, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExL[20], 0,0, 0, state, true); //left EXHB
+                        PlaceExButton(nodesExL[19], 1, 0, 0, state, true);
+                        PlaceExButton(nodesExL[18], 2, 0, 0, state, true);
+                        PlaceExButton(nodesExL[17], 3, 0, 0, state, true);
+                        PlaceExButton(nodesExL[16], 4, 0, 0, state, true);
+                        PlaceExButton(nodesExL[15], 5, 0, 0, state, true);
+                        PlaceExButton(nodesExL[14], 6, 0, 0, state, true);
+                        PlaceExButton(nodesExL[13], 7, 0, 0, state, true);
 
-                        PlaceExButton(nodesExR[20], 8, cfg.Split, 0, state, true); // right EXHB
-                        PlaceExButton(nodesExR[19], 9, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[18], 10, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[17], 11, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[16], 12, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[15], 13, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[14], 14, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[13], 15, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExR[20], 8,0, 0, state, true); // right EXHB
+                        PlaceExButton(nodesExR[19], 9, 0, 0, state, true);
+                        PlaceExButton(nodesExR[18], 10, 0, 0, state, true);
+                        PlaceExButton(nodesExR[17], 11, 0, 0, state, true);
+                        PlaceExButton(nodesExR[16], 12, 0, 0, state, true);
+                        PlaceExButton(nodesExR[15], 13, 0, 0, state, true);
+                        PlaceExButton(nodesExR[14], 14, 0, 0, state, true);
+                        PlaceExButton(nodesExR[13], 15, 0, 0, state, true);
                     }
                     break;
                 case 1:
@@ -398,34 +398,34 @@ namespace CrossUp
                         SlotRangeScale(16, 23, 1.1F);
                         SetLastEightVis(nodesExL, nodesExR, prevState == 3 && !mixBar);
 
-                        PlaceExButton(nodesExL[20], 0, cfg.Split, 0, state, true);   //left EXHB
-                        PlaceExButton(nodesExL[19], 1, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[18], 2, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[17], 3, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExL[20], 0, 0, 0, state, true);   //left EXHB
+                        PlaceExButton(nodesExL[19], 1, 0, 0, state, true);
+                        PlaceExButton(nodesExL[18], 2, 0, 0, state, true);
+                        PlaceExButton(nodesExL[17], 3, 0, 0, state, true);
 
-                        PlaceExButton(nodesExL[16], 4, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[15], 5, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[14], 6, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[13], 7, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[20], 8, cfg.Split, 0, state, true);   //right EXHB
-                        PlaceExButton(nodesExR[19], 9, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[18], 10, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[17], 11, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[16], 12, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[15], 13, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[14], 14, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[13], 15, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExL[16], 4, 0, 0, state, true);
+                        PlaceExButton(nodesExL[15], 5, 0, 0, state, true);
+                        PlaceExButton(nodesExL[14], 6, 0, 0, state, true);
+                        PlaceExButton(nodesExL[13], 7, 0, 0, state, true);
+                        PlaceExButton(nodesExR[20], 8, 0, 0, state, true);   //right EXHB
+                        PlaceExButton(nodesExR[19], 9, 0, 0, state, true);
+                        PlaceExButton(nodesExR[18], 10, 0, 0, state, true);
+                        PlaceExButton(nodesExR[17], 11, 0, 0, state, true);
+                        PlaceExButton(nodesExR[16], 12, 0, 0, state, true);
+                        PlaceExButton(nodesExR[15], 13, 0, 0, state, true);
+                        PlaceExButton(nodesExR[14], 14, 0, 0, state, true);
+                        PlaceExButton(nodesExR[13], 15, 0, 0, state, true);
 
-                        PlaceExButton(nodesExL[12], 24, -lX + cfg.Split * 2, -lY, state, true); //right bar (left buttons)
-                        PlaceExButton(nodesExL[11], 25, -lX + cfg.Split * 2, -lY, state, true);
-                        PlaceExButton(nodesExL[10], 26, -lX + cfg.Split * 2, -lY, state, true);
-                        PlaceExButton(nodesExL[9], 27, -lX + cfg.Split * 2, -lY, state, true);
+                        PlaceExButton(nodesExL[12], 24, -lX + cfg.Split, -lY, state, true); //right bar (left buttons)
+                        PlaceExButton(nodesExL[11], 25, -lX + cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[10], 26, -lX + cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[9], 27, -lX + cfg.Split, -lY, state, true);
 
 
-                        PlaceExButton(nodesExR[12], 28, -rX + cfg.Split * 2, -rY, state, true);  //right bar (right buttons)
-                        PlaceExButton(nodesExR[11], 29, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[10], 30, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[9], 31, -rX + cfg.Split * 2, -rY, state, true);
+                        PlaceExButton(nodesExR[12], 28, -rX + cfg.Split, -rY, state, true);  //right bar (right buttons)
+                        PlaceExButton(nodesExR[11], 29, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[10], 30, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[9], 31, -rX + cfg.Split, -rY, state, true);
                     }
 
                     break;
@@ -442,33 +442,33 @@ namespace CrossUp
                         SlotRangeScale(24, 31, 1.1F);
                         SetLastEightVis(nodesExL, nodesExR, prevState == 4 && !mixBar);
 
-                        PlaceExButton(nodesExL[20], 0, cfg.Split, 0, state, true); //left EXHB
-                        PlaceExButton(nodesExL[19], 1, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[18], 2, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[17], 3, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[16], 4, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[15], 5, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[14], 6, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[13], 7, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExL[20], 0, 0, 0, state, true); //left EXHB
+                        PlaceExButton(nodesExL[19], 1, 0, 0, state, true);
+                        PlaceExButton(nodesExL[18], 2, 0, 0, state, true);
+                        PlaceExButton(nodesExL[17], 3, 0, 0, state, true);
+                        PlaceExButton(nodesExL[16], 4, 0, 0, state, true);
+                        PlaceExButton(nodesExL[15], 5, 0, 0, state, true);
+                        PlaceExButton(nodesExL[14], 6, 0, 0, state, true);
+                        PlaceExButton(nodesExL[13], 7, 0, 0, state, true);
 
-                        PlaceExButton(nodesExR[20], 8, cfg.Split, 0, state, true);   //right EXHB
-                        PlaceExButton(nodesExR[19], 9, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[18], 10, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[17], 11, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[16], 12, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[15], 13, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[14], 14, cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[13], 15, cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExR[20], 8, 0, 0, state, true);   //right EXHB
+                        PlaceExButton(nodesExR[19], 9, 0, 0, state, true);
+                        PlaceExButton(nodesExR[18], 10, 0, 0, state, true);
+                        PlaceExButton(nodesExR[17], 11, 0, 0, state, true);
+                        PlaceExButton(nodesExR[16], 12, 0, 0, state, true);
+                        PlaceExButton(nodesExR[15], 13, 0, 0, state, true);
+                        PlaceExButton(nodesExR[14], 14, 0, 0, state, true);
+                        PlaceExButton(nodesExR[13], 15, 0, 0, state, true);
 
-                        PlaceExButton(nodesExL[12], 16, -lX, -lY, state, true); // left bar (left buttons)
-                        PlaceExButton(nodesExL[11], 17, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[10], 18, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[9], 19, -lX, -lY, state, true);
+                        PlaceExButton(nodesExL[12], 16, -lX - cfg.Split, -lY, state, true); // left bar (left buttons)
+                        PlaceExButton(nodesExL[11], 17, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[10], 18, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[9], 19, -lX - cfg.Split, -lY, state, true);
 
-                        PlaceExButton(nodesExR[12], 20, -rX, -rY, state, true); //left bar (right buttons)
-                        PlaceExButton(nodesExR[11], 21, -rX, -rY, state, true);
-                        PlaceExButton(nodesExR[10], 22, -rX, -rY, state, true);
-                        PlaceExButton(nodesExR[9], 23, -rX, -rY, state, true);
+                        PlaceExButton(nodesExR[12], 20, -rX - cfg.Split, -rY, state, true); //left bar (right buttons)
+                        PlaceExButton(nodesExR[11], 21, -rX - cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[10], 22, -rX - cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[9], 23, -rX - cfg.Split, -rY, state, true);
                     }
 
                     break;
@@ -482,32 +482,32 @@ namespace CrossUp
                         SlotRangeScale(0, 7, 1.1F);
                         if (mixBar) { SlotRangeScale(20, 23, 0.85F); }
 
-                        PlaceExButton(nodesExL[20], 16, -lX, -lY, state, true); //inactive main XHB (first 3 sections)
-                        PlaceExButton(nodesExL[19], 17, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[18], 18, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[17], 19, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 16 : 12], 20, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 15 : 11], 21, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 14 : 10], 22, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 13 : 9], 23, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 12 : 16], 24, -lX + cfg.Split * 2, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 11 : 15], 25, -lX + cfg.Split * 2, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 10 : 14], 26, -lX + cfg.Split * 2, -lY, state, true);
-                        PlaceExButton(nodesExL[!mixBar ? 9 : 13], 27, -lX + cfg.Split * 2, -lY, state, true);
+                        PlaceExButton(nodesExL[20], 16, -lX - cfg.Split, -lY, state, true); //inactive main XHB (first 3 sections)
+                        PlaceExButton(nodesExL[19], 17, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[18], 18, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[17], 19, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 16 : 12], 20, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 15 : 11], 21, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 14 : 10], 22, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 13 : 9], 23, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 12 : 16], 24, -lX + cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 11 : 15], 25, -lX + cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 10 : 14], 26, -lX + cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[!mixBar ? 9 : 13], 27, -lX + cfg.Split, -lY, state, true);
 
-                        PlaceExButton(nodesExR[20], 8, +cfg.Split, 0, state, true); // right EXHB
-                        PlaceExButton(nodesExR[19], 9, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[18], 10, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[17], 11, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[16], 12, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[15], 13, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[14], 14, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExR[13], 15, +cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExR[20], 8, 0, 0, state, true); // right EXHB
+                        PlaceExButton(nodesExR[19], 9, 0, 0, state, true);
+                        PlaceExButton(nodesExR[18], 10, 0, 0, state, true);
+                        PlaceExButton(nodesExR[17], 11, 0, 0, state, true);
+                        PlaceExButton(nodesExR[16], 12, 0, 0, state, true);
+                        PlaceExButton(nodesExR[15], 13, 0, 0, state, true);
+                        PlaceExButton(nodesExR[14], 14, 0, 0, state, true);
+                        PlaceExButton(nodesExR[13], 15, 0, 0, state, true);
 
-                        PlaceExButton(nodesExR[12], 28, -rX + cfg.Split * 2, -rY, state, true); // inactive main XHB (4th section)
-                        PlaceExButton(nodesExR[11], 29, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[10], 30, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[9], 31, -rX + cfg.Split * 2, -rY, state, true);
+                        PlaceExButton(nodesExR[12], 28, -rX + cfg.Split, -rY, state, true); // inactive main XHB (4th section)
+                        PlaceExButton(nodesExR[11], 29, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[10], 30, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[9], 31, -rX + cfg.Split, -rY, state, true);
                     }
 
                     break;
@@ -522,32 +522,32 @@ namespace CrossUp
                         SlotRangeScale(8, 15, 1.1F);
                         if (mixBar) SlotRangeScale(24, 27, 0.85F);
 
-                        PlaceExButton(nodesExL[20], 0, +cfg.Split, 0, state, true); // left EXHB
-                        PlaceExButton(nodesExL[19], 1, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[18], 2, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[17], 3, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[16], 4, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[15], 5, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[14], 6, +cfg.Split, 0, state, true);
-                        PlaceExButton(nodesExL[13], 7, +cfg.Split, 0, state, true);
+                        PlaceExButton(nodesExL[20], 0, 0, 0, state, true); // left EXHB
+                        PlaceExButton(nodesExL[19], 1, 0, 0, state, true);
+                        PlaceExButton(nodesExL[18], 2, 0, 0, state, true);
+                        PlaceExButton(nodesExL[17], 3, 0, 0, state, true);
+                        PlaceExButton(nodesExL[16], 4, 0, 0, state, true);
+                        PlaceExButton(nodesExL[15], 5, 0, 0, state, true);
+                        PlaceExButton(nodesExL[14], 6, 0, 0, state, true);
+                        PlaceExButton(nodesExL[13], 7, 0, 0, state, true);
 
-                        PlaceExButton(nodesExL[12], 16, -lX, -lY, state, true); //main XHB (first section)
-                        PlaceExButton(nodesExL[11], 17, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[10], 18, -lX, -lY, state, true);
-                        PlaceExButton(nodesExL[9], 19, -lX, -lY, state, true);
+                        PlaceExButton(nodesExL[12], 16, -lX - cfg.Split, -lY, state, true); //main XHB (first section)
+                        PlaceExButton(nodesExL[11], 17, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[10], 18, -lX - cfg.Split, -lY, state, true);
+                        PlaceExButton(nodesExL[9], 19, -lX - cfg.Split, -lY, state, true);
 
-                        PlaceExButton(nodesExR[!mixBar ? 12 : 20], 20, -rX, -rY, state, true); //main XHB (second section)
-                        PlaceExButton(nodesExR[!mixBar ? 11 : 19], 21, -rX, -rY, state, true);
-                        PlaceExButton(nodesExR[!mixBar ? 10 : 18], 22, -rX, -rY, state, true);
-                        PlaceExButton(nodesExR[!mixBar ? 9 : 17], 23, -rX, -rY, state, true);
-                        PlaceExButton(nodesExR[!mixBar ? 20 : 12], 24, -rX + cfg.Split * 2, -rY, state, true); //main XHB (right side)
-                        PlaceExButton(nodesExR[!mixBar ? 19 : 11], 25, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[!mixBar ? 18 : 10], 26, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[!mixBar ? 17 : 9], 27, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[16], 28, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[15], 29, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[14], 30, -rX + cfg.Split * 2, -rY, state, true);
-                        PlaceExButton(nodesExR[13], 31, -rX + cfg.Split * 2, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 12 : 20], 20, -rX - cfg.Split, -rY, state, true); //main XHB (second section)
+                        PlaceExButton(nodesExR[!mixBar ? 11 : 19], 21, -rX - cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 10 : 18], 22, -rX - cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 9 : 17], 23, -rX - cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 20 : 12], 24, -rX + cfg.Split, -rY, state, true); //main XHB (right side)
+                        PlaceExButton(nodesExR[!mixBar ? 19 : 11], 25, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 18 : 10], 26, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[!mixBar ? 17 : 9], 27, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[16], 28, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[15], 29, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[14], 30, -rX + cfg.Split, -rY, state, true);
+                        PlaceExButton(nodesExR[13], 31, -rX + cfg.Split, -rY, state, true);
                     }
                     break;
             }
@@ -617,6 +617,18 @@ namespace CrossUp
                 nodesR[i]->Color.A = alpha;
             }
         }//set alpha of our Ex buttons
+        private void SetKeybindVis(int barID, bool show)
+        {
+            var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            var nodes = baseHotbar->UldManager.NodeList;
+            for (var i=12;i<=20;i++)
+            {
+                var keyTextNode = nodes[i]->GetComponent()->UldManager.NodeList[1];
+                NodeEdit.SetVis(keyTextNode,show);
+            }
+
+            return;
+        }
         public void SetSelectColor(bool revert = false) //apply highlight colour chosen in CrossUp settings
         {
             var selectColor = revert ? new(1F, 1F, 1F) : this.Configuration.selectColor;
@@ -698,6 +710,8 @@ namespace CrossUp
                     Scale = 1F
                 });
             }
+
+            SetKeybindVis(barID, true);
             return;
         }
 

@@ -14,8 +14,8 @@ namespace CrossUp
         public int lY { get; set; } = -88;
         public int rX { get; set; } = 214;
         public int rY { get; set; } = -88;
-        public int borrowBarL { get; set; } = 6;
-        public int borrowBarR { get; set; } = 7;
+        public int borrowBarL { get; set; } = 8;
+        public int borrowBarR { get; set; } = 9;
         public int Split { get; set; } = 0;
         public Vector3 selectColor { get; set; } = new(1, 1, 1);
         public bool selectHide { get; set; } = false;
