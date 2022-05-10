@@ -2,6 +2,7 @@
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Game.ClientState;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -33,6 +34,7 @@ namespace CrossUp
         ConfigModule* charConfigs = ConfigModule.Instance();
         RaptureHotbarModule* raptureModule = ClientStructsFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
+        public bool initialized;
         public CrossUp(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
             [RequiredVersion("1.0")] CommandManager commandManager)
@@ -57,10 +59,8 @@ namespace CrossUp
             actionBarBaseUpdateHook ??= Common.Hook<ActionBarBaseUpdate>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
 
             Service.Framework.Update += FrameworkUpdate;
-            actionBarBaseUpdateHook?.Enable();
+            initialized = false;
 
-            SetSelectColor();
-            ArrangeAndFill(0, 0, true, false);
         }
 
         private void DrawUI()
@@ -96,17 +96,40 @@ namespace CrossUp
             CommandManager.RemoveHandler(mainCommand);
         }
 
-
         // HOOKS AND EVENTS
         private void OnMainCommand(string command, string args)
         {
             this.CrossUpUI.SettingsVisible = true;
         }
+
         private void FrameworkUpdate(DalamudFramework framework)
         {
-            if (tweensExist) TweenAllButtons();
+            var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
+            if (!initialized && Service.ClientState.IsLoggedIn && baseXHB != null)
+            {
+                try
+                {
+                    Initialize();
+                } catch (Exception ex)
+                {
+                    PluginLog.Log(ex+"");
+                }
+            }
+            else
+            {
+                if (tweensExist) TweenAllButtons();
+            }
             return;
         }
+        private void Initialize()
+        {
+            actionBarBaseUpdateHook?.Enable();
+            SetSelectColor();
+            UpdateBarState(true, false);
+            initialized = true;
+            return;
+        }
+
         private byte ActionBarBaseUpdateDetour(AddonActionBarBase* addonActionBarBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
         {
             if (addonActionBarBase->HotbarID == 0) // all the bars fire at once every time anything happens, so we'll just take the first bar
@@ -138,6 +161,11 @@ namespace CrossUp
             var baseLL = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
             var baseRR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
 
+            if (barBaseXHB == null || xBar == null || baseLL == null || baseRR == null)
+            {
+                return crossBarState;
+            }
+
             int newCrossBarState = 
             xBar->LeftBar                             ? 1 : // LEFT BAR
             xBar->RightBar                            ? 2 : // RIGHT BAR
@@ -156,6 +184,7 @@ namespace CrossUp
             XivCommon.Functions.Chat.SendMessage($"/hotbar display " + (barID + 1) + " on"); // show the borrowed bar if it was hidden
 
             var baseEx = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            if (baseEx == null) { return; }
             var nodesEx = baseEx->UldManager.NodeList;
 
             for (var i=12;i<=20;i++)
@@ -179,6 +208,8 @@ namespace CrossUp
             Configuration cfg = Configuration;
 
             var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
+            if (baseXHB == null) { return; }
+
             var nodesXHB = baseXHB->UldManager.NodeList;
             var scale = nodesXHB[0]->ScaleX;
             bool mixBar = GetCharConfig(535)==1;
@@ -315,6 +346,8 @@ namespace CrossUp
 
             var baseExL = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[lId], 1);
             var baseExR = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[rId], 1);
+            if (baseExL == null || baseExR == null) { return; }
+
             var nodesExL = baseExL->UldManager.NodeList;
             var nodesExR = baseExR->UldManager.NodeList;
 
@@ -632,6 +665,8 @@ namespace CrossUp
         private void SetKeybindVis(int barID, bool show)
         {
             var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            if (baseHotbar == null) { return; }
+
             var nodes = baseHotbar->UldManager.NodeList;
             for (var i=9;i<=20;i++)
             {
@@ -643,6 +678,8 @@ namespace CrossUp
         }
         private void SetDragDropNodeVis(int barID, bool show) {
             var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            if (baseHotbar == null) { return; }
+
             var nodes = baseHotbar->UldManager.NodeList;
             for (var i = 9; i <= 20; i++)
             {
@@ -658,6 +695,7 @@ namespace CrossUp
             var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             var baseRR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
             var baseLL = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
+            if (baseXHB == null || baseRR == null || baseLL == null) { return; }
 
             NodeEdit.SetColor(baseXHB->UldManager.NodeList[4], selectColor);
             NodeEdit.SetColor(baseXHB->UldManager.NodeList[5], selectColor);
@@ -685,6 +723,8 @@ namespace CrossUp
         public void ResetHud()  //cleanup: reset all the node properties we've messed with and restore actions to borrowed bars
         {
             var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
+            if (baseXHB == null) { return; }
+
             var nodesXHB = baseXHB->UldManager.NodeList;
             NodeEdit.SetSize(nodesXHB[7], 9, 76);
             NodeEdit.SetPos(nodesXHB[26], 284F, 152F);
@@ -707,6 +747,8 @@ namespace CrossUp
         public void ResetBarPos(int barID) //put a borrowed hotbar back the way we found it based on HUD layout settings
         {
             var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+            if (baseHotbar == null) { return; }
+
             var nodes = baseHotbar->UldManager.NodeList;
 
             var gridType = GetCharConfig((uint)(barID + 501));
