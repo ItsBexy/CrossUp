@@ -46,3 +46,12 @@ public struct AddonActionCross
     [FieldOffset(0x702)] public bool RightBar;
     [FieldOffset(0x704)] public bool PetBar;
 }
+
+[StructLayout(LayoutKind.Explicit, Size = 0x2F8)]
+[Addon("_ActionDoubleCrossL", "_ActionDoubleCrossR")]
+public struct AddonActionDoubleCrossBase
+{
+    [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
+    [FieldOffset(0x2EC)] public byte UseLeftSide;
+    [FieldOffset(0x2E8)] public byte BarTarget;
+}

@@ -103,6 +103,28 @@ public static unsafe partial class NodeEdit
         return;
     }
 
+    public class ByLookup // grab and edit things using name and default props from Reference.cs
+    {
+        public static void RelativePos(Ref.nodeProps props, float offX, float offY)
+        {
+            SetPos(props.unitBase->UldManager.NodeList[props.Id], props.pos.X + offX, props.pos.Y + offY);
+            return;
+        }
+        public static void AbsoluteSize(Ref.nodeProps props, ushort? width = null, ushort? height = null)
+        {
+            if (width == null) { width = (ushort)props.size.X; }
+            if (height == null) { height = (ushort)props.size.Y; }
+            SetSize(props.unitBase->UldManager.NodeList[props.Id], (ushort)width, (ushort)height);
+            return;
+        }
 
+        public static void AbsolutePos(Ref.nodeProps props, float? x = null, float? y = null)
+        {
+            if (x == null) { x = props.pos.X; }
+            if (y == null) { y = props.pos.Y; }
+            SetPos(props.unitBase->UldManager.NodeList[props.Id], (float)x, (float)y);
+            return;
+        }
+    };
 
 }
