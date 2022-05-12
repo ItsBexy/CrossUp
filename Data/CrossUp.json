@@ -5,7 +5,7 @@
   "Description": "This plugin provides customizations for the look and feel of the Cross Hotbar\n\n-Split up the left/right hotbars\nDisplay Expanded Hold Controls Separately\n-Customize colors and element positions",
   "InternalName": "crossUp",
   "ApplicableVersion": "any",
-  "AssemblyVersion": "0.1.1.0",
+  "AssemblyVersion": "0.1.1.1",
   "Tags": [
     "hobar",
     "ui",

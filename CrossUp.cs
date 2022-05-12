@@ -11,6 +11,7 @@ using System.Numerics;
 using XivCommon;
 using ClientStructsFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 using DalamudFramework = Dalamud.Game.Framework;
+using System.Threading.Tasks;
 
 namespace CrossUp
 {
@@ -18,10 +19,8 @@ namespace CrossUp
     {
         public string Name => "CrossUp";
         private const string mainCommand = "/pcrossup";
-
         private readonly ActionManager* actionManager;
-        public Configuration PluginConfig { get; private set; }
-        public static CrossUp Plugin { get; private set; }
+        public static CrossUp? Plugin { get; private set; }
         public XivCommonBase XivCommon { get; private set; }
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
@@ -57,12 +56,12 @@ namespace CrossUp
             this.XivCommon = new XivCommonBase();
 
             actionBarBaseUpdateHook ??= Common.Hook<ActionBarBaseUpdate>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
+            actionBarBaseUpdateHook?.Enable();
 
             Service.Framework.Update += FrameworkUpdate;
             initialized = false;
 
         }
-
         private void DrawUI()
         {
             this.CrossUpUI.Draw();
@@ -73,14 +72,13 @@ namespace CrossUp
         }
 
         // Separate EXHB feature toggled on or off
-        public void EnableEx() 
+        public void EnableEx()
         {
             UpdateBarState(true, false);
             return;
         }
         public void DisableEx()
         {
-            ArrangeAndFill(0, 0, true, false);
             ResetHud();
             return;
         }
@@ -101,51 +99,62 @@ namespace CrossUp
         {
             this.CrossUpUI.SettingsVisible = true;
         }
-
         private void FrameworkUpdate(DalamudFramework framework)
         {
-            var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
-            if (!initialized && Service.ClientState.IsLoggedIn && baseXHB != null)
+            if (!initialized && Service.ClientState.IsLoggedIn && (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1) != null)
             {
                 try
                 {
                     Initialize();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
-                    PluginLog.Log(ex+"");
+                    PluginLog.Log(ex + "");
                 }
             }
             else
             {
-                if (tweensExist) TweenAllButtons();
+                if (initialized && tweensExist) TweenAllButtons();
             }
             return;
         }
         private void Initialize()
         {
-            actionBarBaseUpdateHook?.Enable();
+            initialized = true;
             SetSelectColor();
             UpdateBarState(true, false);
-            initialized = true;
+
+            for (var i = 1; i <= 10; i++) Task.Delay(500 * i).ContinueWith(antecedent => { UpdateBarState(true, false); });
+
             return;
         }
-
-        private byte ActionBarBaseUpdateDetour(AddonActionBarBase* addonActionBarBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
+        private byte ActionBarBaseUpdateDetour(AddonActionBarBase* atkUnitBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
         {
-            if (addonActionBarBase->HotbarID == 0) // all the bars fire at once every time anything happens, so we'll just take the first bar
-            {
-                var activeNow = GetCharConfig(586);
-                UpdateBarState(activeNow != crossBarActive, true);
-                crossBarActive = activeNow;
-            }
+            var ret = actionBarBaseUpdateHook.Original(atkUnitBase, numberArrayData, stringArrayData);
 
-            var ret = actionBarBaseUpdateHook.Original(addonActionBarBase, numberArrayData, stringArrayData);
+            if (initialized == true)
+            {
+                try
+                {
+                    if (atkUnitBase->HotbarID == 0) // all the bars fire at once every time anything happens, so we'll just take the first bar
+                    {
+                        var activeNow = GetCharConfig(586);
+                        UpdateBarState(activeNow != crossBarActive, true);
+                        crossBarActive = activeNow;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Log(ex + "");
+                }
+            }
 
             return ret;
         }
+
         private int crossBarState = 0;
         private int crossBarActive = 1;
-        public void UpdateBarState(bool forceArrange = false, bool HudfixCheck = false)  // kind of an intermediary function (cut out this middleman maybe?)
+        public void UpdateBarState(bool forceArrange = false, bool HudfixCheck = false)
         {
             var newCrossBarState = GetCrossBarState();
             ArrangeAndFill(newCrossBarState, crossBarState, forceArrange, HudfixCheck);
@@ -181,18 +190,16 @@ namespace CrossUp
 
         public void ExBarActivate(int barID)    // runs when a bar is selected to be one of the borrowed bars in CrossUp configs
         {
-            XivCommon.Functions.Chat.SendMessage($"/hotbar display " + (barID + 1) + " on"); // show the borrowed bar if it was hidden
-
             var baseEx = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
-            if (baseEx == null) { return; }
-            var nodesEx = baseEx->UldManager.NodeList;
+            if (baseEx == null) return;
 
-            for (var i=12;i<=20;i++)
-            {
-                nodesEx[i]->Flags_2 |= 0xD;
-            }
+            XivCommon.Functions.Chat.SendMessage($"/hotbar display " + (barID + 1) + " on");
 
-            UpdateBarState(true, true);
+            for (var i = 9; i <= 20; i++) baseEx->UldManager.NodeList[i]->Flags_2 |= 0xD;
+
+            UpdateBarState(true, false);
+            Task.Delay(5).ContinueWith(antecedent => { UpdateBarState(true, false); });
+
             return;
         }
 
@@ -212,15 +219,15 @@ namespace CrossUp
 
             var nodesXHB = baseXHB->UldManager.NodeList;
             var scale = nodesXHB[0]->ScaleX;
-            bool mixBar = GetCharConfig(535)==1;
+            bool mixBar = GetCharConfig(535) == 1;
 
             // fix for misalignment after entering HUD Layout interface (unsure if this is sufficient)
             if (HUDfixCheck && baseXHB->X - nodesXHB[0]->X - Math.Round(cfg.Split * scale) < 0) { baseXHB->X += (short)(cfg.Split * scale); }
 
-            NodeEdit.SetVarious(nodesXHB[0],new NodeEdit.NodeProps { //reposition and resize the main bar node based on Split setting
-                X = baseXHB->X - cfg.Split*scale,
+            NodeEdit.SetVarious(nodesXHB[0], new NodeEdit.NodeProps {
+                X = baseXHB->X - cfg.Split * scale,
                 Y = baseXHB->Y,
-                Width = (ushort)(588 + cfg.Split*2),
+                Width = (ushort)(588 + cfg.Split * 2),
                 Height = 210
             });
 
@@ -239,14 +246,14 @@ namespace CrossUp
 
             // NOTE: hardcoding a lot of default coordinate values for nodes in here. should probably consolidate those into a handy index and then just reference
 
-            NodeEdit.SetSize(nodesXHB[7],(ushort)(hideDivider?0:9),(ushort)(hideDivider ? 0 : 76));
+            NodeEdit.SetSize(nodesXHB[7], (ushort)(hideDivider ? 0 : 9), (ushort)(hideDivider ? 0 : 76));
             NodeEdit.SetPos(nodesXHB[26], 284f + cfg.PadlockOffset.X + cfg.Split, 152f + cfg.PadlockOffset.Y);
             NodeEdit.SetPos(nodesXHB[27], 146F + cfg.Split + cfg.ChangeSetOffset.X, cfg.ChangeSetOffset.Y);
             NodeEdit.SetPos(nodesXHB[21], 230F + cfg.Split + cfg.SetTextOffset.X, 170F + cfg.SetTextOffset.Y);
 
             if (state != prevState || forceArrange) // generally only want to rearrange bars if the cross hotbar state has actually changed
             {
-                switch (state) 
+                switch (state)
                 {
                     case 0: // NONE
                     case 5: // LEFT WXHB
@@ -339,14 +346,15 @@ namespace CrossUp
             int lId = this.Configuration.borrowBarL;
             int rId = this.Configuration.borrowBarR;
 
-            SetKeybindVis(lId, false);
-            SetKeybindVis(rId, false);
-            SetDragDropNodeVis(lId, true);
-            SetDragDropNodeVis(rId, true);
 
             var baseExL = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[lId], 1);
             var baseExR = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[rId], 1);
             if (baseExL == null || baseExR == null) { return; }
+
+            SetDragDropNodeVis(baseExL, true);
+            SetDragDropNodeVis(baseExR, true);
+            SetKeybindVis(baseExL, false);
+            SetKeybindVis(baseExR, false);
 
             var nodesExL = baseExL->UldManager.NodeList;
             var nodesExR = baseExR->UldManager.NodeList;
@@ -362,7 +370,7 @@ namespace CrossUp
             NodeEdit.SetVarious(nodesExL[0], new NodeEdit.NodeProps
             {
                 Scale = scale,
-                X = (float)(anchorX + lX * scale +cfg.Split),
+                X = (float)(anchorX + lX * scale + cfg.Split),
                 Y = (float)(anchorY + lY * scale),
                 OriginX = 0,
                 OriginY = 0,
@@ -411,7 +419,7 @@ namespace CrossUp
                         SlotRangeVis(16, 31, false);
                         SetLastEightVis(nodesExL, nodesExR, false);
 
-                        PlaceExButton(nodesExL[20], 0,0, 0, state, true); //left EXHB
+                        PlaceExButton(nodesExL[20], 0, 0, 0, state, true); //left EXHB
                         PlaceExButton(nodesExL[19], 1, 0, 0, state, true);
                         PlaceExButton(nodesExL[18], 2, 0, 0, state, true);
                         PlaceExButton(nodesExL[17], 3, 0, 0, state, true);
@@ -420,7 +428,7 @@ namespace CrossUp
                         PlaceExButton(nodesExL[14], 6, 0, 0, state, true);
                         PlaceExButton(nodesExL[13], 7, 0, 0, state, true);
 
-                        PlaceExButton(nodesExR[20], 8,0, 0, state, true); // right EXHB
+                        PlaceExButton(nodesExR[20], 8, 0, 0, state, true); // right EXHB
                         PlaceExButton(nodesExR[19], 9, 0, 0, state, true);
                         PlaceExButton(nodesExR[18], 10, 0, 0, state, true);
                         PlaceExButton(nodesExR[17], 11, 0, 0, state, true);
@@ -646,11 +654,11 @@ namespace CrossUp
                 NodeEdit.SetVis(nodesR[i], show);
             }
         }
-        private void SlotRangeVis(int start, int end, bool show)
+        private static void SlotRangeVis(int start, int end, bool show)
         {
             for (var i = start; i <= end; i++) slotPositions[i].Visible = show;
         }//set visibility for a range of slots at once
-        private void SlotRangeScale(int start, int end, float scale)
+        private static void SlotRangeScale(int start, int end, float scale)
         {
             for (var i = start; i <= end; i++) slotPositions[i].Scale = scale;
         }//set scale for a range of slots at once
@@ -662,22 +670,22 @@ namespace CrossUp
                 nodesR[i]->Color.A = alpha;
             }
         }//set alpha of our Ex buttons
-        private void SetKeybindVis(int barID, bool show)
+        private void SetKeybindVis(AtkUnitBase* baseHotbar, bool show)
         {
-            var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
             if (baseHotbar == null) { return; }
 
             var nodes = baseHotbar->UldManager.NodeList;
-            for (var i=9;i<=20;i++)
+            for (var i = 9; i <= 20; i++)
             {
                 var keyTextNode = nodes[i]->GetComponent()->UldManager.NodeList[1];
-                NodeEdit.SetVis(keyTextNode,show);
+                NodeEdit.SetVis(keyTextNode, show);
             }
 
             return;
         }
-        private void SetDragDropNodeVis(int barID, bool show) {
-            var baseHotbar = (AtkUnitBase*)Service.GameGui.GetAddonByName(barNames[barID], 1);
+
+        private void SetDragDropNodeVis(AtkUnitBase* baseHotbar, bool show)
+        {
             if (baseHotbar == null) { return; }
 
             var nodes = baseHotbar->UldManager.NodeList;
@@ -688,10 +696,11 @@ namespace CrossUp
             }
             return;
         }
+
         public void SetSelectColor(bool revert = false) //apply highlight colour chosen in CrossUp settings
         {
             var selectColor = revert ? new(1F, 1F, 1F) : this.Configuration.selectColor;
-           
+
             var baseXHB = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             var baseRR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
             var baseLL = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
@@ -709,9 +718,9 @@ namespace CrossUp
 
             bool hide = !revert && this.Configuration.selectHide;   // we can't hide it by toggling visibility, so instead we do it by setting width to 0
 
-            NodeEdit.SetSize(baseXHB->UldManager.NodeList[4],(ushort)(hide ? 0 : 304), 140);
-            NodeEdit.SetSize(baseXHB->UldManager.NodeList[5],(ushort)(hide ? 0 : 166), 140);
-            NodeEdit.SetSize(baseXHB->UldManager.NodeList[6],(ushort)(hide ? 0 : 166), 140);
+            NodeEdit.SetSize(baseXHB->UldManager.NodeList[4], (ushort)(hide ? 0 : 304), 140);
+            NodeEdit.SetSize(baseXHB->UldManager.NodeList[5], (ushort)(hide ? 0 : 166), 140);
+            NodeEdit.SetSize(baseXHB->UldManager.NodeList[6], (ushort)(hide ? 0 : 166), 140);
 
             NodeEdit.SetSize(baseLL->UldManager.NodeList[3], (ushort)(hide ? 0 : 304), 140);
             NodeEdit.SetSize(baseLL->UldManager.NodeList[4], (ushort)(hide ? 0 : 166), 140);
@@ -753,8 +762,7 @@ namespace CrossUp
 
             var gridType = GetCharConfig((uint)(barID + 501));
 
-            NodeEdit.SetVarious(nodes[0], new NodeEdit.NodeProps
-            {
+            NodeEdit.SetVarious(nodes[0], new NodeEdit.NodeProps {
                 Width = (ushort)barSizes[gridType].X,
                 Height = (ushort)barSizes[gridType].Y,
                 X = baseHotbar->X,
@@ -766,8 +774,7 @@ namespace CrossUp
 
             for (var i = 0; i < 12; i++)
             {
-                NodeEdit.SetVarious(nodes[20 - i], new NodeEdit.NodeProps
-                {
+                NodeEdit.SetVarious(nodes[20 - i], new NodeEdit.NodeProps {
                     X = barGrids[gridType, i].X,
                     Y = barGrids[gridType, i].Y,
                     Visible = true,
@@ -775,7 +782,7 @@ namespace CrossUp
                 });
             }
 
-            SetKeybindVis(barID, true);
+            SetKeybindVis(baseHotbar, true);
             return;
         }
 
@@ -867,7 +874,8 @@ namespace CrossUp
                 // Grabbing the same ol regular bar contents for now, even though it looks odd.
                 // this does not affect gameplay, only visuals
                 return GetBarContentsByID(barBaseXHB->HotbarID, 16);
-            } else
+            }
+            else
             {
                 return GetBarContentsByID(barBaseXHB->HotbarID, 16);
             }
@@ -915,17 +923,16 @@ namespace CrossUp
             //  560: mapping for RL expanded cross hotbar
             //  561: mapping for LR expanded cross hotbar
             //  586: toggle, cross hotbar active or not
-            //  600: transparents of standard cross hotbar
+            //  600: transparency of standard cross hotbar
             //  601: transparency of active cross hotbar
             //  602: transparency of inactive cross hotbar
             return charConfigs->GetIntValue(configID);
         }
-        public void LogCharConfigs(uint start, uint end=0)  // for debugging
+        public void LogCharConfigs(uint start, uint end = 0)  // for debugging
         {
             if (end < start) { end = start; }
-            for (uint i=start;i<=end;i++) PluginLog.Log(i+" "+ GetCharConfig(i));
+            for (uint i = start; i <= end; i++) PluginLog.Log(i + " " + GetCharConfig(i));
         }
-
 
         // POSITIONS AND REFERENCE
         public class ScaleTween

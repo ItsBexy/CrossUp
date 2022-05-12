@@ -11,13 +11,6 @@ namespace CrossUp
         private Configuration configuration;
         private CrossUp crossUp;
 
-        //private bool visible = false;
-       /* public bool Visible
-        {
-            get { return this.visible; }
-            set { this.visible = value; }
-        }*/
-
         private bool settingsVisible = false;
         public bool SettingsVisible
         {
@@ -25,24 +18,22 @@ namespace CrossUp
             set { this.settingsVisible = value; }
         }
 
-     
-        public CrossUpUI(Configuration configuration,CrossUp crossup)
+        public CrossUpUI(Configuration configuration, CrossUp crossup)
         {
             this.configuration = configuration;
             this.crossUp = crossup;
-
-
         }
 
-        public void Dispose() { 
-        
+        public void Dispose()
+        {
+
         }
         public void Draw()
         {
             DrawSettingsWindow();
         }
 
-     
+
         public void DrawSettingsWindow()
         {
             if (!SettingsVisible) return;
@@ -57,8 +48,6 @@ namespace CrossUp
                 var lY = this.configuration.lY;
                 var rX = this.configuration.rX;
                 var rY = this.configuration.rY;
-                var borrowBarL = this.configuration.borrowBarL;
-                var borrowBarR = this.configuration.borrowBarR;
                 var selectColor = this.configuration.selectColor;
                 var selectHide = this.configuration.selectHide;
                 var split = this.configuration.Split;
@@ -84,7 +73,7 @@ namespace CrossUp
                 };
 
                 var borrowCount = 0;
-                for (var i=1;i<10;i++)
+                for (var i = 1; i < 10; i++)
                 {
                     if (borrowBars[i]) borrowCount++;
                 }
@@ -144,7 +133,7 @@ namespace CrossUp
                 ImGui.SetNextItemWidth(100);
                 if (ImGui.InputInt("X##PadX", ref padlockX))
                 {
-                    this.configuration.PadlockOffset = new(padlockX,this.configuration.PadlockOffset.Y);
+                    this.configuration.PadlockOffset = new(padlockX, this.configuration.PadlockOffset.Y);
                     this.configuration.Save();
                     this.crossUp.UpdateBarState(true, true);
                 }
@@ -153,7 +142,7 @@ namespace CrossUp
                 ImGui.SetNextItemWidth(100);
                 if (ImGui.InputInt("Y##PadY", ref padlockY))
                 {
-                    this.configuration.PadlockOffset = new(this.configuration.PadlockOffset.X,padlockY);
+                    this.configuration.PadlockOffset = new(this.configuration.PadlockOffset.X, padlockY);
                     this.configuration.Save();
                     this.crossUp.UpdateBarState(true, true);
                 }
@@ -213,7 +202,7 @@ namespace CrossUp
                 ImGui.Separator();
                 ImGui.Spacing();
 
-            
+
                 if (ImGui.Checkbox("Display Expanded Hold Controls Separately", ref sepExBar))
                 {
                     this.configuration.SepExBar = sepExBar;
@@ -236,7 +225,7 @@ namespace CrossUp
                     ImGui.TableNextRow();
 
                     ImGui.TableNextColumn();
-                    ImGui.TextColored(Dalamud.Interface.Colors.ImGuiColors.DalamudGrey,"NOTE: This feature functions by borrowing\nthe buttons from two of your standard\nmouse/kb hotbars. The hotbars you choose\nwill not be overwritten, but they will be\nunavailable while the feature is active.\n\n\n");
+                    ImGui.TextColored(ImGuiColors.DalamudGrey, "NOTE: This feature functions by borrowing\nthe buttons from two of your standard\nmouse/kb hotbars. The hotbars you choose\nwill not be overwritten, but they will be\nunavailable while the feature is active.\n\n\n");
 
                     ImGui.Indent(70);
                     ImGui.TextWrapped("POSITION BARS");
@@ -306,7 +295,7 @@ namespace CrossUp
 
                     for (var i = 1; i < 10; i++)
                     {
-                       
+
                         ImGui.TableNextColumn();
 
                         if (borrowBars[i] || borrowCount < 2)
@@ -343,15 +332,16 @@ namespace CrossUp
                                     this.configuration.Save();
                                 }
                             }
-                        } else
+                        }
+                        else
                         {
                             bool disabled = false;
-                            ImGui.Checkbox("##disabled",ref disabled);
+                            ImGui.Checkbox("##disabled", ref disabled);
                         }
 
                         ImGui.TableNextColumn();
                         ImGui.Text("Hotbar " + (i + 1));
-                       
+
 
                     }
 
