@@ -7,7 +7,6 @@ using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Threading.Tasks;
-using XivCommon;
 using ClientStructsFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 using DalamudFramework = Dalamud.Game.Framework;
 
@@ -18,7 +17,6 @@ namespace CrossUp
         public string Name => "CrossUp";
         private const string mainCommand = "/pcrossup";
         private readonly ActionManager* actionManager;
-        public XivCommonBase XivCommon { get; private set; }
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
         private Configuration Configuration { get; init; }
@@ -48,7 +46,6 @@ namespace CrossUp
             pluginInterface.Create<Service>();
 
             this.CrossUpUI = new CrossUpUI(this.Configuration, this);
-            this.XivCommon = new XivCommonBase();
 
             actionBarBaseUpdateHook ??= Common.Hook<ActionBarBaseUpdate>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
             actionBarBaseUpdateHook?.Enable();
@@ -56,7 +53,7 @@ namespace CrossUp
             Service.Framework.Update += FrameworkUpdate;
             Status.initialized = false;
         }
-        public static class Status
+        private static class Status
         {
             public static bool tweensExist = false;
             public static bool initialized = false;
@@ -71,19 +68,6 @@ namespace CrossUp
         {
             this.CrossUpUI.SettingsVisible = true;
         }
-
-        // Separate EXHB feature toggled on or off
-        public void EnableEx()
-        {
-            UpdateBarState(true, false);
-            return;
-        }
-        public void DisableEx()
-        {
-            ArrangeAndFill(0, 0, true, false);
-            ResetHud();
-            return;
-        }
         public void Dispose()   // put all the bars back in their normal places and take out our hooks
         {
             actionBarBaseUpdateHook?.Disable();
@@ -91,12 +75,10 @@ namespace CrossUp
             CommandManager.RemoveHandler(mainCommand);
             this.Configuration.Split = 0;
             this.Configuration.SepExBar = false;
-            ArrangeAndFill(0, 0, true, false);
-            ResetHud();
+            DisableEx();
             SetSelectColor(true);
             Status.initialized = false;
             CrossUpUI.Dispose();
-            XivCommon.Dispose();
         }
 
         // HOOKS AND EVENTS
@@ -184,31 +166,48 @@ namespace CrossUp
             xBar->ExpandedHoldControlsLTRT > 0 ? 3 : // L->R EX BAR
             xBar->ExpandedHoldControlsRTLT > 0 ? 4 : // R->L EX BAR
 
-            // there's probably a better way to find these two, watching the UI node means we'll always be one frame late
+            // need a better way to find these two, watching the UI node means we'll always be one frame late
             baseLL->UldManager.NodeList[3]->IsVisible ? 5 : // WXHB L
             baseRR->UldManager.NodeList[3]->IsVisible ? 6 : // WXHB R
                                                         0;
             return newCrossBarState;
         }
 
-        public void ExBarActivate(int barID)    // runs when a bar is selected to be one of the borrowed bars in CrossUp configs
+        public void EnableEx()
         {
-            var baseEx = Ref.UnitBases.ActionBar[barID];
-            if (baseEx == null)
-            {
-                return;
-            }
+            var lID = this.Configuration.borrowBarL;
+            var rID = this.Configuration.borrowBarR;
 
-            XivCommon.Functions.Chat.SendMessage($"/hotbar display " + (barID + 1) + " on");
+            if (lID < 0 || rID < 0) { return; }
 
-            for (var i = 9; i <= 20; i++)
-            {
-                baseEx->UldManager.NodeList[i]->Flags_2 |= 0xD;
-            }
+            EnableBorrowedBar(lID);
+            EnableBorrowedBar(rID);
 
             UpdateBarState(true, false);
             Task.Delay(20).ContinueWith(antecedent => { UpdateBarState(true, false); });
 
+            return;
+        }
+
+        private static bool[] wasHidden = { false, false, false, false, false, false, false, false, false, false };
+        public void EnableBorrowedBar(int id)
+        {
+            var unitBase = Ref.UnitBases.ActionBar[id];
+            if (unitBase == null) { return; }
+
+            var visID = (uint)(id + 485);
+            if (charConfigs->GetIntValue(visID) == 0)
+            {
+                wasHidden[id] = true;
+                charConfigs->SetOption(visID, 1);
+            }
+
+            for (var i = 9; i <= 20; i++) unitBase->UldManager.NodeList[i]->Flags_2 |= 0xD;
+        }
+        public void DisableEx()
+        {
+            ArrangeAndFill(0, 0, true, false);
+            ResetHud();
             return;
         }
 
@@ -221,21 +220,22 @@ namespace CrossUp
             public float ToScale { get; set; }
         }
 
-        public class Position
+        public class MetaSlot
         {
-            public float Scale { get; set; }
+            public bool Visible { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
-            public int OrigX { get; set; }
-            public int OrigY { get; set; }
-            public bool Visible { get; set; }
+            public float Scale { get; set; }
             public ushort Width { get; set; }
             public ushort Height { get; set; }
+            public int OrigX { get; set; }
+            public int OrigY { get; set; }
             public ScaleTween? Tween { get; set; }
             public int ScaleIndex { get; set; }
             public AtkResNode* Node { get; set; }
-            public float xMod { get; set; }
-            public float yMod { get; set; }
+            public float Xmod { get; set; }
+            public float Ymod { get; set; }
+            public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new() {X=p.X+p.Xmod,Y=p.Y+p.Ymod,Scale=p.Scale,Width=p.Width,Height=p.Height,Visible=p.Visible,OrigX=p.OrigX,OrigY=p.OrigY};
         }
 
         private void ArrangeAndFill(int select, int prevSelect = 0, bool forceArrange = false, bool HUDfixCheck = true) // the centrepiece of it all
@@ -258,13 +258,14 @@ namespace CrossUp
             // fix for misalignment after entering HUD Layout interface (unsure if this is sufficient)
             if (HUDfixCheck && baseXHB->X - rootNode->X - Math.Round(cfg.Split * scale) < 0) { baseXHB->X += (short)(cfg.Split * scale); }
 
-            NodeEdit.SetVarious(rootNode, new NodeEdit.NodeProps
+            NodeEdit.SetVarious(rootNode, new NodeEdit.PropertySet
             {
                 X = baseXHB->X - cfg.Split * scale,
                 Y = baseXHB->Y,
                 Width = (ushort)(588 + cfg.Split * 2),
                 Height = 210
             });
+
 
             int anchorX = (int)(rootNode->X + (146 * scale));
             int anchorY = (int)(rootNode->Y + (70 * scale));
@@ -368,7 +369,6 @@ namespace CrossUp
             int lId = this.Configuration.borrowBarL;
             int rId = this.Configuration.borrowBarR;
 
-
             var baseExL = Ref.UnitBases.ActionBar[lId];
             var baseExR = Ref.UnitBases.ActionBar[rId];
             if (baseExL == null || baseExR == null) { return; }
@@ -389,25 +389,21 @@ namespace CrossUp
             int rX = cfg.rX;
             int rY = cfg.rY;
 
-            NodeEdit.SetVarious(nodesExL[0], new NodeEdit.NodeProps
+            NodeEdit.SetVarious(nodesExL[0], new NodeEdit.PropertySet
             {
                 Scale = scale,
                 X = (float)(anchorX + lX * scale + cfg.Split),
                 Y = (float)(anchorY + lY * scale),
-                OriginX = 0,
-                OriginY = 0,
                 Visible = true,
                 Width = 295,
                 Height = 120
             });
 
-            NodeEdit.SetVarious(nodesExR[0], new NodeEdit.NodeProps
+            NodeEdit.SetVarious(nodesExR[0], new NodeEdit.PropertySet
             {
                 Scale = scale,
                 X = (float)(anchorX + rX * scale + cfg.Split),
                 Y = (float)(anchorY + rY * scale),
-                OriginX = 0,
-                OriginY = 0,
                 Visible = true,
                 Width = 295,
                 Height = 120
@@ -629,15 +625,13 @@ namespace CrossUp
                     break;
             }
         }
-        private void PlaceExButton(AtkResNode* node, int posID, float xMod = 0, float yMod = 0, int select = 0, bool Tween = false) //move a borrowed button into position and set its scale to animate if needed
+        private static void PlaceExButton(AtkResNode* node, int msID, float xMod = 0, float yMod = 0, int select = 0, bool Tween = false) //move a borrowed button into position and set its scale to animate if needed
         {
-            var to = Ref.scaleMap[select, Ref.slotPositions[posID].ScaleIndex];
-            var pos = Ref.slotPositions[posID];
-            pos.xMod = xMod;
-            pos.yMod = yMod;
+            var to = Ref.scaleMap[select, Ref.metaSlots[msID].ScaleIndex];
+            var pos = Ref.metaSlots[msID];
+            pos.Xmod = xMod;
+            pos.Ymod = yMod;
             pos.Node = node;
-
-            var blah = (ActionBarSlotAction*)node;
 
             if (Tween && to != pos.Scale) //only make a new tween if the button isn't already at the target scale, otherwise just set
             {
@@ -660,15 +654,7 @@ namespace CrossUp
                 pos.Scale = to;
             }
 
-            NodeEdit.SetVarious(node, new NodeEdit.NodeProps
-            {
-                Scale = pos.Scale,
-                OriginX = pos.OrigX,
-                OriginY = pos.OrigY,
-                X = pos.X + xMod,
-                Y = pos.Y + yMod,
-                Visible = pos.Visible
-            });
+            NodeEdit.SetVarious(node,pos);
 
             return;
         }
@@ -680,18 +666,18 @@ namespace CrossUp
                 NodeEdit.SetVis(nodesR[i], show);
             }
         }
-        private void SlotRangeVis(int start, int end, bool show)
+        private static void SlotRangeVis(int start, int end, bool show)
         {
             for (var i = start; i <= end; i++)
             {
-                Ref.slotPositions[i].Visible = show;
+                Ref.metaSlots[i].Visible = show;
             }
         }//set visibility for a range of slots at once
-        private void SlotRangeScale(int start, int end, float scale)
+        private static void SlotRangeScale(int start, int end, float scale)
         {
             for (var i = start; i <= end; i++)
             {
-                Ref.slotPositions[i].Scale = scale;
+                Ref.metaSlots[i].Scale = scale;
             }
         }//set scale for a range of slots at once
         private void SetExAlpha(AtkResNode** nodesL, AtkResNode** nodesR, byte alpha)
@@ -794,7 +780,7 @@ namespace CrossUp
 
             var gridType = GetCharConfig((uint)(barID + 501));
 
-            NodeEdit.SetVarious(nodes[0], new NodeEdit.NodeProps
+            NodeEdit.SetVarious(nodes[0], new NodeEdit.PropertySet
             {
                 Width = (ushort)Ref.barSizes[gridType].X,
                 Height = (ushort)Ref.barSizes[gridType].Y,
@@ -807,7 +793,7 @@ namespace CrossUp
 
             for (var i = 0; i < 12; i++)
             {
-                NodeEdit.SetVarious(nodes[20 - i], new NodeEdit.NodeProps
+                NodeEdit.SetVarious(nodes[20 - i], new NodeEdit.PropertySet
                 {
                     X = Ref.barGrids[gridType, i].X,
                     Y = Ref.barGrids[gridType, i].Y,
@@ -816,18 +802,23 @@ namespace CrossUp
                 });
             }
 
+            if (wasHidden[barID] && (this.Configuration.borrowBarL < 1 || this.Configuration.borrowBarR < 1 || (barID != this.Configuration.borrowBarL && barID != this.Configuration.borrowBarR)) && charConfigs->GetIntValue((uint)(barID + 485)) == 1)
+            {
+                charConfigs->SetOption((uint)(barID + 485), 0);
+            }
+
             SetKeybindVis(baseHotbar, true);
             return;
         }
 
-        private void TweenAllButtons()  //run any extant tweens to animate button scale
+        private static void TweenAllButtons()  //run any extant tweens to animate button scale
         {
             Status.tweensExist = false;
-            for (var i = 0; i < Ref.slotPositions.Length; i++)
+            for (var i = 0; i < Ref.metaSlots.Length; i++)
             {
-                var pos = Ref.slotPositions[i];
-                var tween = pos.Tween;
-                var node = pos.Node;
+                var metaSlot = Ref.metaSlots[i];
+                var tween = metaSlot.Tween;
+                var node = metaSlot.Node;
                 if (tween != null && node != null)
                 {
                     Status.tweensExist = true;
@@ -836,20 +827,15 @@ namespace CrossUp
 
                     if (progress >= 1)
                     {
-                        pos.Tween = null;
-                        pos.Scale = tween.ToScale;
+                        metaSlot.Tween = null;
+                        metaSlot.Scale = tween.ToScale;
                     }
                     else
                     {
-                        pos.Scale = ((tween.ToScale - tween.FromScale) * (float)progress) + tween.FromScale;
+                        metaSlot.Scale = ((tween.ToScale - tween.FromScale) * (float)progress) + tween.FromScale;
                     }
 
-                    NodeEdit.SetVarious(node, new NodeEdit.NodeProps
-                    {
-                        X = pos.X + pos.xMod,
-                        Y = pos.Y + pos.yMod,
-                        Scale = pos.Scale
-                    });
+                    NodeEdit.SetVarious(node, metaSlot);
                 }
             }
             return;
@@ -890,10 +876,6 @@ namespace CrossUp
             }
 
             return contents;
-        }
-        private ButtonAction[] GetHotbarContents(int barID) //get a standard hotbar
-        {
-            return GetBarContentsByID(barID, 12);
         }
         private ButtonAction[] GetCrossbarContents()    //get whatever's on the cross hotbar
         {
@@ -948,8 +930,9 @@ namespace CrossUp
         }
         private int GetCharConfig(uint configID)    //get a char Config setting
         {
-            //  501-508: int from 0-5, represents selected grid layout for hotbars 1-8
-            //  515 - 523: toggle, share setting for hotbars 1 - 8
+            //  485-494: toggle, hotbar 1-10 (0-9 internally) visible or not
+            //  501-510: int from 0-5, represents selected grid layout for hotbars 1-10 (0-9 internally)
+            //  515-523: toggle, share setting for cross hotbars 1 - 8
             //  535: main cross hotbar layout   0 = dpad / button / dpad / button
             //                                  1 = dpad / dpad / button / button
             //  560: mapping for RL expanded cross hotbar

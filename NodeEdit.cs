@@ -5,7 +5,7 @@ namespace CrossUp;
 
 public static unsafe partial class NodeEdit
 {
-    public struct NodeProps
+    public struct PropertySet
     {
         public bool? Visible { get; set; }
         public float? X { get; set; }
@@ -13,10 +13,10 @@ public static unsafe partial class NodeEdit
         public float? Scale { get; set; }
         public ushort? Width { get; set; }
         public ushort? Height { get; set; }
-        public Vector3? Color { get; set; }
         public float? Alpha { get; set; }
-        public int? OriginX { get; set; }
-        public int? OriginY { get; set; }
+        public int? OrigX { get; set; }
+        public int? OrigY { get; set; }
+        public Vector3? Color { get; set; }
     }
     public static void SetVis(AtkResNode* node,bool show)
     {
@@ -88,7 +88,7 @@ public static unsafe partial class NodeEdit
         node->Flags_2 |= 0xD;
         return;
     }
-    public static void SetVarious(AtkResNode* node, NodeProps props)
+    public static void SetVarious(AtkResNode* node, PropertySet props)
     {
         if (props.X != null) { node->X = (float)props.X; }
         if (props.Y != null) { node->Y = (float)props.Y; }
@@ -98,27 +98,26 @@ public static unsafe partial class NodeEdit
         if (props.Visible != null) { SetVis(node, (bool)props.Visible); }
         if (props.Color != null) { SetColor(node, (Vector3)props.Color); }
         if (props.Alpha != null) { SetAlpha(node, (float)props.Alpha); }
-        if (props.OriginX != null && props.OriginY != null) { SetOrigin(node, (int)props.OriginX, (int)props.OriginY); }
+        if (props.OrigX != null && props.OrigY != null) { SetOrigin(node, (int)props.OrigX, (int)props.OrigY); }
         node->Flags_2 |= 0xD;
         return;
     }
 
     public class ByLookup // grab and edit things using name and default props from Reference.cs
     {
-        public static void RelativePos(Ref.nodeProps props, float offX, float offY)
+        public static void RelativePos(Ref.NodeRef props, float offX, float offY)
         {
             SetPos(props.unitBase->UldManager.NodeList[props.Id], props.pos.X + offX, props.pos.Y + offY);
             return;
         }
-        public static void AbsoluteSize(Ref.nodeProps props, ushort? width = null, ushort? height = null)
+        public static void AbsoluteSize(Ref.NodeRef props, ushort? width = null, ushort? height = null)
         {
             if (width == null) { width = (ushort)props.size.X; }
             if (height == null) { height = (ushort)props.size.Y; }
             SetSize(props.unitBase->UldManager.NodeList[props.Id], (ushort)width, (ushort)height);
             return;
         }
-
-        public static void AbsolutePos(Ref.nodeProps props, float? x = null, float? y = null)
+        public static void AbsolutePos(Ref.NodeRef props, float? x = null, float? y = null)
         {
             if (x == null) { x = props.pos.X; }
             if (y == null) { y = props.pos.Y; }
