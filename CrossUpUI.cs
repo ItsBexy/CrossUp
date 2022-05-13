@@ -315,7 +315,7 @@ namespace CrossUp
 
                                     this.crossUp.ResetHud();
                                     this.configuration.Save();
-                                    this.crossUp.ExBarActivate(i);
+                                    this.crossUp.EnableEx();
                                 }
                                 else
                                 {

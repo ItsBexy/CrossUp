@@ -6,7 +6,6 @@ namespace CrossUp
 {
     public unsafe class Ref
     {
-        // POSITIONS AND REFERENCE
         public class UnitBases {
             public static AtkUnitBase*[] ActionBar =
             {
@@ -26,35 +25,35 @@ namespace CrossUp
             public static AtkUnitBase* RR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
         };
 
-        public struct nodeProps
+        public struct NodeRef
         {
+            public AtkUnitBase* unitBase;
             public int Id;
             public Vector2 pos;
             public Vector2 size;
-            public AtkUnitBase* unitBase;
         };
 
         public class barNodes
         {
             public class Cross
             {
-                public static readonly nodeProps RootNode = new nodeProps { unitBase = UnitBases.Cross, Id = 0 };
-                public static readonly nodeProps Component = new nodeProps { unitBase = UnitBases.Cross, Id = 1, pos = new Vector2 { X = 18F, Y = 79F } };
-                public static readonly nodeProps selectBG = new nodeProps { unitBase = UnitBases.Cross, Id = 4, size = new Vector2 { X = 304, Y = 140 } };
-                public static readonly nodeProps miniSelectL = new nodeProps { unitBase = UnitBases.Cross, Id = 5, size = new Vector2 { X = 166, Y = 140 } };
-                public static readonly nodeProps miniSelectR = new nodeProps { unitBase = UnitBases.Cross, Id = 6, size = new Vector2 { X = 166, Y = 140 } };
-                public static readonly nodeProps VertLine = new nodeProps { unitBase = UnitBases.Cross, Id = 7, pos = new Vector2 { X = 271F, Y = 21F }, size = new Vector2 { X = 9, Y = 76 } };
-                public static readonly nodeProps[] Sets = {
-                    new nodeProps { unitBase = UnitBases.Cross, Id = 11, pos = new Vector2 { X = 0F, Y = 0F }},
-                    new nodeProps { unitBase = UnitBases.Cross, Id = 10, pos = new Vector2 { X = 138F, Y = 0F }},
-                    new nodeProps { unitBase = UnitBases.Cross, Id = 9, pos = new Vector2 { X = 284F, Y = 0F }},
-                    new nodeProps { unitBase = UnitBases.Cross, Id = 8, pos = new Vector2 { X = 422F, Y = 0F }},
+                public static readonly NodeRef RootNode = new NodeRef { unitBase = UnitBases.Cross, Id = 0 };
+                public static readonly NodeRef Component = new NodeRef { unitBase = UnitBases.Cross, Id = 1, pos = new Vector2 { X = 18F, Y = 79F } };
+                public static readonly NodeRef selectBG = new NodeRef { unitBase = UnitBases.Cross, Id = 4, size = new Vector2 { X = 304, Y = 140 } };
+                public static readonly NodeRef miniSelectL = new NodeRef { unitBase = UnitBases.Cross, Id = 5, size = new Vector2 { X = 166, Y = 140 } };
+                public static readonly NodeRef miniSelectR = new NodeRef { unitBase = UnitBases.Cross, Id = 6, size = new Vector2 { X = 166, Y = 140 } };
+                public static readonly NodeRef VertLine = new NodeRef { unitBase = UnitBases.Cross, Id = 7, pos = new Vector2 { X = 271F, Y = 21F }, size = new Vector2 { X = 9, Y = 76 } };
+                public static readonly NodeRef[] Sets = {
+                    new NodeRef { unitBase = UnitBases.Cross, Id = 11, pos = new Vector2 { X = 0F, Y = 0F }},
+                    new NodeRef { unitBase = UnitBases.Cross, Id = 10, pos = new Vector2 { X = 138F, Y = 0F }},
+                    new NodeRef { unitBase = UnitBases.Cross, Id = 9, pos = new Vector2 { X = 284F, Y = 0F }},
+                    new NodeRef { unitBase = UnitBases.Cross, Id = 8, pos = new Vector2 { X = 422F, Y = 0F }},
                 };
-                public static readonly nodeProps RT = new nodeProps { unitBase = UnitBases.Cross, Id = 19, pos = new Vector2 { X = 367F, Y = 11F } };
-                public static readonly nodeProps LT = new nodeProps { unitBase = UnitBases.Cross, Id = 20, pos = new Vector2 { X = 83F, Y = 11F } };
-                public static readonly nodeProps setText = new nodeProps { unitBase = UnitBases.Cross, Id = 21, pos = new Vector2 { X = 230F, Y = 170F } };
-                public static readonly nodeProps padlock = new nodeProps { unitBase = UnitBases.Cross, Id = 26, pos = new Vector2 { X = 284F, Y = 152F } };
-                public static readonly nodeProps changeSet = new nodeProps { unitBase = UnitBases.Cross, Id = 27, pos = new Vector2 { X = 146F, Y = 0F } };
+                public static readonly NodeRef RT = new NodeRef { unitBase = UnitBases.Cross, Id = 19, pos = new Vector2 { X = 367F, Y = 11F } };
+                public static readonly NodeRef LT = new NodeRef { unitBase = UnitBases.Cross, Id = 20, pos = new Vector2 { X = 83F, Y = 11F } };
+                public static readonly NodeRef setText = new NodeRef { unitBase = UnitBases.Cross, Id = 21, pos = new Vector2 { X = 230F, Y = 170F } };
+                public static readonly NodeRef padlock = new NodeRef { unitBase = UnitBases.Cross, Id = 26, pos = new Vector2 { X = 284F, Y = 152F } };
+                public static readonly NodeRef changeSet = new NodeRef { unitBase = UnitBases.Cross, Id = 27, pos = new Vector2 { X = 146F, Y = 0F } };
             }
         };
 
@@ -65,51 +64,51 @@ namespace CrossUp
             public static readonly int[,] XHB = { { 16, 17, 18, 19 }, { 20, 21, 22, 23 }, { 24, 25, 26, 27 }, { 28, 29, 30, 31 } };
         }
 
-        public static CrossUp.Position[] slotPositions = { // the positions for all the borrowed buttons
+        public static CrossUp.MetaSlot[] metaSlots = { // the positions for all the borrowed buttons
 
             //EXHB LEFT 0-7
-            new CrossUp.Position{ Scale=1.0F,X=0,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=42,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=84,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=42,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=0,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=42,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=84,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=42,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=2},
 
-            new CrossUp.Position{ Scale=1.0F,X=138,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=180,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=222,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=2},
-            new CrossUp.Position{ Scale=1.0F,X=180,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=138,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=180,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=222,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=2},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=180,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=2},
             
             //EXHB RIGHT 8-15
-            new CrossUp.Position{ Scale=1.0F,X=0,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=42,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=84,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=42,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=0,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=42,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=84,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=42,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=3},
 
-            new CrossUp.Position{ Scale=1.0F,X=138,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=180,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=222,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=3},
-            new CrossUp.Position{ Scale=1.0F,X=180,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=138,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=180,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=222,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=3},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=180,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=3},
             
             //MAIN BAR LEFT 16-23
-            new CrossUp.Position{ Scale=1.0F,X=-142,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=-100,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=-58,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=-100,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=-142,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=-100,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=-58,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=-100,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=0},
 
-            new CrossUp.Position{ Scale=1.0F,X=-9,Y=24,OrigX=95,OrigY=39,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=33,Y=0,OrigX=53,OrigY=63,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=75,Y=24,OrigX=11,OrigY=39,Visible=true,ScaleIndex=0},
-            new CrossUp.Position{ Scale=1.0F,X=33,Y=48,OrigX=53,OrigY=15,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=-9,Y=24,OrigX=95,OrigY=39,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=33,Y=0,OrigX=53,OrigY=63,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=75,Y=24,OrigX=11,OrigY=39,Visible=true,ScaleIndex=0},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=33,Y=48,OrigX=53,OrigY=15,Visible=true,ScaleIndex=0},
             
             //MAIN BAR RIGHT 24-31
-            new CrossUp.Position{ Scale=1.0F,X=142,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=184,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=226,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=184,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=142,Y=24,OrigX=94,OrigY=39,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=184,Y=0,OrigX=52,OrigY=63,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=226,Y=24,OrigX=10,OrigY=39,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=184,Y=48,OrigX=52,OrigY=15,Visible=true,ScaleIndex=1},
 
-            new CrossUp.Position{ Scale=1.0F,X=275,Y=24,OrigX=95,OrigY=39,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=317,Y=0,OrigX=53,OrigY=63,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=359,Y=24,OrigX=11,OrigY=39,Visible=true,ScaleIndex=1},
-            new CrossUp.Position{ Scale=1.0F,X=317,Y=48,OrigX=53,OrigY=15,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=275,Y=24,OrigX=95,OrigY=39,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=317,Y=0,OrigX=53,OrigY=63,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=359,Y=24,OrigX=11,OrigY=39,Visible=true,ScaleIndex=1},
+            new CrossUp.MetaSlot{ Scale=1.0F,X=317,Y=48,OrigX=53,OrigY=15,Visible=true,ScaleIndex=1},
         };
 
         public static readonly float[,] scaleMap = new float[7, 4] { // the scale each section of buttons should be at in each state
@@ -218,7 +217,5 @@ namespace CrossUp
             new Vector2{ X=117,Y=358 },
             new Vector2{ X=72,Y=618 },
         };
-
-
     }
 }
