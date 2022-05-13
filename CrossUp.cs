@@ -53,7 +53,7 @@ namespace CrossUp
             Service.Framework.Update += FrameworkUpdate;
             Status.initialized = false;
         }
-        public static class Status
+        private static class Status
         {
             public static bool tweensExist = false;
             public static bool initialized = false;
@@ -189,7 +189,7 @@ namespace CrossUp
             return;
         }
 
-        public static bool[] wasHidden = { false, false, false, false, false, false, false, false, false, false };
+        private static bool[] wasHidden = { false, false, false, false, false, false, false, false, false, false };
         public void EnableBorrowedBar(int id)
         {
             var unitBase = Ref.UnitBases.ActionBar[id];
@@ -233,9 +233,9 @@ namespace CrossUp
             public ScaleTween? Tween { get; set; }
             public int ScaleIndex { get; set; }
             public AtkResNode* Node { get; set; }
-            public float xMod { get; set; }
-            public float yMod { get; set; }
-            public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new() {X=p.X+p.xMod,Y=p.Y+p.yMod,Scale=p.Scale,Width=p.Width,Height=p.Height,Visible=p.Visible,OrigX=p.OrigX,OrigY=p.OrigY};
+            public float Xmod { get; set; }
+            public float Ymod { get; set; }
+            public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new() {X=p.X+p.Xmod,Y=p.Y+p.Ymod,Scale=p.Scale,Width=p.Width,Height=p.Height,Visible=p.Visible,OrigX=p.OrigX,OrigY=p.OrigY};
         }
 
         private void ArrangeAndFill(int select, int prevSelect = 0, bool forceArrange = false, bool HUDfixCheck = true) // the centrepiece of it all
@@ -625,15 +625,13 @@ namespace CrossUp
                     break;
             }
         }
-        private void PlaceExButton(AtkResNode* node, int msID, float xMod = 0, float yMod = 0, int select = 0, bool Tween = false) //move a borrowed button into position and set its scale to animate if needed
+        private static void PlaceExButton(AtkResNode* node, int msID, float xMod = 0, float yMod = 0, int select = 0, bool Tween = false) //move a borrowed button into position and set its scale to animate if needed
         {
             var to = Ref.scaleMap[select, Ref.metaSlots[msID].ScaleIndex];
             var pos = Ref.metaSlots[msID];
-            pos.xMod = xMod;
-            pos.yMod = yMod;
+            pos.Xmod = xMod;
+            pos.Ymod = yMod;
             pos.Node = node;
-
-            var blah = (ActionBarSlotAction*)node;
 
             if (Tween && to != pos.Scale) //only make a new tween if the button isn't already at the target scale, otherwise just set
             {
@@ -668,14 +666,14 @@ namespace CrossUp
                 NodeEdit.SetVis(nodesR[i], show);
             }
         }
-        private void SlotRangeVis(int start, int end, bool show)
+        private static void SlotRangeVis(int start, int end, bool show)
         {
             for (var i = start; i <= end; i++)
             {
                 Ref.metaSlots[i].Visible = show;
             }
         }//set visibility for a range of slots at once
-        private void SlotRangeScale(int start, int end, float scale)
+        private static void SlotRangeScale(int start, int end, float scale)
         {
             for (var i = start; i <= end; i++)
             {
@@ -813,7 +811,7 @@ namespace CrossUp
             return;
         }
 
-        private void TweenAllButtons()  //run any extant tweens to animate button scale
+        private static void TweenAllButtons()  //run any extant tweens to animate button scale
         {
             Status.tweensExist = false;
             for (var i = 0; i < Ref.metaSlots.Length; i++)
