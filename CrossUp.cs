@@ -88,7 +88,10 @@ namespace CrossUp
         }
         private void FrameworkUpdate(DalamudFramework framework)
         {
-            if (!Status.initialized && Service.ClientState.IsLoggedIn && Ref.UnitBases.Cross != null)
+            if (!Service.ClientState.IsLoggedIn && Ref.UnitBases.Cross == null)
+                return;
+
+            if (!Status.initialized)
             {
                 try
                 {
@@ -103,17 +106,9 @@ namespace CrossUp
             {
                 TweenAllButtons();
             }
-
-            if (Status.initialized && Service.ClientState.IsLoggedIn && Ref.UnitBases.Cross != null)
+            else
             {
-                try
-                {
-                    UpdateBarState();
-                }
-                catch (Exception ex)
-                {
-                    PluginLog.Log(ex + "");
-                }
+                UpdateBarState();
             }
 
             return;
