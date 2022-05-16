@@ -38,9 +38,8 @@ namespace CrossUp
         {
             if (!SettingsVisible) return;
 
-            ImGui.SetNextWindowSize(new Vector2(400, 630), ImGuiCond.Always);
-            if (ImGui.Begin("CrossUp Settings", ref this.settingsVisible,
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            ImGui.SetNextWindowSize(new Vector2(400, 630), ImGuiCond.FirstUseEver);
+            if (ImGui.Begin("CrossUp Settings", ref this.settingsVisible))
             {
 
                 var sepExBar = this.configuration.SepExBar;
