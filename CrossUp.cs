@@ -104,6 +104,18 @@ namespace CrossUp
                 TweenAllButtons();
             }
 
+            if (Status.initialized && Service.ClientState.IsLoggedIn && Ref.UnitBases.Cross != null)
+            {
+                try
+                {
+                    UpdateBarState();
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Log(ex + "");
+                }
+            }
+
             return;
         }
         private void Initialize()
