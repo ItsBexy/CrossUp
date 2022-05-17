@@ -9,33 +9,36 @@ namespace CrossUp
     public class Configuration : IPluginConfiguration
     {
         public int Version { get; set; } = 0;
-        public bool SepExBar { get; set; } = false;
+        public bool SepExBar { get; set; }
         public int lX { get; set; } = -214;
         public int lY { get; set; } = -88;
         public int rX { get; set; } = 214;
         public int rY { get; set; } = -88;
         public int borrowBarL { get; set; } = 8;
         public int borrowBarR { get; set; } = 9;
-        public int Split { get; set; } = 0;
+        public int Split { get; set; }
         public Vector3 selectColor { get; set; } = new(1, 1, 1);
-        public bool selectHide { get; set; } = false;
-        public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
+        public bool selectHide { get; set; }
         public Vector2 PadlockOffset { get; set; } = new(0f, 0f);
         public Vector2 SetTextOffset { get; set; } = new(0f, 0f);
         public Vector2 ChangeSetOffset { get; set; } = new(0f, 0f);
-
+        public bool RemapEx { get; set; }
+        public int[,] MappingsEx { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
+        public bool RemapW { get; set; }
+        public int[,] MappingsW { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
+        public Vector2 ConfigWindowSize { get; set; } = new(450f,390f);
 
         [NonSerialized]
-        private DalamudPluginInterface? pluginInterface;
+        private DalamudPluginInterface? PluginInterface;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
-            this.pluginInterface = pluginInterface;
+            this.PluginInterface = pluginInterface;
         }
 
         public void Save()
         {
-            this.pluginInterface!.SavePluginConfig(this);
+            this.PluginInterface!.SavePluginConfig(this);
         }
     }
 }

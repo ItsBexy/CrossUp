@@ -6,6 +6,7 @@ description: |-
   -Split up the left/right hotbars
   -Display Expanded Hold Controls Separately
   -Customize colors and element positions
+  -Greater control over which sets your extra bars are mapped to
 punchline: Customize the Cross Hotbar!
 repo_url: https://github.com/ItsBexy/CrossUp
 dalamud_api_level: 6

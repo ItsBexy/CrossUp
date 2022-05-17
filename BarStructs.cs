@@ -54,4 +54,5 @@ public struct AddonActionDoubleCrossBase
     [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
     [FieldOffset(0x2EC)] public byte UseLeftSide;
     [FieldOffset(0x2E8)] public byte BarTarget;
+    [FieldOffset(0x2e0)] public bool Selected;
 }
