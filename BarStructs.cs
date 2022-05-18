@@ -38,10 +38,9 @@ public unsafe struct ActionBarSlotAction {
 public struct AddonActionCross
 {
     [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
-    [FieldOffset(0x6E8)] public int ExpandedHoldControlsLTRT;
-    [FieldOffset(0x6EC)] public int ExpandedHoldControlsRTLT;
+    [FieldOffset(0x6E8)] public int LRBar;
+    [FieldOffset(0x6EC)] public int RLBar;
 
-    //some more that I identified - Bexy
     [FieldOffset(0x701)] public bool LeftBar;
     [FieldOffset(0x702)] public bool RightBar;
     [FieldOffset(0x704)] public bool PetBar;
@@ -54,5 +53,6 @@ public struct AddonActionDoubleCrossBase
     [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
     [FieldOffset(0x2EC)] public byte UseLeftSide;
     [FieldOffset(0x2E8)] public byte BarTarget;
+
     [FieldOffset(0x2e0)] public bool Selected;
 }

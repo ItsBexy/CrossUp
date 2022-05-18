@@ -1,45 +1,15 @@
 ﻿using System;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
-    private static void AdjustHudEditorNode() //fix for misaligned frame around XHB when using the HUD Layout Interface
-    {
-        var hudScreen = (AtkUnitBase*)Service.GameGui.GetAddonByName("_HudLayoutScreen", 1); //would like to find a more efficient bool to check
-        if (hudScreen == null) { Status.HudEditNodeChecked = false; return; }
-        if (Status.HudEditNodeChecked) return;
 
-        var rootNode = UnitBases.Cross->UldManager.NodeList[0];
-        var scale = rootNode->ScaleX;
-
-        var hudNodes = hudScreen->UldManager.NodeList;
-        for (var i = 0; i < hudScreen->UldManager.NodeListCount; i++)
-        {
-            if (hudNodes[i]->IsVisible && !(Math.Abs(hudNodes[i]->Y - rootNode->Y) > 1) &&
-                !(Math.Abs(hudNodes[i]->Width - rootNode->Width * scale) > 1) &&
-                !(Math.Abs(hudNodes[i]->Height - rootNode->Height * scale) > 1) &&
-                !(Math.Abs(hudNodes[i]->X - rootNode->X) < 1))
-            {
-                hudNodes[i]->X = rootNode->X;
-                hudNodes[i]->Flags_2 |= 0xD;
-                Status.HudEditNodeChecked = true;
-                break;
-            }
-        }
-    }
-
-    public class ScaleTween
-    {
-        public DateTime Start { get; init; }
-        public TimeSpan Duration { get; init; }
-        public float FromScale { get; init; }
-        public float ToScale { get; init; }
-    }
-
+        // arrange all the hotbars and populate them with the correct contents
     private void ArrangeAndFill(int select, int prevSelect = 0, bool forceArrange = false,bool hudFixCheck = true) { // the centrepiece of it all
-        if (GetCharConfig(586) == 0) //don't do anything if the cross hotbar isn't actually turned on
+        if (GetCharConfig(ConfigID.CrossEnabled) == 0) //don't do anything if the cross hotbar isn't actually turned on
         {
             ResetHud();
             return;
@@ -49,9 +19,8 @@ public sealed unsafe partial class CrossUp
         if (baseXHB == null) return;
 
         var rootNode = baseXHB->UldManager.NodeList[0];
-
         var scale = rootNode->ScaleX;
-        var mixBar = GetCharConfig(535) == 1;
+        var mixBar = GetCharConfig(ConfigID.MixBar) == 1;
 
         // fix for misalignment after entering/exiting HUD Layout interface
         if (hudFixCheck && baseXHB->X - rootNode->X - Math.Round(Config.Split * scale) < 0) baseXHB->X += (short)(Config.Split * scale);
@@ -67,6 +36,7 @@ public sealed unsafe partial class CrossUp
         var anchorX = (int)(rootNode->X + 146 * scale);
         var anchorY = (int)(rootNode->Y + 70 * scale);
 
+            // arrange the EXHB if that feature is turned on and two borrowed bars are selected
         var arrangeEx = Config.SepExBar && Config.borrowBarL > 0 && Config.borrowBarR > 0;
         if (arrangeEx) ArrangeExBars(select, prevSelect, scale, anchorX, anchorY, forceArrange);
 
@@ -75,6 +45,7 @@ public sealed unsafe partial class CrossUp
         var rX = arrangeEx ? Config.rX : 0;
         var rY = arrangeEx ? Config.rY : 0;
 
+            // vertical bar looks odd if certain CrossUp features are turned on
         var hideDivider = Config.Split > 0 || Config.SepExBar;
 
         NodeEdit.ByLookup.AbsoluteSize(barNodes.Cross.VertLine, hideDivider ? 0 : null, hideDivider ? 0 : null);
@@ -82,7 +53,7 @@ public sealed unsafe partial class CrossUp
         NodeEdit.ByLookup.RelativePos(barNodes.Cross.changeSet, Config.ChangeSetOffset.X + Config.Split, Config.ChangeSetOffset.Y);
         NodeEdit.ByLookup.RelativePos(barNodes.Cross.setText, Config.SetTextOffset.X + Config.Split, Config.SetTextOffset.Y);
 
-        if (select == prevSelect && !forceArrange) return;
+        if (!forceArrange && select == prevSelect) return;
         switch (select)
         {
             case 0: // NONE
@@ -152,8 +123,8 @@ public sealed unsafe partial class CrossUp
         }
     }
 
-    private void ArrangeExBars(int select, int prevSelect, float scale, int anchorX, int anchorY,
-        bool forceArrange = false) // arrange our borrowed bars for EXHB if that feature is on
+        // arranged the borrowed hotbars representing the EXHB
+    private void ArrangeExBars(int select, int prevSelect, float scale, int anchorX, int anchorY,bool forceArrange = false)
     {
         var lId = Config.borrowBarL;
         var rId = Config.borrowBarR;
@@ -170,7 +141,7 @@ public sealed unsafe partial class CrossUp
         var nodesExL = baseExL->UldManager.NodeList;
         var nodesExR = baseExR->UldManager.NodeList;
 
-        var mixBar = GetCharConfig(535) == 1;
+        var mixBar = GetCharConfig(ConfigID.MixBar) == 1;
 
         var lX = Config.lX;
         var lY = Config.lY;
@@ -200,226 +171,168 @@ public sealed unsafe partial class CrossUp
         NodeEdit.SetScale(nodesExL[24], 0F);
         NodeEdit.SetScale(nodesExR[24], 0F);
 
-        var contentsExL = GetExBarContents(true);
-        var contentsExR = GetExBarContents(false);
-        var contentsXHB = GetCrossbarContents();
+        var inactiveTransp = GetCharConfig(ConfigID.Transparency.Inactive);
+        var standardTransp = GetCharConfig(ConfigID.Transparency.Active);
 
-        var inactiveConf = GetCharConfig(602);
-        var standardConf = GetCharConfig(600);
-
-        byte inactiveAlpha = (byte)((-0.0205 * Math.Pow(inactiveConf, 2)) - (0.5 * inactiveConf) + 255);
-        byte standardAlpha = (byte)((-0.0205 * Math.Pow(standardConf, 2)) - (0.5 * standardConf) + 255);
+        var inactiveAlpha = (byte)(-0.0205 * Math.Pow(inactiveTransp, 2) - 0.5 * inactiveTransp + 255);
+        var standardAlpha = (byte)(-0.0205 * Math.Pow(standardTransp, 2) - 0.5 * standardTransp + 255);
         SetExAlpha(nodesExL, nodesExR, select == 0 ? standardAlpha : inactiveAlpha);
 
         switch (select)
         {
-            // a lot of repetition here, could be condensed a great deal, but seeing exactly how each case lays out every button is helpful r/n
-            case 0 or 5 or 6:
+            case 0: // NONE
+            case 5: // LEFT WXHB
+            case 6: // RIGHT WXHB
             {
-                CopyButtons(contentsExL, 0, lId, 0, 8);
-                CopyButtons(contentsExR, 0, rId, 0, 8);
+                CopyButtons(BarContents.LR, 0, lId, 0, 8);
+                CopyButtons(BarContents.RL, 0, rId, 0, 8);
 
-                if (select != prevSelect || forceArrange)
+                if (forceArrange || select != prevSelect)
                 {
-                    SlotRangeVis(16, 31, false);
-                    SetLastEightVis(nodesExL, nodesExR, false);
-
-                    PlaceExButton(nodesExL[20], Pos.leftEX[0], 0, 0, select); //left EXHB
-                    PlaceExButton(nodesExL[19], Pos.leftEX[1], 0, 0, select);
-                    PlaceExButton(nodesExL[18], Pos.leftEX[2], 0, 0, select);
-                    PlaceExButton(nodesExL[17], Pos.leftEX[3], 0, 0, select);
-                    PlaceExButton(nodesExL[16], Pos.leftEX[4], 0, 0, select);
-                    PlaceExButton(nodesExL[15], Pos.leftEX[5], 0, 0, select);
-                    PlaceExButton(nodesExL[14], Pos.leftEX[6], 0, 0, select);
-                    PlaceExButton(nodesExL[13], Pos.leftEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExR[20], Pos.rightEX[0], 0, 0, select); // right EXHB
-                    PlaceExButton(nodesExR[19], Pos.rightEX[1], 0, 0, select);
-                    PlaceExButton(nodesExR[18], Pos.rightEX[2], 0, 0, select);
-                    PlaceExButton(nodesExR[17], Pos.rightEX[3], 0, 0, select);
-                    PlaceExButton(nodesExR[16], Pos.rightEX[4], 0, 0, select);
-                    PlaceExButton(nodesExR[15], Pos.rightEX[5], 0, 0, select);
-                    PlaceExButton(nodesExR[14], Pos.rightEX[6], 0, 0, select);
-                    PlaceExButton(nodesExR[13], Pos.rightEX[7], 0, 0, select);
-                }
-
-                break;
-            }
-            case 1:
-            {
-                CopyButtons(contentsExL, 0, lId, 0, 8);
-                CopyButtons(contentsExR, 0, rId, 0, 8);
-                CopyButtons(contentsXHB, 8, lId, 8, 4);
-                CopyButtons(contentsXHB, 12, rId, 8, 4);
-
-                if (select != prevSelect || forceArrange)
-                {
-                    SlotRangeVis(16, 23, true);
-                    SlotRangeVis(24, 31, prevSelect == 3 && !mixBar);
-                    SlotRangeScale(16, 23, 1.1F);
-                    SetLastEightVis(nodesExL, nodesExR, prevSelect == 3 && !mixBar);
-
-                    PlaceExButton(nodesExL[20], Pos.leftEX[0], 0, 0, select); //left EXHB
-                    PlaceExButton(nodesExL[19], Pos.leftEX[1], 0, 0, select);
-                    PlaceExButton(nodesExL[18], Pos.leftEX[2], 0, 0, select);
-                    PlaceExButton(nodesExL[17], Pos.leftEX[3], 0, 0, select);
-                    PlaceExButton(nodesExL[16], Pos.leftEX[4], 0, 0, select);
-                    PlaceExButton(nodesExL[15], Pos.leftEX[5], 0, 0, select);
-                    PlaceExButton(nodesExL[14], Pos.leftEX[6], 0, 0, select);
-                    PlaceExButton(nodesExL[13], Pos.leftEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExR[20], Pos.rightEX[0], 0, 0, select); // right EXHB
-                    PlaceExButton(nodesExR[19], Pos.rightEX[1], 0, 0, select);
-                    PlaceExButton(nodesExR[18], Pos.rightEX[2], 0, 0, select);
-                    PlaceExButton(nodesExR[17], Pos.rightEX[3], 0, 0, select);
-                    PlaceExButton(nodesExR[16], Pos.rightEX[4], 0, 0, select);
-                    PlaceExButton(nodesExR[15], Pos.rightEX[5], 0, 0, select);
-                    PlaceExButton(nodesExR[14], Pos.rightEX[6], 0, 0, select);
-                    PlaceExButton(nodesExR[13], Pos.rightEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExL[12], Pos.XHB[2, 0], -lX + Config.Split, -lY, select); //right bar (left buttons)
-                    PlaceExButton(nodesExL[11], Pos.XHB[2, 1], -lX + Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[10], Pos.XHB[2, 2], -lX + Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[9], Pos.XHB[2, 3], -lX + Config.Split, -lY, select);
-
-                    PlaceExButton(nodesExR[12], Pos.XHB[3, 0], -rX + Config.Split, -rY, select); //right bar (right buttons)
-                    PlaceExButton(nodesExR[11], Pos.XHB[3, 1], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[10], Pos.XHB[3, 2], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[9], Pos.XHB[3, 3], -rX + Config.Split, -rY, select);
-                }
-
-                break;
-            }
-            case 2:
-            {
-                CopyButtons(contentsExL, 0, lId, 0, 8);
-                CopyButtons(contentsExR, 0, rId, 0, 8);
-                CopyButtons(contentsXHB, 0, lId, 8, 4);
-                CopyButtons(contentsXHB, 4, rId, 8, 4);
-
-                if (select != prevSelect || forceArrange)
-                {
-                    SlotRangeVis(24, 31, true);
-                    SlotRangeVis(16, 23, prevSelect == 4 && !mixBar);
-                    SlotRangeScale(24, 31, 1.1F);
-                    SetLastEightVis(nodesExL, nodesExR, prevSelect == 4 && !mixBar);
-
-                    PlaceExButton(nodesExL[20], Pos.leftEX[0], 0, 0, select); //left EXHB
-                    PlaceExButton(nodesExL[19], Pos.leftEX[1], 0, 0, select);
-                    PlaceExButton(nodesExL[18], Pos.leftEX[2], 0, 0, select);
-                    PlaceExButton(nodesExL[17], Pos.leftEX[3], 0, 0, select);
-                    PlaceExButton(nodesExL[16], Pos.leftEX[4], 0, 0, select);
-                    PlaceExButton(nodesExL[15], Pos.leftEX[5], 0, 0, select);
-                    PlaceExButton(nodesExL[14], Pos.leftEX[6], 0, 0, select);
-                    PlaceExButton(nodesExL[13], Pos.leftEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExR[20], Pos.rightEX[0], 0, 0, select); // right EXHB
-                    PlaceExButton(nodesExR[19], Pos.rightEX[1], 0, 0, select);
-                    PlaceExButton(nodesExR[18], Pos.rightEX[2], 0, 0, select);
-                    PlaceExButton(nodesExR[17], Pos.rightEX[3], 0, 0, select);
-                    PlaceExButton(nodesExR[16], Pos.rightEX[4], 0, 0, select);
-                    PlaceExButton(nodesExR[15], Pos.rightEX[5], 0, 0, select);
-                    PlaceExButton(nodesExR[14], Pos.rightEX[6], 0, 0, select);
-                    PlaceExButton(nodesExR[13], Pos.rightEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExL[12], Pos.XHB[0, 0], -lX - Config.Split, -lY, select); // left bar (left buttons)
-                    PlaceExButton(nodesExL[11], Pos.XHB[0, 1], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[10], Pos.XHB[0, 2], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[9], Pos.XHB[0, 3], -lX - Config.Split, -lY, select);
-
-                    PlaceExButton(nodesExR[12], Pos.XHB[1, 0], -rX - Config.Split, -rY, select); //left bar (right buttons)
-                    PlaceExButton(nodesExR[11], Pos.XHB[1, 1], -rX - Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[10], Pos.XHB[1, 2], -rX - Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[9], Pos.XHB[1, 3], -rX - Config.Split, -rY, select);
-                }
-
-                break;
-            }
-            case 3:
-            {
-                CopyButtons(contentsXHB, 0, lId, 0, 12);
-                CopyButtons(contentsXHB, 12, rId, 8, 4);
-
-                if (select != prevSelect || forceArrange)
-                {
-                    SlotRangeVis(16, 31, true);
-                    SlotRangeScale(0, 7, 1.1F);
-                    if (mixBar)
+                    for (var i = 0; i < 8; i++)
                     {
-                        SlotRangeScale(20, 23, 0.85F);
+                        // 8 buttons each from borrowed bars become EXHB
+                        PlaceExButton(nodesExL[20 - i], Pos.leftEX[i], 0, 0, select); //left EXHB
+                        PlaceExButton(nodesExR[20 - i], Pos.rightEX[i], 0, 0, select); // right EXHB
+                        if (i >= 4) continue;
+
+                        NodeEdit.SetVis(nodesExL[12 - i], false); // hide unneeded borrowed buttons
+                        NodeEdit.SetVis(nodesExR[12 - i], false);
+
+                        metaSlots[Pos.XHB[0, i]].Visible = false;  // hide metaSlots for left bar
+                        metaSlots[Pos.XHB[1, i]].Visible = false;
+                        metaSlots[Pos.XHB[2, i]].Visible = false;  // hide metaSlots for right bar
+                        metaSlots[Pos.XHB[3, i]].Visible = false;  
                     }
-
-                    PlaceExButton(nodesExL[20], Pos.XHB[0, 0], -lX - Config.Split, -lY, select); //inactive main XHB (first 3 sections)
-                    PlaceExButton(nodesExL[19], Pos.XHB[0, 1], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[18], Pos.XHB[0, 2], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[17], Pos.XHB[0, 3], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 16 : 12], Pos.XHB[1, 0], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 15 : 11], Pos.XHB[1, 1], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 14 : 10], Pos.XHB[1, 2], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 13 : 9], Pos.XHB[1, 3], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 12 : 16], Pos.XHB[2, 0], -lX + Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 11 : 15], Pos.XHB[2, 1], -lX + Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 10 : 14], Pos.XHB[2, 2], -lX + Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[!mixBar ? 9 : 13], Pos.XHB[2, 3], -lX + Config.Split, -lY, select);
-
-                    PlaceExButton(nodesExR[20], Pos.rightEX[0], 0, 0, select); // right EXHB
-                    PlaceExButton(nodesExR[19], Pos.rightEX[1], 0, 0, select);
-                    PlaceExButton(nodesExR[18], Pos.rightEX[2], 0, 0, select);
-                    PlaceExButton(nodesExR[17], Pos.rightEX[3], 0, 0, select);
-                    PlaceExButton(nodesExR[16], Pos.rightEX[4], 0, 0, select);
-                    PlaceExButton(nodesExR[15], Pos.rightEX[5], 0, 0, select);
-                    PlaceExButton(nodesExR[14], Pos.rightEX[6], 0, 0, select);
-                    PlaceExButton(nodesExR[13], Pos.rightEX[7], 0, 0, select);
-
-                    PlaceExButton(nodesExR[12], Pos.XHB[3, 0], -rX + Config.Split, -rY, select); // inactive main XHB (4th section)
-                    PlaceExButton(nodesExR[11], Pos.XHB[3, 1], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[10], Pos.XHB[3, 2], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[9], Pos.XHB[3, 3], -rX + Config.Split, -rY, select);
                 }
 
                 break;
             }
-            case 4:
+            case 1: // LEFT BAR
             {
-                CopyButtons(contentsXHB, 0, lId, 8, 4);
-                CopyButtons(contentsXHB, 4, rId, 8, 4);
-                CopyButtons(contentsXHB, 8, rId, 0, 8);
+                CopyButtons(BarContents.LR, 0, lId, 0, 8);
+                CopyButtons(BarContents.RL, 0, rId, 0, 8);
 
-                if (select != prevSelect || forceArrange)
+                CopyButtons(BarContents.XHB, 8, lId, 8, 4);
+                CopyButtons(BarContents.XHB, 12, rId, 8, 4);
+
+                if (forceArrange || select != prevSelect)
                 {
-                    SlotRangeVis(16, 31, true);
-                    SlotRangeScale(8, 15, 1.1F);
-                    if (mixBar)
+                    for (var i = 0; i < 8; i++)
                     {
-                        SlotRangeScale(24, 27, 0.85F);
+                        // 8 buttons each from borrowed bars become EXHB
+                        PlaceExButton(nodesExL[20 - i], Pos.leftEX[i], 0, 0, select); //left EXHB
+                        PlaceExButton(nodesExR[20 - i], Pos.rightEX[i], 0, 0, select); // right EXHB
+                        if (i >= 4) continue;
+
+                        metaSlots[Pos.XHB[0, i]].Scale = 1.1F;  // reveal and scale up left bar metaSlots
+                        metaSlots[Pos.XHB[0, i]].Visible = true;
+                        metaSlots[Pos.XHB[1, i]].Scale = 1.1F;
+                        metaSlots[Pos.XHB[1, i]].Visible = true;
+                        metaSlots[Pos.XHB[2, i]].Visible = prevSelect == 3 && !mixBar;  // conditionally hide right bar metaSlots
+                        metaSlots[Pos.XHB[3, i]].Visible = prevSelect == 3 && !mixBar;
+
+                        // 4 buttons each from borrowed bars become right XHB (not necessarily shown, depends on previous selection)
+                        PlaceExButton(nodesExL[12 - i], Pos.XHB[2, i], -lX + Config.Split, -lY, select); //right bar (left buttons)
+                        PlaceExButton(nodesExR[12 - i], Pos.XHB[3, i], -rX + Config.Split, -rY, select); //right bar (right buttons)
+
                     }
+                }
 
-                    PlaceExButton(nodesExL[20], Pos.leftEX[0], 0, 0, select); //left EXHB
-                    PlaceExButton(nodesExL[19], Pos.leftEX[1], 0, 0, select);
-                    PlaceExButton(nodesExL[18], Pos.leftEX[2], 0, 0, select);
-                    PlaceExButton(nodesExL[17], Pos.leftEX[3], 0, 0, select);
-                    PlaceExButton(nodesExL[16], Pos.leftEX[4], 0, 0, select);
-                    PlaceExButton(nodesExL[15], Pos.leftEX[5], 0, 0, select);
-                    PlaceExButton(nodesExL[14], Pos.leftEX[6], 0, 0, select);
-                    PlaceExButton(nodesExL[13], Pos.leftEX[7], 0, 0, select);
+                break;
+            }
+            case 2: // RIGHT BAR
+            {
+                CopyButtons(BarContents.LR, 0, lId, 0, 8);
+                CopyButtons(BarContents.RL, 0, rId, 0, 8);
 
-                    PlaceExButton(nodesExL[12], Pos.XHB[0, 0], -lX - Config.Split, -lY, select); //main XHB (1st section)
-                    PlaceExButton(nodesExL[11], Pos.XHB[0, 1], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[10], Pos.XHB[0, 2], -lX - Config.Split, -lY, select);
-                    PlaceExButton(nodesExL[9], Pos.XHB[0, 3], -lX - Config.Split, -lY, select);
+                var xContents = BarContents.XHB;
+                CopyButtons(xContents, 0, lId, 8, 4);
+                CopyButtons(xContents, 4, rId, 8, 4);
 
-                    PlaceExButton(nodesExR[!mixBar ? 12 : 20], Pos.XHB[1, 0], -rX - Config.Split, -rY, select); //main XHB (last 3 sections)
-                    PlaceExButton(nodesExR[!mixBar ? 11 : 19], Pos.XHB[1, 1], -rX - Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 10 : 18], Pos.XHB[1, 2], -rX - Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 9 : 17], Pos.XHB[1, 3], -rX - Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 20 : 12], Pos.XHB[2, 0], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 19 : 11], Pos.XHB[2, 1], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 18 : 10], Pos.XHB[2, 2], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[!mixBar ? 17 : 9], Pos.XHB[2, 3], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[16], Pos.XHB[3, 0], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[15], Pos.XHB[3, 1], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[14], Pos.XHB[3, 2], -rX + Config.Split, -rY, select);
-                    PlaceExButton(nodesExR[13], Pos.XHB[3, 3], -rX + Config.Split, -rY, select);
+                if (forceArrange || select != prevSelect)
+                {
+                    for (var i = 0; i < 8; i++)
+                    {
+
+                        // 8 buttons each from borrowed bars become EXHB
+                        PlaceExButton(nodesExL[20 - i], Pos.leftEX[i], 0, 0, select); // left EXHB
+                        PlaceExButton(nodesExR[20 - i], Pos.rightEX[i], 0, 0, select); // right EXHB
+
+                        if (i >= 4) continue;
+
+                        metaSlots[Pos.XHB[0, i]].Visible = prevSelect == 4 && !mixBar;
+                        metaSlots[Pos.XHB[1, i]].Visible = prevSelect == 4 && !mixBar;
+                        metaSlots[Pos.XHB[2, i]].Scale = 1.1F;
+                        metaSlots[Pos.XHB[2, i]].Visible = true;
+                        metaSlots[Pos.XHB[3, i]].Visible = true;
+                        metaSlots[Pos.XHB[3, i]].Scale = 1.1F;
+
+                        // 4 buttons each from borrowed bars become left XHB (not necessarily shown, depends on previous selection)
+                        PlaceExButton(nodesExL[12-i], Pos.XHB[0, i], -lX - Config.Split, -lY, select); // left bar (left buttons)
+                        PlaceExButton(nodesExR[12-i], Pos.XHB[1, i], -rX - Config.Split, -rY, select); //left bar (right buttons)
+
+                        NodeEdit.SetVis(nodesExL[12-i], prevSelect == 4 && !mixBar);
+                        NodeEdit.SetVis(nodesExR[12-i], prevSelect == 4 && !mixBar);
+                    }
+                }
+
+                break;
+            }
+            case 3: // L->R BAR
+                {
+                var xContents = BarContents.XHB;
+                CopyButtons(xContents, 0, lId, 0, 12);
+                CopyButtons(xContents, 12, rId, 8, 4);
+
+                if (forceArrange || select != prevSelect)
+                {
+
+                    for (var i = 0; i < 8; i++)
+                    {
+                        metaSlots[Pos.leftEX[i]].Scale = 1.1F;
+                        PlaceExButton(nodesExR[20 - i], Pos.rightEX[i], 0, 0, select); // right EXHB
+                        if (i >= 4) continue;
+
+                        metaSlots[Pos.XHB[0,i]].Visible = true;
+                        metaSlots[Pos.XHB[1,i]].Visible = true;
+                        metaSlots[Pos.XHB[2,i]].Visible = true;
+                        metaSlots[Pos.XHB[3,i]].Visible = true;
+
+                        PlaceExButton(nodesExL[20-i],                  Pos.XHB[0, i], -lX - Config.Split, -lY, select); //inactive main XHB
+                        PlaceExButton(nodesExL[(!mixBar ? 16 : 12)-i], Pos.XHB[1, i], -lX - Config.Split, -lY, select);
+                        PlaceExButton(nodesExL[(!mixBar ? 12 : 16)-i], Pos.XHB[2, i], -lX + Config.Split, -lY, select);
+                        PlaceExButton(nodesExR[12-i],                  Pos.XHB[3, i], -rX + Config.Split, -rY, select); 
+
+                    }
+                }
+
+                break;
+            }
+            case 4: // R->L BAR
+                {
+                var xContents = BarContents.XHB;
+                CopyButtons(xContents, 0, lId, 8, 4);
+                CopyButtons(xContents, 4, rId, 8, 4);
+                CopyButtons(xContents, 8, rId, 0, 8);
+
+                if (forceArrange || select != prevSelect)
+                {
+                    for (var i = 0; i < 8; i++)
+                    {
+                        metaSlots[Pos.rightEX[i]].Scale = 1.1F;
+                        PlaceExButton(nodesExL[20 - i], Pos.leftEX[i], 0, 0, select); //left EXHB
+                        if (i >= 4) continue;
+
+                        metaSlots[Pos.XHB[0, i]].Visible = true;
+                        metaSlots[Pos.XHB[1, i]].Visible = true;
+                        metaSlots[Pos.XHB[2, i]].Visible = true;
+                        metaSlots[Pos.XHB[3, i]].Visible = true;
+                        PlaceExButton(nodesExL[12-i],                  Pos.XHB[0, i], -lX - Config.Split, -lY, select); //main XHB (1st section)
+                        PlaceExButton(nodesExR[(!mixBar ? 12 : 20)-i], Pos.XHB[1, i], -rX - Config.Split, -rY, select); //main XHB (2nd section)
+                        PlaceExButton(nodesExR[(!mixBar ? 20 : 12)-i], Pos.XHB[2, i], -rX + Config.Split, -rY, select); //main XHB (3rd section)
+                        PlaceExButton(nodesExR[16-i],                  Pos.XHB[3, i], -rX + Config.Split, -rY, select); //main XHB (4th  section)
+                    }
                 }
 
                 break;
@@ -427,8 +340,10 @@ public sealed unsafe partial class CrossUp
         }
     }
 
-    private static void PlaceExButton(AtkResNode* node, int msID, float xMod = 0, float yMod = 0, int select = 0,
-        bool tween = true) //move a borrowed button into position and set its scale to animate if needed
+
+
+        //move a borrowed button into position and set its scale to animate if needed
+    private static void PlaceExButton(AtkResNode* node, int msID, float xMod = 0, float yMod = 0, int select = 0,bool tween = true) 
     {
         var to = scaleMap[select, metaSlots[msID].ScaleIndex];
         var pos = metaSlots[msID];
@@ -461,25 +376,6 @@ public sealed unsafe partial class CrossUp
         NodeEdit.SetVarious(node, pos);
     }
 
-    private static void
-        SetLastEightVis(AtkResNode** nodesL, AtkResNode** nodesR, bool show) //sometimes we need to display all 24 borrowed buttons, and sometimes we only need 16
-    {
-        for (var i = 9; i <= 12; i++)
-        {
-            NodeEdit.SetVis(nodesL[i], show);
-            NodeEdit.SetVis(nodesR[i], show);
-        }
-    }
-
-    private static void SlotRangeVis(int start, int end, bool show)
-    {
-        for (var i = start; i <= end; i++) metaSlots[i].Visible = show;
-    }
-
-    private static void SlotRangeScale(int start, int end, float scale)
-    {
-        for (var i = start; i <= end; i++) metaSlots[i].Scale = scale;
-    }
 
     private static void SetExAlpha(AtkResNode** nodesL, AtkResNode** nodesR, byte alpha)
     {
@@ -560,7 +456,7 @@ public sealed unsafe partial class CrossUp
         for (var i = 1; i <= 9; i++)
         {
             ResetBarPos(i);
-            bool shared = GetCharConfig((uint)(i + 515)) == 1;
+            var shared = GetCharConfig(ConfigID.Hotbar.Shared[i]) == 1;
             var jobID = Service.ClientState?.LocalPlayer?.ClassJob.Id;
             if (jobID != null) CopyButtons(GetSavedBar(shared ? 0 : (int)jobID, i), 0, i, 0, 12);
         }
@@ -572,7 +468,7 @@ public sealed unsafe partial class CrossUp
         if (baseHotbar == null) return;
 
         var nodes = baseHotbar->UldManager.NodeList;
-        var gridType = GetCharConfig((uint)(barID + 501));
+        var gridType = GetCharConfig(ConfigID.Hotbar.GridType[barID]);
 
         NodeEdit.SetVarious(nodes[0], new()
         {
@@ -596,7 +492,7 @@ public sealed unsafe partial class CrossUp
             });
         }
 
-        if (WasHidden[barID] && (Config.borrowBarL < 1 || Config.borrowBarR < 1 || (barID != Config.borrowBarL && barID != Config.borrowBarR)) && charConfigs->GetIntValue((uint)(barID + 485)) == 1)
+        if (Status.WasHidden[barID] && (Config.borrowBarL < 1 || Config.borrowBarR < 1 || (barID != Config.borrowBarL && barID != Config.borrowBarR)) && charConfigs->GetIntValue((uint)(barID + 485)) == 1)
         {
             charConfigs->SetOption((uint)(barID + 485), 0);
         }
@@ -629,4 +525,26 @@ public sealed unsafe partial class CrossUp
             NodeEdit.SetVarious(node, metaSlot);
         }
     }
+    private static bool AdjustHudEditorNode() //fix for misaligned frame around XHB when using the HUD Layout Interface
+    {
+        var hudScreen = (AtkUnitBase*)Service.GameGui.GetAddonByName("_HudLayoutScreen", 1);
+        var rootNode = UnitBases.Cross->UldManager.NodeList[0];
+        if (hudScreen == null || rootNode == null) return false;
+
+        var scale = rootNode->ScaleX;
+        var hudNodes = hudScreen->UldManager.NodeList;
+
+        for (var i = 0; i < hudScreen->UldManager.NodeListCount; i++)
+        {
+            if (!hudNodes[i]->IsVisible || Math.Abs(hudNodes[i]->Y - rootNode->Y) > 1 ||
+                Math.Abs(hudNodes[i]->Width - rootNode->Width * scale) > 1 ||
+                Math.Abs(hudNodes[i]->Height - rootNode->Height * scale) > 1 ||
+                Math.Abs(hudNodes[i]->X - rootNode->X) < 1) continue;
+            hudNodes[i]->X = rootNode->X;
+            hudNodes[i]->Flags_2 |= 0xD;
+            return true;
+        }
+        return false;
+    }
 }
+

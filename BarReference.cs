@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Component.GUI;
+﻿using System;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Numerics;
 
 namespace CrossUp
@@ -24,7 +25,6 @@ namespace CrossUp
             public static AtkUnitBase* Cross = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             public static AtkUnitBase* LL = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
             public static AtkUnitBase* RR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
-            public static AtkUnitBase* HudScreen = null;
         };
 
         public struct NodeRef
@@ -40,11 +40,22 @@ namespace CrossUp
             public class Cross
             {
                 public static readonly NodeRef RootNode = new() { unitBase = UnitBases.Cross, Id = 0 };
-                public static readonly NodeRef Component = new() { unitBase = UnitBases.Cross, Id = 1, pos = { X = 18F, Y = 79F } };
-                public static readonly NodeRef selectBG = new() { unitBase = UnitBases.Cross, Id = 4, size = { X = 304, Y = 140 } };
-                public static readonly NodeRef miniSelectL = new() { unitBase = UnitBases.Cross, Id = 5, size = { X = 166, Y = 140 } };
-                public static readonly NodeRef miniSelectR = new() { unitBase = UnitBases.Cross, Id = 6, size = { X = 166, Y = 140 } };
-                public static readonly NodeRef VertLine = new() { unitBase = UnitBases.Cross, Id = 7, pos = { X = 271F, Y = 21F }, size = { X = 9, Y = 76 } };
+
+                public static readonly NodeRef Component = new()
+                    { unitBase = UnitBases.Cross, Id = 1, pos = { X = 18F, Y = 79F } };
+
+                public static readonly NodeRef selectBG = new()
+                    { unitBase = UnitBases.Cross, Id = 4, size = { X = 304, Y = 140 } };
+
+                public static readonly NodeRef miniSelectL = new()
+                    { unitBase = UnitBases.Cross, Id = 5, size = { X = 166, Y = 140 } };
+
+                public static readonly NodeRef miniSelectR = new()
+                    { unitBase = UnitBases.Cross, Id = 6, size = { X = 166, Y = 140 } };
+
+                public static readonly NodeRef VertLine = new()
+                    { unitBase = UnitBases.Cross, Id = 7, pos = { X = 271F, Y = 21F }, size = { X = 9, Y = 76 } };
+
                 public static readonly NodeRef[] Sets =
                 {
                     new NodeRef { unitBase = UnitBases.Cross, Id = 11, pos = { X = 0F, Y = 0F } },
@@ -52,21 +63,37 @@ namespace CrossUp
                     new NodeRef { unitBase = UnitBases.Cross, Id = 9, pos = { X = 284F, Y = 0F } },
                     new NodeRef { unitBase = UnitBases.Cross, Id = 8, pos = { X = 422F, Y = 0F } },
                 };
-                public static readonly NodeRef RT = new() { unitBase = UnitBases.Cross, Id = 19, pos = { X = 367F, Y = 11F } };
-                public static readonly NodeRef LT = new() { unitBase = UnitBases.Cross, Id = 20, pos = { X = 83F, Y = 11F } };
-                public static readonly NodeRef setText = new() { unitBase = UnitBases.Cross, Id = 21, pos = { X = 230F, Y = 170F } };
-                public static readonly NodeRef padlock = new() { unitBase = UnitBases.Cross, Id = 26, pos = { X = 284F, Y = 152F } };
-                public static readonly NodeRef changeSet = new() { unitBase = UnitBases.Cross, Id = 27, pos = { X = 146F, Y = 0F } };
+
+                public static readonly NodeRef RT = new()
+                    { unitBase = UnitBases.Cross, Id = 19, pos = { X = 367F, Y = 11F } };
+
+                public static readonly NodeRef LT = new()
+                    { unitBase = UnitBases.Cross, Id = 20, pos = { X = 83F, Y = 11F } };
+
+                public static readonly NodeRef setText = new()
+                    { unitBase = UnitBases.Cross, Id = 21, pos = { X = 230F, Y = 170F } };
+
+                public static readonly NodeRef padlock = new()
+                    { unitBase = UnitBases.Cross, Id = 26, pos = { X = 284F, Y = 152F } };
+
+                public static readonly NodeRef changeSet = new()
+                    { unitBase = UnitBases.Cross, Id = 27, pos = { X = 146F, Y = 0F } };
             }
         };
 
         public static class Pos
         {
-            public static readonly int[] leftEX = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+            public static readonly int[] leftEX = { 0, 1, 2, 3, 4, 5, 6, 7 };
             public static readonly int[] rightEX = { 8, 9, 10, 11, 12, 13, 14, 15 };
             public static readonly int[,] XHB = { { 16, 17, 18, 19 }, { 20, 21, 22, 23 }, { 24, 25, 26, 27 }, { 28, 29, 30, 31 } };
         }
-
+        public class ScaleTween
+        {
+            public DateTime Start { get; init; }
+            public TimeSpan Duration { get; init; }
+            public float FromScale { get; init; }
+            public float ToScale { get; init; }
+        }
         public class MetaSlot
         {
             public bool Visible { get; set; }
@@ -80,7 +107,7 @@ namespace CrossUp
             public AtkResNode* Node { get; set; }
             public float Xmod { get; set; }
             public float Ymod { get; set; }
-            public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new() { X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX, OrigY = p.OrigY };
+            public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new(){ X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX,OrigY = p.OrigY};
         }
 
         public static MetaSlot[] metaSlots =
@@ -142,7 +169,8 @@ namespace CrossUp
             new() { X = 72, Y = 618 },
         };
 
-        public static readonly float[,] scaleMap = {
+        public static readonly float[,] scaleMap =
+        {
             // the scale each section of buttons should be at in each state
             { 1F, 1F, 1F, 1F }, //0: none selected
             { 1.1F, 0.85F, 0.85F, 0.85F }, //1: left selected
