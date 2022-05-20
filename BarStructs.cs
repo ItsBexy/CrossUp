@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using FFXIVClientStructs.Attributes;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace CrossUp;
@@ -40,7 +41,6 @@ public struct AddonActionCross
     [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
     [FieldOffset(0x6E8)] public int LRBar;
     [FieldOffset(0x6EC)] public int RLBar;
-
     [FieldOffset(0x701)] public bool LeftBar;
     [FieldOffset(0x702)] public bool RightBar;
     [FieldOffset(0x704)] public bool PetBar;
@@ -53,6 +53,35 @@ public struct AddonActionDoubleCrossBase
     [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
     [FieldOffset(0x2EC)] public byte UseLeftSide;
     [FieldOffset(0x2E8)] public byte BarTarget;
-
     [FieldOffset(0x2e0)] public bool Selected;
+}
+
+
+// overriding getter for RaptureHotbarModule.Hotbar to allow retrieval of bar 19
+
+[StructLayout(LayoutKind.Explicit, Size = 160376)]
+public struct RaptureHotbarModule
+{
+    [FieldOffset(144)]
+    public HotBars HotBar;
+
+    [FieldOffset(72052)]
+    public SavedHotBars SavedClassJob;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 64512)]
+public struct HotBars
+{
+    private unsafe fixed byte data[64512];
+
+    public unsafe HotBar* this[int i]
+    {
+        get
+        {
+            if (i is < 0 or > 19)    // upper limit is 17 in ClientStructs, but we need 19 for the pet cross bar
+                return null;
+            fixed (byte* numPtr = this.data)
+                return (HotBar*)(numPtr + sizeof(HotBar) * i);
+        }
+    }
 }

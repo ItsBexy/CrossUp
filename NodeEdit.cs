@@ -1,5 +1,6 @@
 ﻿using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Numerics;
+using Dalamud.Logging;
 
 namespace CrossUp;
 
@@ -100,24 +101,24 @@ public static unsafe class NodeEdit
     {
         public static void RelativePos(CrossUp.NodeRef props, float offX, float offY)
         {
-            SetPos(props.unitBase->UldManager.NodeList[props.Id], props.pos.X + offX, props.pos.Y + offY);
+            SetPos(props.UnitBase->UldManager.NodeList[props.Id], props.Position.X + offX, props.Position.Y + offY);
         }
         public static void AbsoluteSize(CrossUp.NodeRef props, ushort? width = null, ushort? height = null)
         {
-            width ??= (ushort)props.size.X;
-            height ??= (ushort)props.size.Y;
-            SetSize(props.unitBase->UldManager.NodeList[props.Id], (ushort)width, (ushort)height);
+            width ??= (ushort)props.Size.X;
+            height ??= (ushort)props.Size.Y;
+            SetSize(props.UnitBase->UldManager.NodeList[props.Id], (ushort)width, (ushort)height);
         }
         public static void AbsolutePos(CrossUp.NodeRef props, float? x = null, float? y = null)
         {
-            x ??= props.pos.X;
-            y ??= props.pos.Y;
-            SetPos(props.unitBase->UldManager.NodeList[props.Id], (float)x, (float)y);
+            x ??= props.Position.X;
+            y ??= props.Position.Y;
+            SetPos(props.UnitBase->UldManager.NodeList[props.Id], (float)x, (float)y);
         }
 
         public static void SetVis(CrossUp.NodeRef props,bool show)
         {
-            NodeEdit.SetVis(props.unitBase->UldManager.NodeList[props.Id],show);
+            NodeEdit.SetVis(props.UnitBase->UldManager.NodeList[props.Id],show);
         }
     };
 
