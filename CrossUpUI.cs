@@ -3,6 +3,7 @@ using System;
 using System.Numerics;
 using Dalamud.Logging;
 using Dalamud.Interface.Colors;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace CrossUp
 {
@@ -426,6 +427,8 @@ namespace CrossUp
         private void DrawSettingsWindow()
         {
             if (!SettingsVisible) return;
+
+            
 
             var scale = Dalamud.Interface.ImGuiHelpers.GlobalScale;
 

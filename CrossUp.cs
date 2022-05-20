@@ -26,8 +26,7 @@ namespace CrossUp
         private delegate byte ActionBarBaseUpdate(AddonActionBarBase* addonActionBarBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData);
         private readonly HookWrapper<ActionBarBaseUpdate>? ActionBarBaseUpdateHook;
 
-        private static readonly ConfigModule* charConfigs = ConfigModule.Instance();
-        private static readonly RaptureHotbarModule* raptureModule = ClientStructsFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+        private static readonly RaptureHotbarModule* raptureModule = (RaptureHotbarModule*)ClientStructsFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
         private readonly AgentHudLayout* hudLayout = ClientStructsFramework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
         public CrossUp(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -47,7 +46,7 @@ namespace CrossUp
 
             pluginInterface.Create<Service>();
 
-            CrossUpUI = new(Config, this);
+            CrossUpUI = new CrossUpUI(Config, this);
 
             ActionBarBaseUpdateHook ??= Common.Hook<ActionBarBaseUpdate>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
             ActionBarBaseUpdateHook?.Enable();
@@ -57,7 +56,9 @@ namespace CrossUp
         }
 
         // HOUSEKEEPING
-        private static class Status     //stuff other functions need to keep track of
+
+            //stuff various functions need to keep track of
+        private static class Status     
         {
             public static bool TweensExist;
             public static bool Initialized;
@@ -73,6 +74,7 @@ namespace CrossUp
         {
             Status.Initialized = true;
             SetSelectColor();
+            ResetHud();
             UpdateBarState(true);
 
             for (var i = 1; i <= 10; i++)
@@ -104,7 +106,7 @@ namespace CrossUp
             // on every new frame
         private void FrameworkUpdate(DalamudFramework framework)
         {
-            if (!Status.Initialized && Service.ClientState.IsLoggedIn && UnitBases.Cross != null)
+            if (!Status.Initialized && Service.ClientState.IsLoggedIn && UnitBases.Cross() != null)
             {
                 try
                 {
@@ -117,10 +119,18 @@ namespace CrossUp
             }
             else if (Status.Initialized)
             {
-                if (Status.TweensExist) TweenAllButtons();
+                if (Service.ClientState.IsLoggedIn)
+                {
+                    if (Status.TweensExist) TweenAllButtons();
 
-                // if HUD layout editor is open, perform this fix once:
-                Status.DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() && (Status.DoneHudCheck || AdjustHudEditorNode());
+                    // if HUD layout editor is open, perform this fix once:
+                    Status.DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() &&
+                                          (Status.DoneHudCheck || AdjustHudEditorNode());
+                }
+                else
+                {
+                    Status.Initialized = false;
+                }
             }
         }
 
@@ -133,12 +143,12 @@ namespace CrossUp
 
             try
             {
-                
                 // almost all the bars fire at once every time anything happens,
                 // so we'll just take barID 1 because it's always included
                 if (addonActionBarBase->HotbarID == 1) 
                 {
                     var activeNow = GetCharConfig(ConfigID.CrossEnabled);
+
                     UpdateBarState(activeNow != Status.CrossBarActive, true);
                     Status.CrossBarActive = activeNow;
                 }
@@ -166,9 +176,9 @@ namespace CrossUp
             // check which bar is selected, if any (returns value from 0-6)
         private static int GetCrossBarSelection()
         {
-            var xBar  = (AddonActionCross*)UnitBases.Cross;
-            var LLBar = (AddonActionDoubleCrossBase*)UnitBases.LL;
-            var RRbar = (AddonActionDoubleCrossBase*)UnitBases.RR;
+            var xBar  = (AddonActionCross*)UnitBases.Cross();
+            var LLBar = (AddonActionDoubleCrossBase*)UnitBases.LL();
+            var RRbar = (AddonActionDoubleCrossBase*)UnitBases.RR();
 
             if (xBar == null || LLBar == null || RRbar == null) return Status.CrossBarSelection;
 
@@ -227,25 +237,24 @@ namespace CrossUp
         }
 
             // turn on each specific bar
-        private void EnableBorrowedBar(int id)
+        private static void EnableBorrowedBar(int id)
         {
-            var unitBase = UnitBases.ActionBar[id];
+            var unitBase = UnitBases.ActionBar(id);
             if (unitBase == null) return;
             
             var visID = ConfigID.Hotbar.Visible[id];
-            if (charConfigs->GetIntValue(visID) == 0)
+            if (CharConfigs->GetIntValue(visID) == 0)
             {
                 Status.WasHidden[id] = true;
-                charConfigs->SetOption(visID, 1);
+                CharConfigs->SetOption(visID, 1);
             }
 
             for (var i = 9; i <= 20; i++) unitBase->UldManager.NodeList[i]->Flags_2 |= 0xD;
         }
 
-            // disable the feature
+            // disable the feature (assumes Config.SepExBar has been turned off prior to this being called)
         public void DisableEx()
         {
-            Config.SepExBar = false;
             ArrangeAndFill(0, 0, true, false);
             ResetHud();
         }
@@ -263,8 +272,8 @@ namespace CrossUp
                 var overrideRL = Config.MappingsEx[1, index];
                 var configLR = ConfigID.LRset[usePvP];
                 var configRL = ConfigID.RLset[usePvP];
-                if (GetCharConfig(configLR) != overrideLR) charConfigs->SetOption(configLR, overrideLR, 1);
-                if (GetCharConfig(configRL) != overrideRL) charConfigs->SetOption(configRL, overrideRL, 1);
+                if (GetCharConfig(configLR) != overrideLR) SetCharConfig(configLR, overrideLR);
+                if (GetCharConfig(configRL) != overrideRL) SetCharConfig(configRL, overrideRL);
             }
 
             if (Config.RemapW)
@@ -273,52 +282,11 @@ namespace CrossUp
                 var overrideRR = Config.MappingsW[1, index];
                 var configLL = ConfigID.LLset[usePvP];
                 var configRR = ConfigID.RRset[usePvP];
-                if (GetCharConfig(configLL) != overrideLL) charConfigs->SetOption(configLL, overrideLL, 1);
-                if (GetCharConfig(configRR) != overrideRR) charConfigs->SetOption(configRR, overrideRR, 1);
+                if (GetCharConfig(configLL) != overrideLL) SetCharConfig(configLL, overrideLL);
+                if (GetCharConfig(configRR) != overrideRR) SetCharConfig(configRR, overrideRR);
             }
         }
-
-        // CHARACTER CONFIGURATION
-        private static int GetCharConfig(uint configID) => charConfigs->GetIntValue(configID);
         
-
-            //relevant character configuration IDs
-        public readonly struct ConfigID
-        {
-            public const uint CrossEnabled = 586; // checkbox -- Cross Hotbar enabled
-            public const uint SepPvP = 563;       // checkbox -- using different settings for PvP
-            public const uint MixBar = 535;       // checkbox -- main XHB layout
-                                                  //           0 = dpad / button / dpad / button
-                                                  //           1 = dpad / dpad / button / button
-
-            // dropdowns -- selected sets for EXHB and WXHB [PvE, PvP]
-            // returns 0-19 representing the left/right sides of each bar, and the four cycle options
-            public static readonly uint[] LRset = { 561, 584 };
-            public static readonly uint[] RLset = { 560, 583 };
-            public static readonly uint[] LLset = { 588, 591 };
-            public static readonly uint[] RRset = { 589, 592 };
-            public struct Transparency  // slider -- transparency for cross hotbar buttons
-            {
-                public const uint Standard = 600;
-                public const uint Active   = 601;
-                public const uint Inactive = 602;
-            }
-            public struct Hotbar    // kb/mouse hotbars 1-10 (0-9 internally)
-            {
-                public static readonly uint[] Visible  = { 485, 486, 487, 488, 489, 490, 491, 492, 493, 494 }; //checkbox -- bar is visible
-                public static readonly uint[] Shared   = { 515, 516, 517, 518, 519, 520, 521, 522, 523, 524 }; //checkbox -- bar is shared between jobs
-                public static readonly uint[] GridType = { 501, 502, 503, 504, 505, 506, 507, 508, 509, 510 }; //radio    -- bar grid type (0-5)
-            }
-        }
-
-             // ReSharper disable once UnusedMember.Global
-        public void LogCharConfigs(uint start, uint end = 0)
-        {
-            if (end < start) { end = start; }
-            for (var i = start; i <= end; i++)
-            {
-                PluginLog.Log(i + " " + GetCharConfig(i));
-            }
-        }
+ 
     }
 }

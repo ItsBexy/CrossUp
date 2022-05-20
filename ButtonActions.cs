@@ -19,6 +19,7 @@ public sealed unsafe partial class CrossUp
         public static ButtonAction[] XHB => GetCrossbarContents();
         public static ButtonAction[] LR => GetExBarContents(true);
         public static ButtonAction[] RL => GetExBarContents(false);
+        public static ButtonAction[] CrossPet => GetBarContentsByID(19, 16);
     }
 
         // main func for retrieving hotbar actions. most others point to this one
@@ -57,26 +58,17 @@ public sealed unsafe partial class CrossUp
         //get whatever's on the cross hotbar
     private static ButtonAction[] GetCrossbarContents() 
     {
-        var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross;
-        var xBar = (AddonActionCross*)UnitBases.Cross;
-        if (xBar->PetBar)
-        {
-            // FIX STILL NEEDED
-            // I can identify if the pet hotbar is active, but I haven't worked out how to retrieve its contents.
-            // Grabbing the same ol regular bar contents for now, even though it looks odd.
-            // this does not affect gameplay, only visuals
-            
-            return GetBarContentsByID(barBaseXHB->HotbarID, 16);
-        }
-        else
-        {
-            return GetBarContentsByID(barBaseXHB->HotbarID, 16);
-        }
+        var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross();
+        var xBar = (AddonActionCross*)UnitBases.Cross();
+
+        return xBar->PetBar ? BarContents.CrossPet : GetBarContentsByID(barBaseXHB->HotbarID, 16);
     }
 
         //get whatever's mapped to the Ex cross hotbars
-    private static ButtonAction[] GetExBarContents(bool leftOrRight) 
+    private static ButtonAction[] GetExBarContents(bool leftOrRight)
     {
+
+
         var usePvP = GetCharConfig(ConfigID.SepPvP) == 1 && Service.ClientState.IsPvP ? 1 : 0;
         var exConf = GetCharConfig(leftOrRight ? ConfigID.LRset[usePvP] : ConfigID.RLset[usePvP]);
         int exBarTarget;
@@ -88,7 +80,7 @@ public sealed unsafe partial class CrossUp
         }
         else
         {
-            var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross;
+            var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross();
             exBarTarget = (barBaseXHB->HotbarID + ((exConf < 18) ? -1 : 1) - 2) % 8 + 10;
             useLeft = exConf % 2 == 1;
         }

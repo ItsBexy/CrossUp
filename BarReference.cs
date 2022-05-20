@@ -8,85 +8,51 @@ namespace CrossUp
     {
         public class UnitBases
         {
-            public static AtkUnitBase*[] ActionBar =
+            public static AtkUnitBase* ActionBar(int i)
             {
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar01", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar02", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar03", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar04", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar05", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar06", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar07", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar08", 1),
-                (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar09", 1)
-            };
-
-            public static AtkUnitBase* Cross = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
-            public static AtkUnitBase* LL = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
-            public static AtkUnitBase* RR = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
+                if (i is < 0 or > 9) return null;
+                var suffix = i == 0 ? "" : $"0{i}";
+                return (AtkUnitBase*)Service.GameGui.GetAddonByName($"_ActionBar{suffix}", 1);
+            }
+            public static AtkUnitBase* Cross() => (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
+            public static AtkUnitBase* LL() => (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
+            public static AtkUnitBase* RR() => (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
         };
 
-        public struct NodeRef
+        public class NodeRef
         {
-            public AtkUnitBase* unitBase;
+            public AtkUnitBase* UnitBase;
             public int Id;
-            public Vector2 pos;
-            public Vector2 size;
+            public Vector2 Position;
+            public Vector2 Size;
         };
 
-        public class barNodes
+            // base/ID and certain default parameters for specific bar nodes
+        public class BarNodes
         {
             public class Cross
             {
-                public static readonly NodeRef RootNode = new() { unitBase = UnitBases.Cross, Id = 0 };
-
-                public static readonly NodeRef Component = new()
-                    { unitBase = UnitBases.Cross, Id = 1, pos = { X = 18F, Y = 79F } };
-
-                public static readonly NodeRef selectBG = new()
-                    { unitBase = UnitBases.Cross, Id = 4, size = { X = 304, Y = 140 } };
-
-                public static readonly NodeRef miniSelectL = new()
-                    { unitBase = UnitBases.Cross, Id = 5, size = { X = 166, Y = 140 } };
-
-                public static readonly NodeRef miniSelectR = new()
-                    { unitBase = UnitBases.Cross, Id = 6, size = { X = 166, Y = 140 } };
-
-                public static readonly NodeRef VertLine = new()
-                    { unitBase = UnitBases.Cross, Id = 7, pos = { X = 271F, Y = 21F }, size = { X = 9, Y = 76 } };
-
-                public static readonly NodeRef[] Sets =
+                public static NodeRef RootNode => new() { UnitBase = UnitBases.Cross(), Id = 0 };
+                public static NodeRef Component => new() { UnitBase = UnitBases.Cross(), Id = 1, Position = { X = 18F, Y = 79F } };
+                public static NodeRef SelectBG => new() { UnitBase = UnitBases.Cross(), Id = 4, Size = { X = 304, Y = 140 } };
+                public static NodeRef MiniSelectL => new() { UnitBase = UnitBases.Cross(), Id = 5, Size = { X = 166, Y = 140 } };
+                public static NodeRef MiniSelectR => new() { UnitBase = UnitBases.Cross(), Id = 6, Size = { X = 166, Y = 140 } };
+                public static NodeRef VertLine => new() { UnitBase = UnitBases.Cross(), Id = 7, Position = { X = 271F, Y = 21F }, Size = { X = 9, Y = 76 } };
+                public class Sets
                 {
-                    new NodeRef { unitBase = UnitBases.Cross, Id = 11, pos = { X = 0F, Y = 0F } },
-                    new NodeRef { unitBase = UnitBases.Cross, Id = 10, pos = { X = 138F, Y = 0F } },
-                    new NodeRef { unitBase = UnitBases.Cross, Id = 9, pos = { X = 284F, Y = 0F } },
-                    new NodeRef { unitBase = UnitBases.Cross, Id = 8, pos = { X = 422F, Y = 0F } },
-                };
-
-                public static readonly NodeRef RT = new()
-                    { unitBase = UnitBases.Cross, Id = 19, pos = { X = 367F, Y = 11F } };
-
-                public static readonly NodeRef LT = new()
-                    { unitBase = UnitBases.Cross, Id = 20, pos = { X = 83F, Y = 11F } };
-
-                public static readonly NodeRef setText = new()
-                    { unitBase = UnitBases.Cross, Id = 21, pos = { X = 230F, Y = 170F } };
-
-                public static readonly NodeRef padlock = new()
-                    { unitBase = UnitBases.Cross, Id = 26, pos = { X = 284F, Y = 152F } };
-
-                public static readonly NodeRef changeSet = new()
-                    { unitBase = UnitBases.Cross, Id = 27, pos = { X = 146F, Y = 0F } };
+                    public static NodeRef Left1 => new() { UnitBase = UnitBases.Cross(), Id = 11, Position = { X = 0F, Y = 0F } };
+                    public static NodeRef Left2 => new() { UnitBase = UnitBases.Cross(), Id = 10, Position = { X = 138F, Y = 0F } };
+                    public static NodeRef Right1 => new() { UnitBase = UnitBases.Cross(), Id = 9, Position = { X = 284F, Y = 0F } };
+                    public static NodeRef Right2 => new() { UnitBase = UnitBases.Cross(), Id = 8, Position = { X = 422F, Y = 0F } };
+                }
+                public static NodeRef RT => new() { UnitBase = UnitBases.Cross(), Id = 19, Position = { X = 367F, Y = 11F } };
+                public static NodeRef LT => new() { UnitBase = UnitBases.Cross(), Id = 20, Position = { X = 83F, Y = 11F } };
+                public static NodeRef setText => new() { UnitBase = UnitBases.Cross(), Id = 21, Position = { X = 230F, Y = 170F } };
+                public static NodeRef padlock => new() { UnitBase = UnitBases.Cross(), Id = 26, Position = { X = 284F, Y = 152F } };
+                public static NodeRef changeSet => new() { UnitBase = UnitBases.Cross(), Id = 27, Position = { X = 146F, Y = 0F } };
             }
         };
 
-        public static class Pos
-        {
-            public static readonly int[] leftEX = { 0, 1, 2, 3, 4, 5, 6, 7 };
-            public static readonly int[] rightEX = { 8, 9, 10, 11, 12, 13, 14, 15 };
-            public static readonly int[,] XHB = { { 16, 17, 18, 19 }, { 20, 21, 22, 23 }, { 24, 25, 26, 27 }, { 28, 29, 30, 31 } };
-        }
         public class ScaleTween
         {
             public DateTime Start { get; init; }
@@ -110,11 +76,10 @@ namespace CrossUp
             public static implicit operator NodeEdit.PropertySet(MetaSlot p) => new(){ X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX,OrigY = p.OrigY};
         }
 
-        public static MetaSlot[] metaSlots =
+            // MetaSlots = all the potential positions we might place a borrowed button, depending on which bar it's imitating
+        public static MetaSlot[] MetaSlots =
         {
-            // the positions for all the borrowed buttons
-
-            //EXHB LEFT 0-7
+            // EXHB L->R
             new() { Scale = 1.0F, X = 0, Y = 24, OrigX = 94, OrigY = 39, Visible = true, ScaleIndex = 2 },
             new() { Scale = 1.0F, X = 42, Y = 0, OrigX = 52, OrigY = 63, Visible = true, ScaleIndex = 2 },
             new() { Scale = 1.0F, X = 84, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 2 },
@@ -125,7 +90,7 @@ namespace CrossUp
             new() { Scale = 1.0F, X = 222, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 2 },
             new() { Scale = 1.0F, X = 180, Y = 48, OrigX = 52, OrigY = 15, Visible = true, ScaleIndex = 2 },
 
-            //EXHB RIGHT 8-15
+            // EXHB R->L
             new() { Scale = 1.0F, X = 0, Y = 24, OrigX = 94, OrigY = 39, Visible = true, ScaleIndex = 3 },
             new() { Scale = 1.0F, X = 42, Y = 0, OrigX = 52, OrigY = 63, Visible = true, ScaleIndex = 3 },
             new() { Scale = 1.0F, X = 84, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 3 },
@@ -136,7 +101,7 @@ namespace CrossUp
             new() { Scale = 1.0F, X = 222, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 3 },
             new() { Scale = 1.0F, X = 180, Y = 48, OrigX = 52, OrigY = 15, Visible = true, ScaleIndex = 3 },
 
-            //MAIN BAR LEFT 16-23
+            // MAIN XHB
             new() { Scale = 1.0F, X = -142, Y = 24, OrigX = 94, OrigY = 39, Visible = true, ScaleIndex = 0 },
             new() { Scale = 1.0F, X = -100, Y = 0, OrigX = 52, OrigY = 63, Visible = true, ScaleIndex = 0 },
             new() { Scale = 1.0F, X = -58, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 0 },
@@ -146,8 +111,7 @@ namespace CrossUp
             new() { Scale = 1.0F, X = 33, Y = 0, OrigX = 53, OrigY = 63, Visible = true, ScaleIndex = 0 },
             new() { Scale = 1.0F, X = 75, Y = 24, OrigX = 11, OrigY = 39, Visible = true, ScaleIndex = 0 },
             new() { Scale = 1.0F, X = 33, Y = 48, OrigX = 53, OrigY = 15, Visible = true, ScaleIndex = 0 },
-
-            //MAIN BAR RIGHT 24-31
+            
             new() { Scale = 1.0F, X = 142, Y = 24, OrigX = 94, OrigY = 39, Visible = true, ScaleIndex = 1 },
             new() { Scale = 1.0F, X = 184, Y = 0, OrigX = 52, OrigY = 63, Visible = true, ScaleIndex = 1 },
             new() { Scale = 1.0F, X = 226, Y = 24, OrigX = 10, OrigY = 39, Visible = true, ScaleIndex = 1 },
@@ -159,19 +123,17 @@ namespace CrossUp
             new() { Scale = 1.0F, X = 317, Y = 48, OrigX = 53, OrigY = 15, Visible = true, ScaleIndex = 1 },
         };
 
-        public static readonly Vector2[] barSizes = // default bar sizes for same purpose
+            // index of metaSlots by bar
+        public static class Pos
         {
-            new() { X = 624, Y = 72 },
-            new() { X = 331, Y = 121 },
-            new() { X = 241, Y = 170 },
-            new() { X = 162, Y = 260 },
-            new() { X = 117, Y = 358 },
-            new() { X = 72, Y = 618 },
-        };
+            public static readonly int[] LeftEx = { 0, 1, 2, 3, 4, 5, 6, 7 };
+            public static readonly int[] RightEx = { 8, 9, 10, 11, 12, 13, 14, 15 };
+            public static readonly int[,] XHB = { { 16, 17, 18, 19 }, { 20, 21, 22, 23 }, { 24, 25, 26, 27 }, { 28, 29, 30, 31 } };
+        }
 
-        public static readonly float[,] scaleMap =
+            // correct scales for specific metaSlots in specific cross bar selections
+        public static readonly float[,] ScaleMap =
         {
-            // the scale each section of buttons should be at in each state
             { 1F, 1F, 1F, 1F }, //0: none selected
             { 1.1F, 0.85F, 0.85F, 0.85F }, //1: left selected
             { 0.85F, 1.1F, 0.85F, 0.85F }, //2: right selected
@@ -181,7 +143,19 @@ namespace CrossUp
             { 0.85F, 0.85F, 0.85F, 0.85F }, //6: WXHB R selected
         };
 
-        public static readonly Vector2[,] barGrids =
+            // default bar sizes for when restoring borrowed hotbars to their normal state
+        public static readonly Vector2[] ActionBarSizes =
+        {
+            new() { X = 624, Y = 72 },
+            new() { X = 331, Y = 121 },
+            new() { X = 241, Y = 170 },
+            new() { X = 162, Y = 260 },
+            new() { X = 117, Y = 358 },
+            new() { X = 72, Y = 618 },
+        };
+
+            // default grid layouts for when restoring borrowed hotbars to their normal state
+        public static readonly Vector2[,] ActionBarGrids =
         {
             {
                 new() { X = 34, Y = 0 },
@@ -267,6 +241,6 @@ namespace CrossUp
                 new() { X = 0, Y = 464 },
                 new() { X = 0, Y = 509 },
             },
-        }; // default grid layouts for when restoring borrowed hotbars to their normal state
+        };
     }
 }
