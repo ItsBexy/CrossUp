@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.2.0.2</Version>
+    <Version>0.2.1.0</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -32,13 +32,12 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>0.2.0.2</FileVersion>
-	  <AssemblyVersion>0.2.0.2</AssemblyVersion>
+	  <FileVersion>0.2.1.0</FileVersion>
+	  <AssemblyVersion>0.2.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.6" />
-	  <PackageReference Include="XivCommon" Version="5.0.1-alpha.1" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>

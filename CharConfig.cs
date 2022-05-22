@@ -1,8 +1,8 @@
 ﻿using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+// ReSharper disable UnusedMember.Global
 
 namespace CrossUp;
-
 public sealed unsafe partial class CrossUp
 {
     private static readonly ConfigModule* CharConfigs = ConfigModule.Instance();
@@ -20,8 +20,8 @@ public sealed unsafe partial class CrossUp
         }
     }
 
-    // relevant character configuration lookups
-    // NOTE: (uint) will get/set by index, (short) will get/set by ID. NOT the same thing
+        // relevant character configuration lookups
+        // NOTE: (uint) will get/set by index, (short) will get/set by ID. NOT the same thing
     public readonly struct ConfigID
     {
         public const short CrossEnabled = 378; // checkbox -- Cross Hotbar Enabled
@@ -55,18 +55,14 @@ public sealed unsafe partial class CrossUp
     }
 
         // For debugging
-    // ReSharper disable once UnusedMember.Global
     public void LogCharConfigs(uint start, uint end = 0)
     {
         if (end < start) end = start;
         for (var i = start; i <= end; i++) PluginLog.Log(i + " " + GetCharConfig(i));
     }
-
-    // ReSharper disable once UnusedMember.Global
     public void LogCharConfigs(short start, short end = 0)
     {
         if (end < start) end = start;
         for (var i = start; i <= end; i++) PluginLog.Log(i + " " + GetCharConfig(i));
     }
-
 }

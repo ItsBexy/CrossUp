@@ -57,7 +57,7 @@ public struct AddonActionDoubleCrossBase
 }
 
 
-// overriding getter for RaptureHotbarModule.Hotbar to allow retrieval of bar 19
+    // overriding getter for RaptureHotbarModule.Hotbar to allow retrieval of bar 19
 
 [StructLayout(LayoutKind.Explicit, Size = 160376)]
 public struct RaptureHotbarModule
@@ -80,7 +80,7 @@ public struct HotBars
         {
             if (i is < 0 or > 19)    // upper limit is 17 in ClientStructs, but we need 19 for the pet cross bar
                 return null;
-            fixed (byte* numPtr = this.data)
+            fixed (byte* numPtr = data)
                 return (HotBar*)(numPtr + sizeof(HotBar) * i);
         }
     }

@@ -1,26 +1,49 @@
 ﻿using System;
-using Dalamud.Logging;
+using System.Numerics;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
+    public static AtkResNode* GetChild(AtkResNode* node, int i) => node->GetAsAtkComponentNode()->Component->UldManager.NodeList[i];
+    public static AtkResNode* GetChild(AtkUnitBase* unitBase, int i) => unitBase->UldManager.NodeList[i];
+    public static AtkResNode* GetChild(AtkResNode* node, params int[] path)
+    {
+        foreach (var i in path) node = GetChild(node, i);
+        return node;
+    }
+    public static AtkResNode* GetChild(AtkUnitBase* unitBase, params int[] path)
+    {
+        AtkResNode* node = null;
+        for (var i = 0; i < path.Length; i++) node = i == 0 ? GetChild(unitBase, path[i]) : GetChild(node, path[i]);
+        return node;
+    }
 
-        // arrange all the hotbars and populate them with the correct contents
-    private void ArrangeAndFill(int select, int prevSelect = 0, bool forceArrange = false,bool hudFixCheck = true) { // the centrepiece of it all
-        if (GetCharConfig(ConfigID.CrossEnabled) == 0) //don't do anything if the cross hotbar isn't actually turned on
+    public static AtkResNode* GetChild(NodeRef nodeRef, int i) => GetChild(nodeRef.Node,i);
+    public static AtkResNode* GetChild(NodeRef nodeRef, params int[] path) => GetChild(nodeRef.Node, path);
+
+    // arrange all the hotbars and populate them with the correct contents
+    private void ArrangeAndFill(int select, int prevSelect = 0, bool forceArrange = false,bool hudFixCheck = true) {
+           //don't do anything if the cross hotbar isn't actually turned on
+        if (GetCharConfig(ConfigID.CrossEnabled) == 0) 
         {
             ResetHud();
             return;
         }
 
-        var baseXHB = UnitBases.Cross();
-        if (baseXHB == null) return;
+        var baseXHB = UnitBases.Cross;
+        if (baseXHB == null || baseXHB->UldManager.NodeListSize == 0) return;
 
-        var rootNode = baseXHB->UldManager.NodeList[0];
+        var rootNode = GetChild(baseXHB,0);
         var scale = rootNode->ScaleX;
         var mixBar = GetCharConfig(ConfigID.MixBar) == 1;
+
+        for (var i = 0; i < 4; i++)
+        {
+            MetaSlots[20 + i].ScaleIndex = mixBar ? 1 : 0;
+            MetaSlots[24 + i].ScaleIndex = mixBar ? 0 : 1;
+        }
 
             // fix for misalignment after entering/exiting HUD Layout interface
         if (hudFixCheck && baseXHB->X - rootNode->X - Math.Round(Config.Split * scale) < 0) baseXHB->X += (short)(Config.Split * scale);
@@ -42,16 +65,20 @@ public sealed unsafe partial class CrossUp
 
         var lX = arrangeEx ? Config.lX : 0;
         var lY = arrangeEx ? Config.lY : 0;
-        var rX = arrangeEx ? Config.rX : 0;
-        var rY = arrangeEx ? Config.rY : 0;
+        var rX = arrangeEx ? Config.OnlyOneEx ? Config.lX : Config.rX : 0;
+        var rY = arrangeEx ? Config.OnlyOneEx ? Config.lY : Config.rY : 0;
 
             // vertical bar looks odd if certain CrossUp features are turned on, so hiding if necessary
         var hideDivider = Config.Split > 0 || Config.SepExBar;
 
-        NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.VertLine, hideDivider ? 0 : null, hideDivider ? 0 : null);
-        NodeEdit.ByLookup.RelativePos(BarNodes.Cross.padlock, Config.PadlockOffset.X + Config.Split, Config.PadlockOffset.Y);
-        NodeEdit.ByLookup.RelativePos(BarNodes.Cross.changeSet, Config.ChangeSetOffset.X + Config.Split, Config.ChangeSetOffset.Y);
-        NodeEdit.ByLookup.RelativePos(BarNodes.Cross.setText, Config.SetTextOffset.X + Config.Split, Config.SetTextOffset.Y);
+
+        NodeEdit.SetSize(BarNodes.Cross.VertLine, hideDivider ? 0 : null, hideDivider ? 0 : null);
+        NodeEdit.RelativePos(BarNodes.Cross.Padlock, Config.PadlockOffset.X + Config.Split,  Config.PadlockOffset.Y);
+        NodeEdit.SetVis(GetChild(BarNodes.Cross.Padlock,1),!Config.HidePadlock);
+
+        NodeEdit.RelativePos(BarNodes.Cross.ChangeSet, Config.ChangeSetOffset.X + Config.Split, Config.ChangeSetOffset.Y);
+        NodeEdit.RelativePos(BarNodes.Cross.SetText, Config.SetTextOffset.X + Config.Split, Config.SetTextOffset.Y);
+        NodeEdit.SetVis(BarNodes.Cross.SetText,!Config.HideSetText);
 
         if (!forceArrange && select == prevSelect) return;
         switch (select)
@@ -59,78 +86,80 @@ public sealed unsafe partial class CrossUp
             case 0: // NONE
             case 5: // LEFT WXHB
             case 6: // RIGHT WXHB
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Component, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.LT, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.RT, Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Component, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.LT, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.RT, Config.Split * 2, 0F);
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left1, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right1, Config.Split * 2, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right2, Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left1, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right1, Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right2, Config.Split * 2, 0F);
                 break;
             case 1: //LEFT BAR
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Component, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.LT, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.RT, Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Component, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.LT, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.RT, Config.Split * 2, 0F);
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left1, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right1, Config.Split * 2,prevSelect == 3 && arrangeEx && !mixBar ? 9999F : 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right2, Config.Split * 2,prevSelect == 3 && arrangeEx && !mixBar ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left1, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left2, 0F, prevSelect == 3 && arrangeEx && mixBar ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right1, Config.Split * 2,prevSelect == 3 && arrangeEx && !mixBar ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right2, Config.Split * 2,prevSelect == 3 && arrangeEx ? 9999F : 0F);
 
-                NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectL,(ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
-                NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectR,(ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
+                NodeEdit.SetSize(BarNodes.Cross.MiniSelectL,(ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
+                NodeEdit.SetSize(BarNodes.Cross.MiniSelectR,(ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
 
                 break;
             case 2: // RIGHT BAR
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Component, Config.Split * 2, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.LT, -Config.Split * 2, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.RT, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Component, Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.LT, -Config.Split * 2, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.RT, 0F, 0F);
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left1, -Config.Split * 2, prevSelect == 4 && arrangeEx && !mixBar ? 9999F : 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left2, -Config.Split * 2, prevSelect == 4 && arrangeEx && !mixBar ? 9999F : 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right1, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right2, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left1, -Config.Split * 2, prevSelect == 4 && arrangeEx ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left2, -Config.Split * 2, prevSelect == 4 && arrangeEx && !mixBar ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right1, 0F, prevSelect == 4 && arrangeEx && mixBar ? 9999F : 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right2, 0F, 0F);
 
-                NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectL, (ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
-                NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectR, (ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
+                NodeEdit.SetSize(BarNodes.Cross.MiniSelectL, (ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
+                NodeEdit.SetSize(BarNodes.Cross.MiniSelectR, (ushort)(Config.selectHide || (mixBar && Config.Split > 0) ? 0 : 166), 140);
 
                 break;
             case 3: // L->R BAR
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Component, lX + Config.Split, lY);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.LT, -lX - Config.Split, -lY);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.RT, -lX + Config.Split, -lY);
+                NodeEdit.RelativePos(BarNodes.Cross.Component, lX + Config.Split, lY);
+                NodeEdit.RelativePos(BarNodes.Cross.LT, -lX - Config.Split, -lY);
+                NodeEdit.RelativePos(BarNodes.Cross.RT, -lX + Config.Split, -lY);
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left1, 9999F, 9999F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right1, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right2, 9999F, 9999F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left1, 9999F, 9999F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right1, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right2, 9999F, 9999F);
 
                 break;
             case 4: // R->L BAR
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Component, rX + Config.Split, rY);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.LT, -rX - Config.Split, -rY);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.RT, -rX + Config.Split, -rY);
+                NodeEdit.RelativePos(BarNodes.Cross.Component, rX + Config.Split, rY);
+                NodeEdit.RelativePos(BarNodes.Cross.LT, -rX - Config.Split, -rY);
+                NodeEdit.RelativePos(BarNodes.Cross.RT, -rX + Config.Split, -rY);
 
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left1, 9999F, 9999F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right1, 0F, 0F);
-                NodeEdit.ByLookup.RelativePos(BarNodes.Cross.Sets.Right2, 9999F, 9999F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left1, 9999F, 9999F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Left2, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right1, 0F, 0F);
+                NodeEdit.RelativePos(BarNodes.Cross.Sets.Right2, 9999F, 9999F);
                 break;
         }
     }
 
-        // arranged the borrowed hotbars representing the EXHB
+        // arrange the borrowed hotbars representing the EXHB
+
+
     private void ArrangeExBars(int select, int prevSelect, float scale, int anchorX, int anchorY,bool forceArrange = false)
     {
         var lId = Config.borrowBarL;
         var rId = Config.borrowBarR;
 
-        var baseExL = UnitBases.ActionBar(lId);
-        var baseExR = UnitBases.ActionBar(rId);
+        var baseExL = UnitBases.ActionBar[lId];
+        var baseExR = UnitBases.ActionBar[rId];
         if (baseExL == null || baseExR == null) return;
 
         SetDragDropNodeVis(baseExL, true);
@@ -145,8 +174,8 @@ public sealed unsafe partial class CrossUp
 
         var lX = Config.lX;
         var lY = Config.lY;
-        var rX = Config.rX;
-        var rY = Config.rY;
+        var rX = !Config.OnlyOneEx ? Config.rX : Config.lX;
+        var rY = !Config.OnlyOneEx ? Config.rY : Config.lY;
 
         NodeEdit.SetVarious(nodesExL[0], new()
         {
@@ -171,12 +200,11 @@ public sealed unsafe partial class CrossUp
         NodeEdit.SetScale(nodesExL[24], 0F);
         NodeEdit.SetScale(nodesExR[24], 0F);
 
-        var inactiveTransp = GetCharConfig(ConfigID.Transparency.Inactive);
-        var standardTransp = GetCharConfig(ConfigID.Transparency.Active);
-
-        var inactiveAlpha = (byte)(-0.0205 * Math.Pow(inactiveTransp, 2) - 0.5 * inactiveTransp + 255);
-        var standardAlpha = (byte)(-0.0205 * Math.Pow(standardTransp, 2) - 0.5 * standardTransp + 255);
+        var inactiveAlpha = TransToAlpha(GetCharConfig(ConfigID.Transparency.Inactive));
+        var standardAlpha = TransToAlpha(GetCharConfig(ConfigID.Transparency.Active));
         SetExAlpha(nodesExL, nodesExR, select == 0 ? standardAlpha : inactiveAlpha);
+
+        for (var i = 0; i < 8; i++) MetaSlots[Pos.RightEx[i]].Visible = !Config.OnlyOneEx;
 
         switch (select)
         {
@@ -191,18 +219,14 @@ public sealed unsafe partial class CrossUp
                 {
                     for (var i = 0; i < 8; i++)
                     {
-                        // 8 buttons each from borrowed bars become EXHB
-                        PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select); //left EXHB
+                        PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select);  //left EXHB
                         PlaceExButton(nodesExR[20 - i], Pos.RightEx[i], 0, 0, select); // right EXHB
                         if (i >= 4) continue;
 
+                        for (var j = 0; j < 4; j++) MetaSlots[Pos.XHB[j, i]].Visible = false; // hide metaSlots for XHB
+
                         NodeEdit.SetVis(nodesExL[12 - i], false); // hide unneeded borrowed buttons
                         NodeEdit.SetVis(nodesExR[12 - i], false);
-
-                        MetaSlots[Pos.XHB[0, i]].Visible = false;  // hide metaSlots for left bar
-                        MetaSlots[Pos.XHB[1, i]].Visible = false;
-                        MetaSlots[Pos.XHB[2, i]].Visible = false;  // hide metaSlots for right bar
-                        MetaSlots[Pos.XHB[3, i]].Visible = false;  
                     }
                 }
 
@@ -220,23 +244,25 @@ public sealed unsafe partial class CrossUp
                 {
                     for (var i = 0; i < 8; i++)
                     {
-                        // 8 buttons each from borrowed bars become EXHB
-                        PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select); //left EXHB
+                        PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select);  //left EXHB
                         PlaceExButton(nodesExR[20 - i], Pos.RightEx[i], 0, 0, select); // right EXHB
+
                         if (i >= 4) continue;
 
-                        MetaSlots[Pos.XHB[0, i]].Scale = 1.1F;  // reveal and scale up left bar metaSlots
-                        MetaSlots[Pos.XHB[0, i]].Visible = true;
-                        MetaSlots[Pos.XHB[1, i]].Scale = 1.1F;
-                        MetaSlots[Pos.XHB[1, i]].Visible = true;
-                        MetaSlots[Pos.XHB[2, i]].Visible = prevSelect == 3 && !mixBar;  // conditionally hide right bar metaSlots
-                        MetaSlots[Pos.XHB[3, i]].Visible = prevSelect == 3 && !mixBar;
+                        // handle metaSlots for XHB depending on previous selection and display type
+                        MetaSlots[Pos.XHB[0, i]].Visible = true;                        
+                        MetaSlots[Pos.XHB[1, i]].Visible = prevSelect == 3 && mixBar;
+                        MetaSlots[Pos.XHB[2, i]].Visible = prevSelect == 3 && !mixBar;
+                        MetaSlots[Pos.XHB[3, i]].Visible = prevSelect == 3;
 
-                        // 4 buttons each from borrowed bars become right XHB (not necessarily shown, depends on previous selection)
-                        PlaceExButton(nodesExL[12 - i], Pos.XHB[2, i], -lX + Config.Split, -lY, select); //right XHB bar (left buttons)
-                        PlaceExButton(nodesExR[12 - i], Pos.XHB[3, i], -rX + Config.Split, -rY, select); //right XHB bar (right buttons)
-
-                        }
+                        MetaSlots[Pos.XHB[0, i]].Scale = ScaleMap[1, 0];
+                        MetaSlots[Pos.XHB[1, i]].Scale = ScaleMap[1, mixBar ? 1 : 0];
+                        MetaSlots[Pos.XHB[2, i]].Scale = ScaleMap[1, mixBar ? 0 : 1];
+                        MetaSlots[Pos.XHB[3, i]].Scale = ScaleMap[1, 1];
+                            
+                        PlaceExButton(nodesExL[12 - i], Pos.XHB[mixBar ? 1 : 2, i], -lX + (mixBar ? -1 : 1) * Config.Split, -lY, select); //right XHB (left buttons)
+                        PlaceExButton(nodesExR[12 - i], Pos.XHB[3, i], -rX + Config.Split, -rY, select);                                  //right XHB (right buttons)
+                    }
                 }
 
                 break;
@@ -254,26 +280,24 @@ public sealed unsafe partial class CrossUp
                 {
                     for (var i = 0; i < 8; i++)
                     {
-
-                        // 8 buttons each from borrowed bars become EXHB
                         PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select); // left EXHB
                         PlaceExButton(nodesExR[20 - i], Pos.RightEx[i], 0, 0, select); // right EXHB
 
                         if (i >= 4) continue;
 
-                        MetaSlots[Pos.XHB[0, i]].Visible = prevSelect == 4 && !mixBar;
+                        // handle metaSlots for XHB depending on previous selection and display type
+                        MetaSlots[Pos.XHB[0, i]].Visible = prevSelect == 4;
                         MetaSlots[Pos.XHB[1, i]].Visible = prevSelect == 4 && !mixBar;
-                        MetaSlots[Pos.XHB[2, i]].Scale = 1.1F;
-                        MetaSlots[Pos.XHB[2, i]].Visible = true;
+                        MetaSlots[Pos.XHB[2, i]].Visible = prevSelect == 4 && mixBar;
                         MetaSlots[Pos.XHB[3, i]].Visible = true;
-                        MetaSlots[Pos.XHB[3, i]].Scale = 1.1F;
 
-                        // 4 buttons each from borrowed bars become left XHB (not necessarily shown, depends on previous selection)
-                        PlaceExButton(nodesExL[12-i], Pos.XHB[0, i], -lX - Config.Split, -lY, select); // left XHB bar (left buttons)
-                        PlaceExButton(nodesExR[12-i], Pos.XHB[1, i], -rX - Config.Split, -rY, select); // left XHB bar (right buttons)
+                        MetaSlots[Pos.XHB[0, i]].Scale = ScaleMap[2, 0];
+                        MetaSlots[Pos.XHB[1, i]].Scale = ScaleMap[2, mixBar ? 1 : 0];
+                        MetaSlots[Pos.XHB[2, i]].Scale = ScaleMap[2, mixBar ? 0 : 1];
+                        MetaSlots[Pos.XHB[3, i]].Scale = ScaleMap[2, 1];
 
-                        NodeEdit.SetVis(nodesExL[12-i], prevSelect == 4 && !mixBar);
-                        NodeEdit.SetVis(nodesExR[12-i], prevSelect == 4 && !mixBar);
+                        PlaceExButton(nodesExL[12-i], Pos.XHB[0, i], -lX - Config.Split, -lY, select);                              // left XHB (left buttons)
+                        PlaceExButton(nodesExR[12-i], Pos.XHB[mixBar?2:1, i], -rX - (mixBar ? -1 : 1) * Config.Split, -rY, select); // left XHB (right buttons)
                     }
                 }
 
@@ -287,23 +311,20 @@ public sealed unsafe partial class CrossUp
 
                 if (forceArrange || select != prevSelect)
                 {
-
                     for (var i = 0; i < 8; i++)
                     {
                         MetaSlots[Pos.LeftEx[i]].Scale = 1.1F;
+
                         PlaceExButton(nodesExR[20 - i], Pos.RightEx[i], 0, 0, select); // right EXHB
+
                         if (i >= 4) continue;
 
-                        MetaSlots[Pos.XHB[0,i]].Visible = true;
-                        MetaSlots[Pos.XHB[1,i]].Visible = true;
-                        MetaSlots[Pos.XHB[2,i]].Visible = true;
-                        MetaSlots[Pos.XHB[3,i]].Visible = true;
+                        for (var j = 0; j < 4; j++) MetaSlots[Pos.XHB[j,i]].Visible = true;
 
                         PlaceExButton(nodesExL[20-i],                  Pos.XHB[0, i], -lX - Config.Split, -lY, select); // inactive XHB
                         PlaceExButton(nodesExL[(!mixBar ? 16 : 12)-i], Pos.XHB[1, i], -lX - Config.Split, -lY, select);
                         PlaceExButton(nodesExL[(!mixBar ? 12 : 16)-i], Pos.XHB[2, i], -lX + Config.Split, -lY, select);
-                        PlaceExButton(nodesExR[12-i],                  Pos.XHB[3, i], -rX + Config.Split, -rY, select); 
-
+                        PlaceExButton(nodesExR[12-i],                  Pos.XHB[3, i], -rX + Config.Split, -rY, select);
                     }
                 }
 
@@ -321,13 +342,14 @@ public sealed unsafe partial class CrossUp
                     for (var i = 0; i < 8; i++)
                     {
                         MetaSlots[Pos.RightEx[i]].Scale = 1.1F;
-                        PlaceExButton(nodesExL[20 - i], Pos.LeftEx[i], 0, 0, select); // left EXHB
+                        if (Config.OnlyOneEx) MetaSlots[Pos.LeftEx[i]].Scale = 1.1F;
+
+                        PlaceExButton(nodesExL[20 - i], Config.OnlyOneEx ? Pos.RightEx[i] : Pos.LeftEx[i], 0, 0, select); // left EXHB
+
                         if (i >= 4) continue;
 
-                        MetaSlots[Pos.XHB[0, i]].Visible = true;
-                        MetaSlots[Pos.XHB[1, i]].Visible = true;
-                        MetaSlots[Pos.XHB[2, i]].Visible = true;
-                        MetaSlots[Pos.XHB[3, i]].Visible = true;
+                        for (var j = 0; j < 4; j++) MetaSlots[Pos.XHB[j, i]].Visible = true;
+
                         PlaceExButton(nodesExL[12-i],                  Pos.XHB[0, i], -lX - Config.Split, -lY, select); // inactive XHB
                         PlaceExButton(nodesExR[(!mixBar ? 12 : 20)-i], Pos.XHB[1, i], -rX - Config.Split, -rY, select);
                         PlaceExButton(nodesExR[(!mixBar ? 20 : 12)-i], Pos.XHB[2, i], -rX + Config.Split, -rY, select);
@@ -374,7 +396,7 @@ public sealed unsafe partial class CrossUp
         NodeEdit.SetVarious(node, pos);
     }
 
-
+    private static byte TransToAlpha(int t) => (byte)(-0.0205 * Math.Pow(t, 2) - 0.5 * t + 255);
     private static void SetExAlpha(AtkResNode** nodesL, AtkResNode** nodesR, byte alpha)
     {
         for (var i = 0; i < 12; i++)
@@ -411,46 +433,72 @@ public sealed unsafe partial class CrossUp
     {
         var selectColor = revert ? new(1F, 1F, 1F) : Config.selectColor;
 
-        var baseXHB = UnitBases.Cross();
-        var baseRR = UnitBases.RR();
-        var baseLL = UnitBases.LL();
-        if (baseXHB == null || baseRR == null || baseLL == null) return;
+        NodeEdit.SetColor(BarNodes.Cross.SelectBG, selectColor);
+        NodeEdit.SetColor(BarNodes.Cross.MiniSelectR, selectColor);
+        NodeEdit.SetColor(BarNodes.Cross.MiniSelectL, selectColor);
 
-        NodeEdit.SetColor(baseXHB->UldManager.NodeList[4], selectColor);
-        NodeEdit.SetColor(baseXHB->UldManager.NodeList[5], selectColor);
-        NodeEdit.SetColor(baseXHB->UldManager.NodeList[6], selectColor);
+        NodeEdit.SetColor(BarNodes.LL.SelectBG, selectColor);
+        NodeEdit.SetColor(BarNodes.LL.MiniSelect, selectColor);
 
-        NodeEdit.SetColor(baseLL->UldManager.NodeList[3], selectColor);
-        NodeEdit.SetColor(baseLL->UldManager.NodeList[4], selectColor);
-
-        NodeEdit.SetColor(baseRR->UldManager.NodeList[3], selectColor);
-        NodeEdit.SetColor(baseRR->UldManager.NodeList[4], selectColor);
+        NodeEdit.SetColor(BarNodes.RR.SelectBG, selectColor);
+        NodeEdit.SetColor(BarNodes.RR.MiniSelect, selectColor);
 
         var hide = !revert && Config.selectHide; // we can't hide it by toggling visibility, so instead we do it by setting width to 0
 
-        NodeEdit.SetSize(baseXHB->UldManager.NodeList[4], (ushort)(hide ? 0 : 304), 140);
-        NodeEdit.SetSize(baseXHB->UldManager.NodeList[5], (ushort)(hide ? 0 : 166), 140);
-        NodeEdit.SetSize(baseXHB->UldManager.NodeList[6], (ushort)(hide ? 0 : 166), 140);
+        NodeEdit.SetSize(BarNodes.Cross.SelectBG, new() { X = hide ? 0 : 304, Y = 140 });
+        NodeEdit.SetSize(BarNodes.Cross.MiniSelectR, new() { X = hide ? 0 : 166, Y = 140 });
+        NodeEdit.SetSize(BarNodes.Cross.MiniSelectL, new() { X = hide ? 0 : 166, Y = 140 });
 
-        NodeEdit.SetSize(baseLL->UldManager.NodeList[3], (ushort)(hide ? 0 : 304), 140);
-        NodeEdit.SetSize(baseLL->UldManager.NodeList[4], (ushort)(hide ? 0 : 166), 140);
+        NodeEdit.SetSize(BarNodes.LL.SelectBG, new() { X = hide ? 0 : 304, Y = 140 });
+        NodeEdit.SetSize(BarNodes.LL.MiniSelect, new Vector2 { X = hide ? 0 : 166, Y = 140 });
 
-        NodeEdit.SetSize(baseRR->UldManager.NodeList[3], (ushort)(hide ? 0 : 304), 140);
-        NodeEdit.SetSize(baseRR->UldManager.NodeList[4], (ushort)(hide ? 0 : 166), 140);
+        NodeEdit.SetSize(BarNodes.RR.SelectBG, new() { X = hide ? 0 : 304, Y = 140 });
+        NodeEdit.SetSize(BarNodes.RR.MiniSelect, new() { X = hide ? 0 : 166, Y = 140 });
     }
 
-        // reset all the node properties we've messed with and restore actions to borrowed bars
+
+    public void SetPulseColor(bool revert=false)
+    {
+        var glowA = revert ? new(1F, 1F, 1F) : Config.GlowA;
+        var glowB = revert ? new(1F, 1F, 1F) : Config.GlowB;
+
+        for (var i = 11; i >= 8; i--)
+        {
+            for (var b = 0; b <= 3; b++)
+            {
+                NodeEdit.SetColor(GetChild(UnitBases.Cross, i, b, 2, 10 ), glowA);
+                NodeEdit.SetColor(GetChild(UnitBases.Cross, i, b, 2, 14 ), glowB);
+            }
+        }
+
+        if (!Config.SepExBar && !revert) return;
+        {
+            var baseExL = UnitBases.ActionBar[Config.borrowBarL];
+            var baseExR = UnitBases.ActionBar[Config.borrowBarR];
+
+            for (var i = 9; i <= 20; i++)
+            {
+                NodeEdit.SetColor(GetChild(baseExL, i, 0, 2, 10 ), glowA);
+                NodeEdit.SetColor(GetChild(baseExR, i, 0, 2, 10 ), glowA);
+
+                NodeEdit.SetColor(GetChild(baseExL, i, 0, 2, 14 ), glowB);
+                NodeEdit.SetColor(GetChild(baseExR, i, 0, 2, 14 ), glowB);
+            }
+        }
+    }
+
+         // reset all the node properties we've messed with and restore actions to borrowed bars
     public void ResetHud() 
     {
-        var baseXHB = UnitBases.Cross();
+        var baseXHB = UnitBases.Cross;
         if (baseXHB == null) return;
 
-        NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.VertLine);
-        NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectL);
-        NodeEdit.ByLookup.AbsoluteSize(BarNodes.Cross.MiniSelectR);
-        NodeEdit.ByLookup.AbsolutePos(BarNodes.Cross.padlock);
-        NodeEdit.ByLookup.AbsolutePos(BarNodes.Cross.setText);
-        NodeEdit.ByLookup.AbsolutePos(BarNodes.Cross.changeSet);
+        NodeEdit.SetSize(BarNodes.Cross.VertLine);
+        NodeEdit.SetSize(BarNodes.Cross.MiniSelectL);
+        NodeEdit.SetSize(BarNodes.Cross.MiniSelectR);
+        NodeEdit.SetPos(BarNodes.Cross.Padlock);
+        NodeEdit.SetPos(BarNodes.Cross.SetText);
+        NodeEdit.SetPos(BarNodes.Cross.ChangeSet);
 
         for (var i = 1; i <= 9; i++)
         {
@@ -464,7 +512,7 @@ public sealed unsafe partial class CrossUp
         //put a borrowed hotbar back the way we found it based on HUD layout settings
     private void ResetBarPos(int barID)
     {
-        AtkUnitBase* baseHotbar = UnitBases.ActionBar(barID);
+        var baseHotbar = UnitBases.ActionBar[barID];
         if (baseHotbar == null) return;
 
         var nodes = baseHotbar->UldManager.NodeList;
@@ -492,9 +540,9 @@ public sealed unsafe partial class CrossUp
             });
         }
 
-        if (Status.WasHidden[barID] && (Config.borrowBarL < 1 || Config.borrowBarR < 1 || (barID != Config.borrowBarL && barID != Config.borrowBarR)) && CharConfigs->GetIntValue((uint)(barID + 485)) == 1)
+        if (Status.WasHidden[barID] && (Config.borrowBarL < 1 || Config.borrowBarR < 1 || (barID != Config.borrowBarL && barID != Config.borrowBarR)) && GetCharConfig(ConfigID.Hotbar.Visible[barID]) == 1)
         {
-            CharConfigs->SetOption((uint)(barID + 485), 0);
+            SetCharConfig(ConfigID.Hotbar.Visible[barID], 0);
         }
 
         SetKeybindVis(baseHotbar, true);
@@ -520,7 +568,7 @@ public sealed unsafe partial class CrossUp
             }
             else
             {
-                metaSlot.Scale = ((tween.ToScale - tween.FromScale) * (float)progress) + tween.FromScale;
+                metaSlot.Scale = (tween.ToScale - tween.FromScale) * (float)progress + tween.FromScale;
             }
 
             NodeEdit.SetVarious(node, metaSlot);
@@ -530,7 +578,7 @@ public sealed unsafe partial class CrossUp
     private static bool AdjustHudEditorNode() 
     {
         var hudScreen = (AtkUnitBase*)Service.GameGui.GetAddonByName("_HudLayoutScreen", 1);
-        var rootNode = UnitBases.Cross()->UldManager.NodeList[0];
+        var rootNode = GetChild(UnitBases.Cross,0);
         if (hudScreen == null || rootNode == null) return false;
 
         var scale = rootNode->ScaleX;

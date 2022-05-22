@@ -1,11 +1,7 @@
-﻿using System;
-using System.Numerics;
-using Dalamud.Logging;
+﻿using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace CrossUp;
-
 public sealed unsafe partial class CrossUp
 {
     public struct ButtonAction
@@ -13,7 +9,6 @@ public sealed unsafe partial class CrossUp
         public uint Id;
         public HotbarSlotType CommandType;
     }
-
     public class BarContents
     {
         public static ButtonAction[] XHB => GetCrossbarContents();
@@ -58,8 +53,8 @@ public sealed unsafe partial class CrossUp
         //get whatever's on the cross hotbar
     private static ButtonAction[] GetCrossbarContents() 
     {
-        var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross();
-        var xBar = (AddonActionCross*)UnitBases.Cross();
+        var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross;
+        var xBar = (AddonActionCross*)UnitBases.Cross;
 
         return xBar->PetBar ? BarContents.CrossPet : GetBarContentsByID(barBaseXHB->HotbarID, 16);
     }
@@ -67,8 +62,6 @@ public sealed unsafe partial class CrossUp
         //get whatever's mapped to the Ex cross hotbars
     private static ButtonAction[] GetExBarContents(bool leftOrRight)
     {
-
-
         var usePvP = GetCharConfig(ConfigID.SepPvP) == 1 && Service.ClientState.IsPvP ? 1 : 0;
         var exConf = GetCharConfig(leftOrRight ? ConfigID.LRset[usePvP] : ConfigID.RLset[usePvP]);
         int exBarTarget;
@@ -80,8 +73,8 @@ public sealed unsafe partial class CrossUp
         }
         else
         {
-            var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross();
-            exBarTarget = (barBaseXHB->HotbarID + ((exConf < 18) ? -1 : 1) - 2) % 8 + 10;
+            var barBaseXHB = (AddonActionBarBase*)UnitBases.Cross;
+            exBarTarget = (barBaseXHB->HotbarID + (exConf < 18 ? -1 : 1) - 2) % 8 + 10;
             useLeft = exConf % 2 == 1;
         }
 
@@ -90,7 +83,7 @@ public sealed unsafe partial class CrossUp
     }
 
         // copy a set of actions onto part/all of a bar
-    private static void CopyButtons(ButtonAction[] sourceButtons, int sourceSlot, int targetBarID, int targetSlot,int count)
+    private static void CopyButtons(IReadOnlyList<ButtonAction> sourceButtons, int sourceSlot, int targetBarID, int targetSlot,int count)
     {
         var targetBar = raptureModule->HotBar[targetBarID];
         for (var i = 0; i < count; i++)

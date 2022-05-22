@@ -1,6 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Numerics;
-using Dalamud.Logging;
 
 namespace CrossUp;
 
@@ -21,18 +20,12 @@ public static unsafe class NodeEdit
     }
     public static void SetVis(AtkResNode* node,bool show)
     {
-        if (show)
-        {
-            node->Flags |= 0x10;
-        } else
-        {
-            node->Flags &= ~0x10;
-        }
+        if (show) node->Flags |=  0x10;
+        else      node->Flags &= ~0x10;
 
         node->Flags_2 |= 0xD;
     }
-
-    private static void SetPos(AtkResNode* node,float x=0F,float y=0F)
+    public static void SetPos(AtkResNode* node,float x=0F,float y=0F)
     {
         node->X = x;
         node->Y = y;
@@ -44,20 +37,19 @@ public static unsafe class NodeEdit
         node->ScaleY = scale;
         node->Flags_2 |= 0xD;
     }
-
-    private static void SetOrigin(AtkResNode* node, int x, int y)
+    public static void SetOrigin(AtkResNode* node, int x, int y)
     {
         node->OriginX = x;
         node->OriginY = y;
         node->Flags_2 |= 0xD;
     }
-
     public static void SetSize(AtkResNode* node, ushort w, ushort h)
     {
         node->Width = w;
         node->Height = h;
         node->Flags_2 |= 0xD;
     }
+    public static void SetSize(AtkResNode* node, Vector2 size) => SetSize(node, (ushort)size.X, (ushort)size.Y);
     public static void SetColor(AtkResNode* node, Vector3 color)
     {
         node->Color.R = (byte)(color.X * 255f);
@@ -65,7 +57,6 @@ public static unsafe class NodeEdit
         node->Color.B = (byte)(color.Z * 255f);
         node->Flags_2 |= 0xD;
     }
-
     public static void SetTextColor(AtkResNode* node, Vector3 color, Vector3 glow)
     {
         var tnode = node->GetAsAtkTextNode();
@@ -77,8 +68,7 @@ public static unsafe class NodeEdit
         tnode->TextColor.B = (byte)(glow.Z * 255f);
         node->Flags_2 |= 0xD;
     }
-
-    private static void SetAlpha(AtkResNode* node, float a)
+    public static void SetAlpha(AtkResNode* node, float a)
     {
         node->Color.A = (byte)(a * 255f);
         node->Flags_2 |= 0xD;
@@ -97,29 +87,23 @@ public static unsafe class NodeEdit
         node->Flags_2 |= 0xD;
     }
 
-    public class ByLookup // grab and edit things using name and default props from Reference.cs
+         // overloads for stuff from BarReference.cs
+    public static void SetVis(CrossUp.NodeRef nodeRef, bool show) => SetVis(nodeRef.Node, show);
+    public static void SetPos(CrossUp.NodeRef nodeRef, float? x = null, float? y = null)
     {
-        public static void RelativePos(CrossUp.NodeRef props, float offX, float offY)
-        {
-            SetPos(props.UnitBase->UldManager.NodeList[props.Id], props.Position.X + offX, props.Position.Y + offY);
-        }
-        public static void AbsoluteSize(CrossUp.NodeRef props, ushort? width = null, ushort? height = null)
-        {
-            width ??= (ushort)props.Size.X;
-            height ??= (ushort)props.Size.Y;
-            SetSize(props.UnitBase->UldManager.NodeList[props.Id], (ushort)width, (ushort)height);
-        }
-        public static void AbsolutePos(CrossUp.NodeRef props, float? x = null, float? y = null)
-        {
-            x ??= props.Position.X;
-            y ??= props.Position.Y;
-            SetPos(props.UnitBase->UldManager.NodeList[props.Id], (float)x, (float)y);
-        }
-
-        public static void SetVis(CrossUp.NodeRef props,bool show)
-        {
-            NodeEdit.SetVis(props.UnitBase->UldManager.NodeList[props.Id],show);
-        }
-    };
-
+        x ??= nodeRef.Position.X;
+        y ??= nodeRef.Position.Y;
+        SetPos(nodeRef.Node, (float)x, (float)y);
+    }
+    public static void RelativePos(CrossUp.NodeRef nodeRef, float x, float y) => SetPos(nodeRef.Node, nodeRef.Position.X + x, nodeRef.Position.Y + y);
+    public static void SetSize(CrossUp.NodeRef nodeRef, ushort? width = null, ushort? height = null)
+    {
+        width ??= (ushort)nodeRef.Size.X;
+        height ??= (ushort)nodeRef.Size.Y;
+        SetSize(nodeRef.Node, (ushort)width, (ushort)height);
+    }
+    public static void SetSize(CrossUp.NodeRef nodeRef, Vector2 size) => SetSize(nodeRef.Node, (ushort)size.X, (ushort)size.Y);
+    public static void SetColor(CrossUp.NodeRef nodeRef, Vector3 color) => SetColor(nodeRef.Node, color);
+    public static void SetAlpha(CrossUp.NodeRef nodeRef, float a) => SetAlpha(nodeRef.Node, a);
+    public static void SetVarious(CrossUp.NodeRef nodeRef, PropertySet props) => SetVarious(nodeRef.Node, props);
 }
