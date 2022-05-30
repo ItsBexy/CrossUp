@@ -21,6 +21,7 @@ public class Configuration : IPluginConfiguration
     public bool selectHide { get; set; }
     public bool HidePadlock { get; set; }
     public bool HideSetText { get; set; }
+    public bool HideTriggerText { get; set; }
     public Vector2 PadlockOffset { get; set; } = new(0f, 0f);
     public Vector2 SetTextOffset { get; set; } = new(0f, 0f);
     public Vector2 ChangeSetOffset { get; set; } = new(0f, 0f);
@@ -37,5 +38,4 @@ public class Configuration : IPluginConfiguration
     private DalamudPluginInterface? PluginInterface;
     public void Initialize(DalamudPluginInterface pluginInterface) => PluginInterface = pluginInterface;
     public void Save() => PluginInterface!.SavePluginConfig(this);
-
 }

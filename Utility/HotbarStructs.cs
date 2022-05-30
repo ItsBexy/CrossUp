@@ -2,6 +2,8 @@
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace CrossUp;
 
@@ -9,21 +11,23 @@ namespace CrossUp;
 
 [StructLayout(LayoutKind.Explicit, Size = 0x248)]
 [Addon("_ActionBar02", "_ActionBar03", "_ActionBar04", "_ActionBar05", "_ActionBar06", "_ActionBar07", "_ActionBar08", "_ActionBar09")]
-public unsafe struct AddonActionBarBase {
+public unsafe struct AddonActionBarBase
+{
     [FieldOffset(0x000)] public AtkUnitBase AtkUnitBase;
     [FieldOffset(0x220)] public ActionBarSlotAction* ActionBarSlotsAction;
     [FieldOffset(0x228)] public void* UnknownPtr228; // Field of 0s
     [FieldOffset(0x230)] public void* UnknownPtr230; // Points to same location as +0x228 ??
-    [FieldOffset(0x238)] public int UnknownInt238;   
+    [FieldOffset(0x238)] public int UnknownInt238;
     [FieldOffset(0x23C)] public byte HotbarID;
     [FieldOffset(0x23D)] public sbyte HotbarIDOther;
     [FieldOffset(0x23E)] public byte HotbarSlotCount;
     [FieldOffset(0x23F)] public int UnknownInt23F;
-    [FieldOffset(0x243)] public int UnknownInt243; // Flags of some kind
+    [FieldOffset(0x243)] public int Flags; // rightmost flag momentarily returns 1 when a hotbar slot is changed via drag-drop
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0xC8)]
-public unsafe struct ActionBarSlotAction {
+public unsafe struct ActionBarSlotAction
+{
     [FieldOffset(0x04)] public int ActionId;       // Not cleared when slot is emptied
     [FieldOffset(0x18)] public void* UnknownPtr;   // Points 34 bytes ahead ??
     [FieldOffset(0x90)] public AtkComponentNode* Icon;
@@ -57,7 +61,7 @@ public struct AddonActionDoubleCrossBase
 }
 
 
-    // overriding getter for RaptureHotbarModule.Hotbar to allow retrieval of bar 19
+// overriding getter for RaptureHotbarModule.Hotbar to allow retrieval of bar 19
 
 [StructLayout(LayoutKind.Explicit, Size = 160376)]
 public struct RaptureHotbarModule

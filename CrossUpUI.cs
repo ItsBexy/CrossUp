@@ -16,16 +16,13 @@ internal class CrossUpUI : IDisposable
         get => settingsVisible;
         set => settingsVisible = value;
     }
-
     public CrossUpUI(Configuration config, CrossUp crossup)
     {
         Config = config;
         CrossUp = crossup;
     }
-
-    public void Dispose() {}
+    public void Dispose() { }
     public void Draw() => DrawSettingsWindow();
-
     private void StyleTab()
     {
         var scale = ImGuiHelpers.GlobalScale;
@@ -35,6 +32,7 @@ internal class CrossUpUI : IDisposable
         var hideSelect = Config.selectHide;
         var hidePadlock = Config.HidePadlock;
         var hideSetText = Config.HideSetText;
+        var hideTriggerText = Config.HideTriggerText;
         var split = Config.Split;
         var padlockX = (int)Config.PadlockOffset.X;
         var padlockY = (int)Config.PadlockOffset.Y;
@@ -43,12 +41,12 @@ internal class CrossUpUI : IDisposable
         var changeSetX = (int)Config.ChangeSetOffset.X;
         var changeSetY = (int)Config.ChangeSetOffset.Y;
 
-
         ImGui.Spacing();
         ImGui.TextColored(ImGuiColors.DalamudGrey, "REPOSITION BAR ELEMENTS");
         ImGui.Spacing();
         ImGui.BeginTable("Reposition", 4, ImGuiTableFlags.SizingFixedFit);
-
+        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, 135 * scale);
+        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, 215 * scale);
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -64,7 +62,6 @@ internal class CrossUpUI : IDisposable
             CrossUp.ResetHud();
             CrossUp.UpdateBarState(true);
         }
-        
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -79,7 +76,7 @@ internal class CrossUpUI : IDisposable
             CrossUp.UpdateBarState(true, true);
         }
 
-        ImGui.TableNextColumn();
+        ImGui.SameLine();
         ImGui.SetNextItemWidth(90 * scale);
         if (ImGui.InputInt("Y##PadY", ref padlockY))
         {
@@ -109,7 +106,7 @@ internal class CrossUpUI : IDisposable
             CrossUp.UpdateBarState(true, true);
         }
 
-        ImGui.TableNextColumn();
+        ImGui.SameLine();
         ImGui.SetNextItemWidth(90 * scale);
         if (ImGui.InputInt("Y##SetY", ref setTextY))
         {
@@ -139,13 +136,26 @@ internal class CrossUpUI : IDisposable
             CrossUp.UpdateBarState(true, true);
         }
 
-        ImGui.TableNextColumn();
+        ImGui.SameLine();
         ImGui.SetNextItemWidth(90 * scale);
         if (ImGui.InputInt("Y##ChangeSetY", ref changeSetY))
         {
             Config.ChangeSetOffset = Config.ChangeSetOffset with { Y = changeSetY };
             Config.Save();
             CrossUp.UpdateBarState(true, true);
+        }
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text("L/R Trigger Text");
+
+        ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
+        if (ImGui.Checkbox("Hide##HideTriggerText", ref hideTriggerText))
+        {
+            Config.HideTriggerText = hideTriggerText;
+            CrossUp.UpdateBarState(true, true);
+            Config.Save();
         }
 
         ImGui.EndTable();
@@ -158,15 +168,23 @@ internal class CrossUpUI : IDisposable
         ImGui.TextColored(ImGuiColors.DalamudGrey, "CUSTOMIZE COLORS");
         ImGui.Spacing();
 
-        ImGui.SetNextItemWidth(200 * scale);
-        if (ImGui.ColorEdit3("Bar Highlight", ref selectColor))
+        ImGui.BeginTable("Colors", 3, ImGuiTableFlags.SizingFixedFit);
+
+        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, 100 * scale);
+        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, 250 * scale);
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text("Bar Highlight");
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(250 * scale);
+        if (ImGui.ColorEdit3("##BarHighlight", ref selectColor))
         {
             Config.selectColor = selectColor;
             Config.Save();
             CrossUp.SetSelectColor();
         }
-
-        ImGui.SameLine();
+        ImGui.TableNextColumn();
         if (ImGui.Checkbox("Hide##HideHighlight", ref hideSelect))
         {
             Config.selectHide = hideSelect;
@@ -174,22 +192,33 @@ internal class CrossUpUI : IDisposable
             CrossUp.SetSelectColor();
         }
 
-        ImGui.SetNextItemWidth(200 * scale);
-        if (ImGui.ColorEdit3("Button Glow", ref glowA))
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text("Button Glow");
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(250 * scale);
+        if (ImGui.ColorEdit3("##ButtonGlow", ref glowA))
         {
             Config.GlowA = glowA;
             Config.Save();
             CrossUp.SetPulseColor();
         }
+        ImGui.TableNextColumn();
 
-        ImGui.SetNextItemWidth(200 * scale);
-        if (ImGui.ColorEdit3("Button Pulse", ref glowB))
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text("Button Pulse");
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(250 * scale);
+        if (ImGui.ColorEdit3("##ButtonPulse", ref glowB))
         {
             Config.GlowB = glowB;
             Config.Save();
             CrossUp.SetPulseColor();
         }
+        ImGui.TableNextColumn();
 
+        ImGui.EndTable();
     }
 
     private void SepExTab()
@@ -231,12 +260,12 @@ internal class CrossUpUI : IDisposable
         ImGui.Spacing();
 
         if (!Config.SepExBar) return;
-        
+
         ImGui.BeginTable("BarBorrowDesc", 2, ImGuiTableFlags.SizingStretchProp);
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "NOTE: This feature functions by borrowing\nthe buttons from two of your standard\nmouse/kb hotbars. The hotbars you choose\nwill not be overwritten, but they will be\nunavailable while the feature is active.\n\n");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, "NOTE: This feature functions by borrowing\nthe buttons from two of your standard\nmouse/kb hotbars. The hotbars you choose\nwill not be overwritten, but they will be\nunavailable while the feature is active.\n");
 
         ImGui.BeginTable("Coords", 3, ImGuiTableFlags.SizingFixedFit);
 
@@ -264,10 +293,10 @@ internal class CrossUpUI : IDisposable
 
         ImGui.TableNextColumn();
         ImGui.Indent(-5);
-        ImGui.Text(onlyOneEx?"EXHB Position":"Left EXHB Position");
+        ImGui.Text(onlyOneEx ? "EXHB Position" : "Left EXHB Position");
 
         ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(100*scale);
+        ImGui.SetNextItemWidth(100 * scale);
         if (ImGui.InputInt("X##LX", ref lX))
         {
             Config.lX = lX;
@@ -323,7 +352,6 @@ internal class CrossUpUI : IDisposable
 
         for (var i = 1; i < 10; i++)
         {
-
             ImGui.TableNextColumn();
 
             if (borrowBars[i] || borrowCount < 2)
@@ -364,7 +392,7 @@ internal class CrossUpUI : IDisposable
         ImGui.EndTable();
     }
 
-    private void ColumnCentredText(string text)
+    private static void ColumnCentredText(string text)
     {
         var colWidth = ImGui.GetColumnWidth();
         var textWidth = ImGui.CalcTextSize(text).X;
@@ -384,15 +412,15 @@ internal class CrossUpUI : IDisposable
         for (var i = 1; i <= 8; i++) optionString += $"Cross Hotbar {i} - Left\0Cross Hotbar {i} - Right\0";
 
         ImGui.Spacing();
-        if (ImGui.Checkbox($"Use set-specific assignments for {(type ? "Expanded Hold Controls" : "WXHB")}",ref featureOn))
+        if (ImGui.Checkbox($"Use set-specific assignments for {(type ? "Expanded Hold Controls" : "WXHB")}", ref featureOn))
         {
             if (type) Config.RemapEx = featureOn;
-            else      Config.RemapW  = featureOn;
+            else Config.RemapW = featureOn;
         }
 
         if (!featureOn) return;
-        
-        ImGui.BeginTable((type?"EXHB":"WXHB")+" Remap",3,ImGuiTableFlags.SizingStretchProp);
+
+        ImGui.BeginTable((type ? "EXHB" : "WXHB") + " Remap", 3, ImGuiTableFlags.SizingStretchProp);
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -408,15 +436,15 @@ internal class CrossUpUI : IDisposable
         {
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ColumnCentredText("SET "+(i+1));
+            ColumnCentredText("SET " + (i + 1));
 
             for (var c = 0; c <= 1; c++)
             {
                 ImGui.TableNextColumn();
 
-                var indent = (ImGui.GetColumnWidth()-170f*scale) / 2;
-                if (indent>0) {ImGui.Indent(indent);}
-                ImGui.SetNextItemWidth(170f*scale);
+                var indent = (ImGui.GetColumnWidth() - 170f * scale) / 2;
+                if (indent > 0) { ImGui.Indent(indent); }
+                ImGui.SetNextItemWidth(170f * scale);
                 if (ImGui.Combo($"##{(type ? c == 0 ? "LR" : "RL" : c == 0 ? "LL" : "RR")}{i + 1}", ref mappings[c, i], optionString, 16))
                 {
                     if (type) Config.MappingsEx[c, i] = mappings[c, i];
@@ -436,11 +464,12 @@ internal class CrossUpUI : IDisposable
 
         var scale = ImGuiHelpers.GlobalScale;
 
-        ImGui.SetNextWindowSizeConstraints(new Vector2(450 * scale, 200 * scale), new Vector2(550 * scale, 500 * scale));
+        ImGui.SetNextWindowSizeConstraints(new Vector2(460 * scale, 200 * scale), new Vector2(550 * scale, 500 * scale));
         ImGui.SetNextWindowSize(Config.ConfigWindowSize, ImGuiCond.Always);
         if (ImGui.Begin("CrossUp Settings", ref settingsVisible))
         {
-            if (ImGui.BeginTabBar("Nav")) {
+            if (ImGui.BeginTabBar("Nav"))
+            {
 
                 if (ImGui.BeginTabItem("Look & Feel"))
                 {

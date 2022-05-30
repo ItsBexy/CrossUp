@@ -2,7 +2,6 @@
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
 {
     public string Name => "CrossUp";
     private const string MainCommand = "/xup";
-    private static readonly ActionManager* ActionManager;
     private DalamudPluginInterface PluginInterface { get; }
     private CommandManager CommandManager { get; }
     private Configuration Config { get; }
@@ -24,7 +22,7 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     private delegate byte ActionBarBaseUpdate(AddonActionBarBase* addonActionBarBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData);
     private readonly HookWrapper<ActionBarBaseUpdate>? ActionBarBaseUpdateHook;
 
-    private static readonly RaptureHotbarModule* raptureModule = (RaptureHotbarModule*)ClientStructsFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+    private static readonly RaptureHotbarModule* RaptureModule = (RaptureHotbarModule*)ClientStructsFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
     private readonly AgentHudLayout* hudLayout = ClientStructsFramework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
     public CrossUp(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -52,52 +50,49 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
 
     // HOUSEKEEPING
 
-        //stuff various functions need to keep track of
-    private static class Status     
+    //stuff various functions need to keep track of
+    private static class Status
     {
         public static bool TweensExist;
         public static bool Initialized;
-        public static int CrossBarSelection;
-        public static int CrossBarActive = 1;
-        public static int CrossBarSet;
         public static bool DoneHudCheck;
-        public static readonly bool[] WasHidden = new bool[10];
     }
 
-    private static BarUnitBases UnitBases = new();
-
-        // run once logged in and bar nodes confirmed to exist
+    // run once logged in and bar nodes confirmed to exist
     private void Initialize()
     {
         Status.Initialized = true;
-        UnitBases = new BarUnitBases();
+        Bars.Init();
+
+        if (Config.SepExBar && Config.borrowBarR > 0 && Config.borrowBarL > 0) EnableEx();
         SetSelectColor();
         SetPulseColor();
-        ResetHud();
-        UpdateBarState(true);
+
+        UpdateBarState(true, true);
 
         for (var i = 1; i <= 10; i++)
         {
             // run the update function a few times upon login (ensures bars look right by the time user sees them)
-            Task.Delay(500 * i).ContinueWith(delegate { if (Status.Initialized) { UpdateBarState(true); } });
+            var n = i;
+            Task.Delay(500 * i).ContinueWith(delegate
+            {
+                if (!Status.Initialized) return;
+                PluginLog.LogDebug($"Nudging Nodes Post-Login {n}/10");
+                UpdateBarState(true);
+            });
         }
     }
 
-        // put all modified nodes back in place and remove hooks
-    public void Dispose()  
+    // put all modified nodes back in place and remove hooks
+    public void Dispose()
     {
         ActionBarBaseUpdateHook?.Disable();
         Service.Framework.Update -= FrameworkUpdate;
         CommandManager.RemoveHandler(MainCommand);
 
-        Config.Split = 0;
-        Config.SepExBar = false;
-        ArrangeAndFill(0, 0, true, false);
+        ArrangeCrossBar(0, 0, true, true, true);
         ResetHud();
-        SetSelectColor(true);
-        SetPulseColor(true);
-        NodeEdit.SetVis(BarNodes.Cross.SetText, true);
-        NodeEdit.SetVis(GetChild(BarNodes.Cross.Padlock, 1), true);
+        ResetColors();
         Status.Initialized = false;
 
         CrossUpUI.Dispose();
@@ -105,167 +100,89 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
 
     // HOOKS AND EVENTS
 
-        // on every new frame
+    // on every new frame
     private void FrameworkUpdate(DalamudFramework framework)
     {
-        if (!Status.Initialized && Service.ClientState.IsLoggedIn && (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1) != null) Initialize();
-        else if (Status.Initialized)
+        if (Status.Initialized)
         {
-            if (Service.ClientState.IsLoggedIn && UnitBases.Cross->UldManager.NodeListSize > 0)
+            if (Bars.Cross.Exist)
             {
                 // animate button sizes if needed
-                if (Status.TweensExist) TweenAllButtons();
+                if (Status.TweensExist) TweenAllMetaSlots();
 
                 // if HUD layout editor is open, perform this fix once:
-                Status.DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() && (Status.DoneHudCheck || AdjustHudEditorNode());
+                Status.DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() &&
+                                      (Status.DoneHudCheck || AdjustHudEditorNode());
             }
             else
             {
+                PluginLog.LogDebug("Cross Hotbar nodes not found; disabling plugin features");
                 Status.Initialized = false;
+            }
+
+        }
+        else if (Bars.Cross.Exist)
+        {
+            PluginLog.LogDebug("Cross Hotbar nodes found; setting up plugin features");
+            try { Initialize(); }
+            catch (Exception ex)
+            {
+                PluginLog.Log($"Exception: Initialization Failed!\n{ex}");
             }
         }
     }
 
-        // when any hotbar updates
-    private byte ActionBarBaseUpdateDetour(AddonActionBarBase* addonActionBarBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
+    // when any hotbar updates
+    private byte ActionBarBaseUpdateDetour(AddonActionBarBase* barBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
     {
-        var ret = ActionBarBaseUpdateHook!.Original(addonActionBarBase, numberArrayData, stringArrayData);
-
+        var ret = ActionBarBaseUpdateHook!.Original(barBase, numberArrayData, stringArrayData);
         if (!Status.Initialized) return ret;
 
         try
         {
+            var barID = barBase->HotbarID;
+
             // almost all the bars fire at once every time anything happens,
             // so we'll just take barID 1 because it's always included
-            if (addonActionBarBase->HotbarID == 1) 
+            if (barBase->HotbarID == 1)
             {
-                var activeNow = GetCharConfig(ConfigID.CrossEnabled);
-
-                UpdateBarState(activeNow != Status.CrossBarActive, true);
-                Status.CrossBarActive = activeNow;
+                UpdateBarState(Bars.Cross.Enabled != Bars.Cross.LastEnabledState, true);
+                Bars.Cross.LastEnabledState = Bars.Cross.Enabled;
             }
-            else if (addonActionBarBase->HotbarSlotCount == 16) // 16 slots means it's the cross bar
-            { 
-                //check if the cross hotbar set has changed
-                var barID = addonActionBarBase->HotbarID;
-                if (barID != Status.CrossBarSet)
+            else if (barBase->HotbarSlotCount == 16 && barID != Bars.Cross.LastKnownSetID) // Cross Hotbar set has changed
+            {
+                PluginLog.LogDebug($"Switched to Cross Hotbar Set {barID - 9}");
+                if (Config.RemapEx || Config.RemapW) OverrideMappings(barID);
+                Bars.Cross.LastKnownSetID = barID;
+            }
+
+            // detecting drag/drop changes on the first 8 slots of borrowed bars
+            if (Config.SepExBar && (barID == Config.borrowBarL || barID == Config.borrowBarR))
+            {
+                var barSlots = barBase->ActionBarSlotsAction;
+                for (var i = 0; i < 8; i++) if (barSlots[i].Icon->AtkResNode.Flags_2 % 2 == 1)
                 {
-                    if (Config.RemapEx || Config.RemapW) OverrideMappings(barID);
-                    Status.CrossBarSet = barID;
+                    OnDragDropEx(barID == Config.borrowBarL);
+                    break;
                 }
             }
         }
         catch (Exception ex)
         {
-            PluginLog.Log(ex + "");
+            PluginLog.Log($"Exception: ActionBarBaseUpdateDetour Failed!\n{ex}");
         }
 
         return ret;
     }
 
-    // CROSS HOTBAR STATE
-
-        // check which bar is selected, if any (returns value from 0-6)
-    private static int GetCrossBarSelection()
-    {
-        var xBar  = (AddonActionCross*)UnitBases.Cross;
-        var LLBar = (AddonActionDoubleCrossBase*)UnitBases.LL;
-        var RRbar = (AddonActionDoubleCrossBase*)UnitBases.RR;
-
-        if (xBar == null || LLBar == null || RRbar == null) return Status.CrossBarSelection;
-
-        var newCrossBarSelection =
-            xBar->LeftBar   ? 1 : // LEFT BAR
-            xBar->RightBar  ? 2 : // RIGHT BAR
-            xBar->LRBar > 0 ? 3 : // L->R EX BAR
-            xBar->RLBar > 0 ? 4 : // R->L EX BAR
-            LLBar->Selected ? 5 : // WXHB LL
-            RRbar->Selected ? 6 : // WXHB RR
-            0 ;
-
-        return newCrossBarSelection;
-    }
-
-        // run arrangement updates based on bar change (previous -> current)
     public void UpdateBarState(bool forceArrange = false, bool hudFixCheck = false)
     {
-        var newSelection = GetCrossBarSelection();
-        ArrangeAndFill(newSelection, Status.CrossBarSelection, forceArrange, hudFixCheck);
-        Status.CrossBarSelection = newSelection;
+        ArrangeCrossBar(Bars.Cross.Selection, Bars.Cross.LastKnownSelection, forceArrange, hudFixCheck);
+        Bars.Cross.LastKnownSelection = Bars.Cross.Selection;
     }
 
     // PLUGIN INTERFACE
-
-        // config button or /xup command
     private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = true;
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
-
-    // SEPARATE EXPANDED HOLD CONTROLS
-
-        // turn on separate Ex bar feature
-    public void EnableEx()
-    {
-        var lID = Config.borrowBarL;
-        var rID = Config.borrowBarR;
-
-        if (lID < 0 || rID < 0) { return; }
-
-        EnableBorrowedBar(lID);
-        EnableBorrowedBar(rID);
-
-        UpdateBarState(true);
-        Task.Delay(20).ContinueWith(delegate { if (Status.Initialized) { UpdateBarState(true); } });
-    }
-
-        // turn on each specific bar
-    private static void EnableBorrowedBar(int id)
-    {
-        var unitBase = UnitBases.ActionBar[id];
-        if (unitBase == null) return;
-            
-        var visID = ConfigID.Hotbar.Visible[id];
-        if (CharConfigs->GetIntValue(visID) == 0)
-        {
-            Status.WasHidden[id] = true;
-            CharConfigs->SetOption(visID, 1);
-        }
-
-        for (var i = 9; i <= 20; i++) unitBase->UldManager.NodeList[i]->Flags_2 |= 0xD;
-    }
-
-        // disable the feature (assumes Config.SepExBar has been turned off prior to this being called)
-    public void DisableEx()
-    {
-        ArrangeAndFill(0, 0, true, false);
-        ResetHud();
-    }
-
-    // EXHB/WXHB CUSTOM MAPPING
-
-        // set Character Configs to match user's override prefs
-    private void OverrideMappings(int barID)
-    {
-        var usePvP = GetCharConfig(ConfigID.SepPvP) == 1 && Service.ClientState.IsPvP ? 1:0;
-        var index = barID - 10;
-        if (Config.RemapEx)
-        {
-            var overrideLR = Config.MappingsEx[0, index];
-            var overrideRL = Config.MappingsEx[1, index];
-            var configLR = ConfigID.LRset[usePvP];
-            var configRL = ConfigID.RLset[usePvP];
-            if (GetCharConfig(configLR) != overrideLR) SetCharConfig(configLR, overrideLR);
-            if (GetCharConfig(configRL) != overrideRL) SetCharConfig(configRL, overrideRL);
-        }
-
-        if (Config.RemapW)
-        {
-            var overrideLL = Config.MappingsW[0, index];
-            var overrideRR = Config.MappingsW[1, index];
-            var configLL = ConfigID.LLset[usePvP];
-            var configRR = ConfigID.RRset[usePvP];
-            if (GetCharConfig(configLL) != overrideLL) SetCharConfig(configLL, overrideLL);
-            if (GetCharConfig(configRR) != overrideRR) SetCharConfig(configRR, overrideRR);
-        }
-    }
 }
