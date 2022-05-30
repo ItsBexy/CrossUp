@@ -157,15 +157,13 @@ public sealed unsafe partial class CrossUp
         var bar = Bars.ActionBars[barID];
         if (!bar.Exist) return;
 
-        int gridType = CharConfig.Hotbar.GridType[barID];
-
         bar.Root.SetPos(bar.Base->X, bar.Base->Y)
-                .SetSize(ActionBarSizes[gridType])
+                .SetSize()
                 .SetScale(bar.Base->Scale);
 
         bar.BarNumText.SetScale();
 
-        for (var i = 0; i < 12; i++) bar.Button[i].SetPos(ActionBarGrids[gridType, i])
+        for (var i = 0; i < 12; i++) bar.Button[i].SetRelativePos()
                                                   .SetVis(true)
                                                   .SetScale();
 

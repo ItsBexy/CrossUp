@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Component.GUI;
+﻿using System.Numerics;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
@@ -82,6 +83,7 @@ public sealed unsafe partial class CrossUp
         // expanded hold
         public class LR
         {
+            public string Name = "Expanded Hold L->R";
             public static int BorrowID = -1;
             public static ActionBar BorrowBar => ActionBars[BorrowID];
             public static Action[] Actions => GetExBarContents(lr: true);
@@ -89,6 +91,7 @@ public sealed unsafe partial class CrossUp
         }
         public class RL
         {
+            public string Name = "Expanded Hold R->L";
             public static int BorrowID = -1;
             public static ActionBar BorrowBar => ActionBars[BorrowID];
             public static Action[] Actions => GetExBarContents(lr: false);
@@ -105,7 +108,7 @@ public sealed unsafe partial class CrossUp
             private AtkResNode** NodeList => Base->UldManager.NodeList;
             public bool Exist => BaseCheck(Base);
             public int NodeCount => Base->UldManager.NodeListSize;
-            public NodeRef Root => NodeList[0];
+            public NodeRef Root => new() {Node = NodeList[0], DefaultSize = DefaultBarSizes[CharConfig.Hotbar.GridType[BarID]] };
             public NodeRef BarNumText => NodeList[24];
             public NodeRef[] Button = new NodeRef[12];
             public Action[] Actions => GetBarContentsByID(BarID, 12);
@@ -121,8 +124,9 @@ public sealed unsafe partial class CrossUp
                 var barBase = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar" + (i == 0 ? "" : "0" + i), 1);
                 var nodeList = barBase->UldManager.NodeList;
                 var button = new NodeRef[12];
+                int gridType = CharConfig.Hotbar.GridType[i];
 
-                for (var b = 0; b < 12; b++) button[b] = new() { Node = nodeList[20 - b] };
+                for (var b = 0; b < 12; b++) button[b] = new() { Node = nodeList[20 - b], DefaultPos = DefaultBarGrids[gridType, b] };
 
                 ActionBars[i] = new()
                 {
@@ -132,8 +136,107 @@ public sealed unsafe partial class CrossUp
                 };
             }
         }
-        public static readonly Action[]?[] StoredActions = new Action[10][];
-        public static readonly bool[] WasHidden = new bool[10];
+
         private static bool BaseCheck(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && unitBase->X > 0 && unitBase->Y > 0;
+
+        // values for restoring borrowed hotbars to their normal state
+        public static readonly Action[]?[] StoredActions = new Action[10][]; // may need to account for jobs if the borrowed bars are unshared?
+        private static readonly Vector2[] DefaultBarSizes =
+        {
+            new() { X = 624, Y = 72 },
+            new() { X = 331, Y = 121 },
+            new() { X = 241, Y = 170 },
+            new() { X = 162, Y = 260 },
+            new() { X = 117, Y = 358 },
+            new() { X = 72, Y = 618 }
+        };
+        private static readonly Vector2[,] DefaultBarGrids =
+        {
+            {
+                new() { X = 34, Y = 0 },
+                new() { X = 79, Y = 0 },
+                new() { X = 124, Y = 0 },
+                new() { X = 169, Y = 0 },
+                new() { X = 214, Y = 0 },
+                new() { X = 259, Y = 0 },
+                new() { X = 304, Y = 0 },
+                new() { X = 349, Y = 0 },
+                new() { X = 394, Y = 0 },
+                new() { X = 439, Y = 0 },
+                new() { X = 484, Y = 0 },
+                new() { X = 529, Y = 0 }
+            },
+            {
+                new() { X = 34, Y = 0 },
+                new() { X = 79, Y = 0 },
+                new() { X = 124, Y = 0 },
+                new() { X = 169, Y = 0 },
+                new() { X = 214, Y = 0 },
+                new() { X = 259, Y = 0 },
+                new() { X = 34, Y = 49 },
+                new() { X = 79, Y = 49 },
+                new() { X = 124, Y = 49 },
+                new() { X = 169, Y = 49 },
+                new() { X = 214, Y = 49 },
+                new() { X = 259, Y = 49 }
+            },
+            {
+                new() { X = 34, Y = 0 },
+                new() { X = 79, Y = 0 },
+                new() { X = 124, Y = 0 },
+                new() { X = 169, Y = 0 },
+                new() { X = 34, Y = 49 },
+                new() { X = 79, Y = 49 },
+                new() { X = 124, Y = 49 },
+                new() { X = 169, Y = 49 },
+                new() { X = 34, Y = 98 },
+                new() { X = 79, Y = 98 },
+                new() { X = 124, Y = 98 },
+                new() { X = 169, Y = 98 }
+            },
+            {
+                new() { X = 0, Y = 0 },
+                new() { X = 45, Y = 0 },
+                new() { X = 90, Y = 0 },
+                new() { X = 0, Y = 49 },
+                new() { X = 45, Y = 49 },
+                new() { X = 90, Y = 49 },
+                new() { X = 0, Y = 98 },
+                new() { X = 45, Y = 98 },
+                new() { X = 90, Y = 98 },
+                new() { X = 0, Y = 147 },
+                new() { X = 45, Y = 147 },
+                new() { X = 90, Y = 147 }
+            },
+            {
+                new() { X = 0, Y = 0 },
+                new() { X = 45, Y = 0 },
+                new() { X = 0, Y = 49 },
+                new() { X = 45, Y = 49 },
+                new() { X = 0, Y = 98 },
+                new() { X = 45, Y = 98 },
+                new() { X = 0, Y = 147 },
+                new() { X = 45, Y = 147 },
+                new() { X = 0, Y = 196 },
+                new() { X = 45, Y = 196 },
+                new() { X = 0, Y = 245 },
+                new() { X = 45, Y = 245 }
+            },
+            {
+                new() { X = 0, Y = 14 },
+                new() { X = 0, Y = 59 },
+                new() { X = 0, Y = 104 },
+                new() { X = 0, Y = 149 },
+                new() { X = 0, Y = 194 },
+                new() { X = 0, Y = 239 },
+                new() { X = 0, Y = 284 },
+                new() { X = 0, Y = 329 },
+                new() { X = 0, Y = 374 },
+                new() { X = 0, Y = 419 },
+                new() { X = 0, Y = 464 },
+                new() { X = 0, Y = 509 }
+            }
+        };
+        public static readonly bool[] WasHidden = new bool[10];
     }
 }

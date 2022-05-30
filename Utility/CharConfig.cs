@@ -29,8 +29,8 @@ public class CharConfig
     public static readonly Config MixBar = new() { ID = 370 };       // radio -- Cross Hotbar Display Type
     public static readonly Config[] LRset = { new() { ID = 399 }, new() { ID = 422 } };  // dropdowns -- selected sets for EXHB and WXHB [PvE, PvP]
     public static readonly Config[] RLset = { new() { ID = 398 }, new() { ID = 421 } };  //    each setting returns  0-19
-    public static Config[] LLset = { new() { ID = 424 }, new() { ID = 427 } };  //     0-15 = Left/Right (Alternating) sides of the 8 Cross Hotbar sets
-    public static Config[] RRset = { new() { ID = 425 }, new() { ID = 428 } };  //    16-19 = "Cycle" options that grab Right/Left sides of next/prev bar
+    public static readonly Config[] LLset = { new() { ID = 424 }, new() { ID = 427 } };  //     0-15 = Left/Right (Alternating) sides of the 8 Cross Hotbar sets
+    public static readonly Config[] RRset = { new() { ID = 425 }, new() { ID = 428 } };  //    16-19 = "Cycle" options that grab Right/Left sides of next/prev bar
 
     public class Transparency   // sliders -- transparency for cross hotbar buttons
     {

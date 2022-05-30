@@ -101,11 +101,9 @@ public sealed unsafe partial class CrossUp
         var mapSet = GetExHoldMapping(lr);
 
         CopyButtons(borrow.Actions, 0, mapSet.BarID, mapSet.UseLeft ? 0 : 8, 8);
-
         SetSavedBar(borrow.Actions, 0, mapSet.BarID, mapSet.UseLeft ? 0 : 8, 8, CharConfig.Hotbar.Shared[mapSet.BarID] ? 0 : GetPlayerJob());
 
         if (Bars.StoredActions[borrow.BarID] == null || Bars.StoredActions[borrow.BarID]!.Length == 0) return;
-
         SetSavedBar(Bars.StoredActions[borrow.BarID]!, 0, borrow.BarID, 0, 12, CharConfig.Hotbar.Shared[borrow.BarID] ? 0 : GetPlayerJob());
     }
 }

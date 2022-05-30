@@ -2,7 +2,6 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace CrossUp;
 
@@ -32,8 +31,8 @@ public sealed unsafe partial class CrossUp
     private static void PrepBorrowedBar(int id)
     {
         if (Bars.ActionBars[id].Base == null || Bars.ActionBars[id].NodeCount == 0) return;
-
-        Bars.StoredActions[id] = GetSavedBar(CharConfig.Hotbar.Shared[id] ? 0 : GetPlayerJob(), id);
+        var job = CharConfig.Hotbar.Shared[id] ? 0 : GetPlayerJob();
+        Bars.StoredActions[id] = GetSavedBar(job, id);
 
         if (!CharConfig.Hotbar.Visible[id])
         {
@@ -49,6 +48,7 @@ public sealed unsafe partial class CrossUp
     {
         ArrangeCrossBar(0, 0, true, false);
         ResetHud();
+       
         for (var barID = 1; barID <= 9; barID++) Bars.StoredActions[barID] = null;
     }
 
@@ -145,10 +145,10 @@ public sealed unsafe partial class CrossUp
                             MetaSlots.Cross.RightL[i].Visible = prevSelect == 3 && !mixBar;
                             MetaSlots.Cross.RightR[i].Visible = prevSelect == 3;
 
-                            MetaSlots.Cross.LeftL[i].Scale = ScaleMap[1, 0];
-                            MetaSlots.Cross.LeftR[i].Scale = ScaleMap[1, mixBar ? 1 : 0];
-                            MetaSlots.Cross.RightL[i].Scale = ScaleMap[1, mixBar ? 0 : 1];
-                            MetaSlots.Cross.RightR[i].Scale = ScaleMap[1, 1];
+                            MetaSlots.Cross.LeftL[i].Scale = MetaSlots.ScaleMap[1, 0];
+                            MetaSlots.Cross.LeftR[i].Scale = MetaSlots.ScaleMap[1, mixBar ? 1 : 0];
+                            MetaSlots.Cross.RightL[i].Scale = MetaSlots.ScaleMap[1, mixBar ? 0 : 1];
+                            MetaSlots.Cross.RightR[i].Scale = MetaSlots.ScaleMap[1, 1];
 
                             PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.LR[i], 0, 0, select);  //left EXHB
                             PlaceButton(Bars.LR.BorrowBar.Button[i + 4], MetaSlots.LR[i + 4], 0, 0, select);
@@ -182,10 +182,10 @@ public sealed unsafe partial class CrossUp
                             MetaSlots.Cross.RightL[i].Visible = prevSelect == 4 && mixBar;
                             MetaSlots.Cross.RightR[i].Visible = false;
 
-                            MetaSlots.Cross.LeftL[i].Scale = ScaleMap[2, 0];
-                            MetaSlots.Cross.LeftR[i].Scale = ScaleMap[2, mixBar ? 1 : 0];
-                            MetaSlots.Cross.RightL[i].Scale = ScaleMap[2, mixBar ? 0 : 1];
-                            MetaSlots.Cross.RightR[i].Scale = ScaleMap[2, 1];
+                            MetaSlots.Cross.LeftL[i].Scale = MetaSlots.ScaleMap[2, 0];
+                            MetaSlots.Cross.LeftR[i].Scale = MetaSlots.ScaleMap[2, mixBar ? 1 : 0];
+                            MetaSlots.Cross.RightL[i].Scale = MetaSlots.ScaleMap[2, mixBar ? 0 : 1];
+                            MetaSlots.Cross.RightR[i].Scale = MetaSlots.ScaleMap[2, 1];
 
                             PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.LR[i], 0, 0, select); // left EXHB
                             PlaceButton(Bars.LR.BorrowBar.Button[i + 4], MetaSlots.LR[i + 4], 0, 0, select);
@@ -271,9 +271,9 @@ public sealed unsafe partial class CrossUp
     }
 
     // move a borrowed button into position and set its scale to animate if needed
-    private static void PlaceButton(NodeRef nodeRef, MetaSlot mSlot, float xMod = 0, float yMod = 0, int select = 0)
+    private static void PlaceButton(NodeRef nodeRef, MetaSlots.MetaSlot mSlot, float xMod = 0, float yMod = 0, int select = 0)
     {
-        var to = ScaleMap[select, mSlot.ScaleIndex];
+        var to = MetaSlots.ScaleMap[select, mSlot.ScaleIndex];
         mSlot.Xmod = xMod;
         mSlot.Ymod = yMod;
         mSlot.NodeRef = nodeRef;
@@ -289,7 +289,7 @@ public sealed unsafe partial class CrossUp
                     Start = DateTime.Now,
                     Duration = new(0, 0, 0, 0, 40)
                 };
-                Status.TweensExist = true;
+                MetaSlots.TweensExist = true;
                 return;
             }
         }
@@ -315,71 +315,56 @@ public sealed unsafe partial class CrossUp
         }
     }
 
-    // turn empty slot display off/on for borrowed bars
-
-    private static void TweenMetaSlot(MetaSlot mSlot)
-    {
-        if (mSlot.Tween == null || mSlot.NodeRef == null) return;
-
-        Status.TweensExist = true;
-
-        var timePassed = DateTime.Now - mSlot.Tween.Start;
-        var progress = (float)decimal.Divide(timePassed.Milliseconds, mSlot.Tween.Duration.Milliseconds);
-        var to = mSlot.Tween.ToScale;
-        var from = mSlot.Tween.FromScale;
-
-        if (progress >= 1)
-        {
-            mSlot.Scale = to;
-            mSlot.Tween = null;
-        }
-        else
-        {
-            mSlot.Scale = (to - from) * progress + from;
-        }
-
-        mSlot.NodeRef.SetProps(mSlot);
-    }
-
-    // run any extant animation tweens
-    private static void TweenAllMetaSlots()
-    {
-        Status.TweensExist = false;
-
-        foreach (var mSlot in MetaSlots.LR) TweenMetaSlot(mSlot);
-        foreach (var mSlot in MetaSlots.RL) TweenMetaSlot(mSlot);
-        foreach (var mSlot in MetaSlots.Cross.LeftL) TweenMetaSlot(mSlot);
-        foreach (var mSlot in MetaSlots.Cross.LeftR) TweenMetaSlot(mSlot);
-        foreach (var mSlot in MetaSlots.Cross.RightL) TweenMetaSlot(mSlot);
-        foreach (var mSlot in MetaSlots.Cross.RightR) TweenMetaSlot(mSlot);
-    }
-
     // MetaSlots = all the potential positions we might place a borrowed button, depending on which bar it's imitating
-    public class MetaSlot
-    {
-        public bool Visible { get; set; } = true;
-        public int X { get; init; }
-        public int Y { get; init; }
-        public float Scale { get; set; } = 1.0F;
-        public float OrigX { get; init; }
-        public float OrigY { get; init; }
-        public class ScaleTween
-        {
-            public DateTime Start { get; init; }
-            public TimeSpan Duration { get; init; }
-            public float FromScale { get; init; }
-            public float ToScale { get; init; }
-        }
-        public ScaleTween? Tween { get; set; }
-        public int ScaleIndex { get; set; }
-        public NodeRef? NodeRef { get; set; }
-        public float Xmod { get; set; }
-        public float Ymod { get; set; }
-        public static implicit operator NodeRef.PropertySet(MetaSlot p) => new() { X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX, OrigY = p.OrigY };
-    }
 
     public static class MetaSlots
     {
+        public class MetaSlot
+        {
+            public bool Visible { get; set; } = true;
+            public int X { get; init; }
+            public int Y { get; init; }
+            public float Scale { get; set; } = 1.0F;
+            public float OrigX { get; init; }
+            public float OrigY { get; init; }
+            public class ScaleTween
+            {
+                public DateTime Start { get; init; }
+                public TimeSpan Duration { get; init; }
+                public float FromScale { get; init; }
+                public float ToScale { get; init; }
+            }
+            public ScaleTween? Tween { get; set; }
+            public int ScaleIndex { get; set; }
+            public NodeRef? NodeRef { get; set; }
+            public float Xmod { get; set; }
+            public float Ymod { get; set; }
+            public void RunTween()
+            {
+                if (Tween == null || NodeRef == null || NodeRef.Node == null) return;
+
+                TweensExist = true;
+
+                var timePassed = DateTime.Now - Tween.Start;
+                var progress = (float)decimal.Divide(timePassed.Milliseconds, Tween.Duration.Milliseconds);
+                var to = Tween.ToScale;
+                var from = Tween.FromScale;
+
+                if (progress >= 1)
+                {
+                    Scale = to;
+                    Tween = null;
+                }
+                else
+                {
+                    Scale = (to - from) * progress + from;
+                }
+
+                NodeRef.SetProps(this);
+            }
+            public static implicit operator NodeRef.PropertySet(MetaSlot p) => new() { X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX, OrigY = p.OrigY };
+        }
+
         public static readonly MetaSlot[] LR =
         {
             new() { X = 0, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 2 },
@@ -431,117 +416,29 @@ public sealed unsafe partial class CrossUp
                 new() { X = 317, Y = 48, OrigX = 52+1/0.85F, OrigY = 15, ScaleIndex = 1 }
             };
         }
-    }
+        public static bool TweensExist { get; set; }
+        public static void TweenAll()
+        {
+            TweensExist = false;
 
-    // correct scales for specific metaSlots in specific cross bar selections
-    private static readonly float[,] ScaleMap =
-    {
-        { 1F, 1F, 1F, 1F }, //0: none selected
-        { 1.1F, 0.85F, 0.85F, 0.85F }, //1: left selected
-        { 0.85F, 1.1F, 0.85F, 0.85F }, //2: right selected
-        { 0.85F, 0.85F, 1.1F, 0.85F }, //3: LR selected
-        { 0.85F, 0.85F, 0.85F, 1.1F }, //4: RL selected
-        { 0.85F, 0.85F, 0.85F, 0.85F }, //5: WXHB L selected
-        { 0.85F, 0.85F, 0.85F, 0.85F } //6: WXHB R selected
-    };
-
-    // default bar sizes for when restoring borrowed hotbars to their normal state
-    private static readonly Vector2[] ActionBarSizes =
-    {
-        new() { X = 624, Y = 72 },
-        new() { X = 331, Y = 121 },
-        new() { X = 241, Y = 170 },
-        new() { X = 162, Y = 260 },
-        new() { X = 117, Y = 358 },
-        new() { X = 72, Y = 618 }
-    };
-
-    // default grid layouts for when restoring borrowed hotbars to their normal state
-    private static readonly Vector2[,] ActionBarGrids =
-    {
-        {
-            new() { X = 34, Y = 0 },
-            new() { X = 79, Y = 0 },
-            new() { X = 124, Y = 0 },
-            new() { X = 169, Y = 0 },
-            new() { X = 214, Y = 0 },
-            new() { X = 259, Y = 0 },
-            new() { X = 304, Y = 0 },
-            new() { X = 349, Y = 0 },
-            new() { X = 394, Y = 0 },
-            new() { X = 439, Y = 0 },
-            new() { X = 484, Y = 0 },
-            new() { X = 529, Y = 0 }
-        },
-        {
-            new() { X = 34, Y = 0 },
-            new() { X = 79, Y = 0 },
-            new() { X = 124, Y = 0 },
-            new() { X = 169, Y = 0 },
-            new() { X = 214, Y = 0 },
-            new() { X = 259, Y = 0 },
-            new() { X = 34, Y = 49 },
-            new() { X = 79, Y = 49 },
-            new() { X = 124, Y = 49 },
-            new() { X = 169, Y = 49 },
-            new() { X = 214, Y = 49 },
-            new() { X = 259, Y = 49 }
-        },
-        {
-            new() { X = 34, Y = 0 },
-            new() { X = 79, Y = 0 },
-            new() { X = 124, Y = 0 },
-            new() { X = 169, Y = 0 },
-            new() { X = 34, Y = 49 },
-            new() { X = 79, Y = 49 },
-            new() { X = 124, Y = 49 },
-            new() { X = 169, Y = 49 },
-            new() { X = 34, Y = 98 },
-            new() { X = 79, Y = 98 },
-            new() { X = 124, Y = 98 },
-            new() { X = 169, Y = 98 }
-        },
-        {
-            new() { X = 0, Y = 0 },
-            new() { X = 45, Y = 0 },
-            new() { X = 90, Y = 0 },
-            new() { X = 0, Y = 49 },
-            new() { X = 45, Y = 49 },
-            new() { X = 90, Y = 49 },
-            new() { X = 0, Y = 98 },
-            new() { X = 45, Y = 98 },
-            new() { X = 90, Y = 98 },
-            new() { X = 0, Y = 147 },
-            new() { X = 45, Y = 147 },
-            new() { X = 90, Y = 147 }
-        },
-        {
-            new() { X = 0, Y = 0 },
-            new() { X = 45, Y = 0 },
-            new() { X = 0, Y = 49 },
-            new() { X = 45, Y = 49 },
-            new() { X = 0, Y = 98 },
-            new() { X = 45, Y = 98 },
-            new() { X = 0, Y = 147 },
-            new() { X = 45, Y = 147 },
-            new() { X = 0, Y = 196 },
-            new() { X = 45, Y = 196 },
-            new() { X = 0, Y = 245 },
-            new() { X = 45, Y = 245 }
-        },
-        {
-            new() { X = 0, Y = 14 },
-            new() { X = 0, Y = 59 },
-            new() { X = 0, Y = 104 },
-            new() { X = 0, Y = 149 },
-            new() { X = 0, Y = 194 },
-            new() { X = 0, Y = 239 },
-            new() { X = 0, Y = 284 },
-            new() { X = 0, Y = 329 },
-            new() { X = 0, Y = 374 },
-            new() { X = 0, Y = 419 },
-            new() { X = 0, Y = 464 },
-            new() { X = 0, Y = 509 }
+            foreach (var mSlot in LR) mSlot.RunTween();
+            foreach (var mSlot in RL) mSlot.RunTween();
+            foreach (var mSlot in Cross.LeftL) mSlot.RunTween();
+            foreach (var mSlot in Cross.LeftR) mSlot.RunTween();
+            foreach (var mSlot in Cross.RightL) mSlot.RunTween();
+            foreach (var mSlot in Cross.RightR) mSlot.RunTween();
         }
-    };
+
+        // correct scales for specific metaSlots in specific cross bar selections
+        public static readonly float[,] ScaleMap =
+        {
+            { 1F, 1F, 1F, 1F }, //0: none selected
+            { 1.1F, 0.85F, 0.85F, 0.85F }, //1: left selected
+            { 0.85F, 1.1F, 0.85F, 0.85F }, //2: right selected
+            { 0.85F, 0.85F, 1.1F, 0.85F }, //3: LR selected
+            { 0.85F, 0.85F, 0.85F, 1.1F }, //4: RL selected
+            { 0.85F, 0.85F, 0.85F, 0.85F }, //5: WXHB L selected
+            { 0.85F, 0.85F, 0.85F, 0.85F } //6: WXHB R selected
+        };
+    }
 }

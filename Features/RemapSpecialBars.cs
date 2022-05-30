@@ -27,8 +27,8 @@ public sealed partial class CrossUp
             var overrideLL = Config.MappingsW[0, index];
             var overrideRR = Config.MappingsW[1, index];
 
-            var configLL = CharConfig.LRset[usePvP];
-            var configRR = CharConfig.RLset[usePvP];
+            var configLL = CharConfig.LLset[usePvP];
+            var configRR = CharConfig.RRset[usePvP];
 
             if (configLL != overrideLL) configLL.Set(overrideLL);
             if (configRR != overrideRR) configRR.Set(overrideRR);

@@ -53,7 +53,6 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     //stuff various functions need to keep track of
     private static class Status
     {
-        public static bool TweensExist;
         public static bool Initialized;
         public static bool DoneHudCheck;
     }
@@ -108,7 +107,7 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
             if (Bars.Cross.Exist)
             {
                 // animate button sizes if needed
-                if (Status.TweensExist) TweenAllMetaSlots();
+                if (MetaSlots.TweensExist) MetaSlots.TweenAll();
 
                 // if HUD layout editor is open, perform this fix once:
                 Status.DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() &&
@@ -151,6 +150,8 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
             }
             else if (barBase->HotbarSlotCount == 16 && barID != Bars.Cross.LastKnownSetID) // Cross Hotbar set has changed
             {
+   
+
                 PluginLog.LogDebug($"Switched to Cross Hotbar Set {barID - 9}");
                 if (Config.RemapEx || Config.RemapW) OverrideMappings(barID);
                 Bars.Cross.LastKnownSetID = barID;

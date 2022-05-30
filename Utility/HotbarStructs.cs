@@ -22,7 +22,7 @@ public unsafe struct AddonActionBarBase
     [FieldOffset(0x23D)] public sbyte HotbarIDOther;
     [FieldOffset(0x23E)] public byte HotbarSlotCount;
     [FieldOffset(0x23F)] public int UnknownInt23F;
-    [FieldOffset(0x243)] public int Flags; // rightmost flag momentarily returns 1 when a hotbar slot is changed via drag-drop
+    [FieldOffset(0x243)] public int Flags;
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0xC8)]
