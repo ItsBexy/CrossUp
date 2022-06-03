@@ -5,14 +5,15 @@ using System.Numerics;
 namespace CrossUp;
 public sealed unsafe partial class CrossUp
 {
-    public class NodeRef
+    /// <summary>A wrapper that points to an AtkResNode*, alongside optional defaults for that node's properties, and chainable methods for editing the node</summary>
+    public class NodeWrapper
     {
         public Vector2 DefaultPos;
         public Vector2 DefaultSize;
         public AtkResNode* Node;
 
-        public static implicit operator AtkResNode*(NodeRef nr) => nr.Node;
-        public static implicit operator NodeRef(AtkResNode* n) => new() { Node = n };
+        public static implicit operator AtkResNode*(NodeWrapper nr) => nr.Node;
+        public static implicit operator NodeWrapper(AtkResNode* n) => new() { Node = n };
         public struct PropertySet
         {
             public bool? Visible { get; init; }
@@ -27,47 +28,47 @@ public sealed unsafe partial class CrossUp
             public Vector3? Color { get; init; }
         }
         public int ChildCount() => Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
-        public NodeRef SetVis(bool show)
+        public NodeWrapper SetVis(bool show)
         {
             if (show) Node->Flags |= 0x10;
             else Node->Flags &= ~0x10;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef ChildVis(bool show)
+        public NodeWrapper ChildVis(bool show)
         {
             var count = (int)Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
             for (var i = 0; i < count; i++) ChildNode(i).SetVis(show);
             return this;
         }
-        public NodeRef SetScale(float scale = 1f)
+        public NodeWrapper SetScale(float scale = 1f)
         {
             Node->ScaleX = scale;
             Node->ScaleY = scale;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetSize(Vector2? size)
+        public NodeWrapper SetSize(Vector2? size)
         {
             size ??= DefaultSize;
             return SetSize((Vector2)size);
         }
-        public NodeRef SetSize(Vector2 size) => SetSize((ushort)size.X, (ushort)size.Y);
-        public NodeRef SetSize(ushort? w, ushort? h)
+        public NodeWrapper SetSize(Vector2 size) => SetSize((ushort)size.X, (ushort)size.Y);
+        public NodeWrapper SetSize(ushort? w, ushort? h)
         {
             w ??= (ushort)DefaultSize.X;
             h ??= (ushort)DefaultSize.Y;
             return SetSize((ushort)w, (ushort)h);
         }
-        public NodeRef SetSize(ushort w, ushort h)
+        public NodeWrapper SetSize(ushort w, ushort h)
         {
             Node->Width = w;
             Node->Height = h;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetSize() => SetSize(DefaultSize);
-        public NodeRef SetColor(Vector3 color)
+        public NodeWrapper SetSize() => SetSize(DefaultSize);
+        public NodeWrapper SetColor(Vector3 color)
         {
             Node->Color.R = (byte)(color.X * 255f);
             Node->Color.G = (byte)(color.Y * 255f);
@@ -75,13 +76,13 @@ public sealed unsafe partial class CrossUp
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetAlpha(byte a)
+        public NodeWrapper SetAlpha(byte a)
         {
             Node->Color.A = a;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetProps(PropertySet props)
+        public NodeWrapper SetProps(PropertySet props)
         {
             if (props.X != null) Node->X = (float)props.X;
             if (props.Y != null) Node->Y = (float)props.Y;
@@ -103,46 +104,46 @@ public sealed unsafe partial class CrossUp
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetOrigin(float x, float y)
+        public NodeWrapper SetOrigin(float x, float y)
         {
             Node->OriginX = x;
             Node->OriginY = y;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetPos(Vector2 pos)
+        public NodeWrapper SetPos(Vector2 pos)
         {
             Node->X = pos.X;
             Node->Y = pos.Y;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetPos(Vector2? pos)
+        public NodeWrapper SetPos(Vector2? pos)
         {
             pos ??= DefaultSize;
             return SetPos((Vector2)pos);
         }
-        public NodeRef SetPos(float x, float y)
+        public NodeWrapper SetPos(float x, float y)
         {
             Node->X = x;
             Node->Y = y;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef SetRelativePos(float x = 0f, float y = 0f)
+        public NodeWrapper SetRelativePos(float x = 0f, float y = 0f)
         {
             Node->X = DefaultPos.X + x;
             Node->Y = DefaultPos.Y + y;
             Node->Flags_2 |= 0xD;
             return this;
         }
-        public NodeRef ChildNode(params int[] path)
+        public NodeWrapper ChildNode(params int[] path)
         {
             var node = Node;
             foreach (var i in path) node = node->GetAsAtkComponentNode()->Component->UldManager.NodeList[i];
             return node;
         }
-        public NodeRef SetTextColor(Vector3 color,Vector3 glow)
+        public NodeWrapper SetTextColor(Vector3 color,Vector3 glow)
         {
             var tnode = Node->GetAsAtkTextNode();
             tnode->EdgeColor.R = (byte)(color.X * 255f);

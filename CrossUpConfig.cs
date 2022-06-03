@@ -33,6 +33,8 @@ public class Configuration : IPluginConfiguration
     public Vector3 GlowA { get; set; } = new(1, 1, 1);
     public Vector3 GlowB { get; set; } = new(1, 1, 1);
     public bool OnlyOneEx { get; set; }
+    public short? DisposeBaseX { get; set; }
+    public float? DisposeRootX { get; set; }
 
     [NonSerialized]
     private DalamudPluginInterface? PluginInterface;

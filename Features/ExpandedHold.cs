@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 
@@ -9,7 +8,7 @@ public sealed unsafe partial class CrossUp
 {
     // SEPARATE EXPANDED HOLD CONTROLS
 
-    // turn on the feature
+    /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
     public void EnableEx()
     {
         Bars.LR.BorrowID = Config.borrowBarL;
@@ -24,26 +23,26 @@ public sealed unsafe partial class CrossUp
         PluginLog.LogDebug($"Borrowing {Bars.RL.BorrowBar.Name} to serve as R->L Expanded Hold Bar");
 
         UpdateBarState(true);
-        Task.Delay(20).ContinueWith(delegate { if (Status.Initialized) UpdateBarState(true); });
+        Task.Delay(20).ContinueWith(delegate { if (Initialized) UpdateBarState(true); });
     }
 
-    // turn on each specific bar
-    private static void PrepBorrowedBar(int id)
+    /// <summary>Turn on each borrowed bar</summary>
+    private static void PrepBorrowedBar(int barID)
     {
-        if (Bars.ActionBars[id].Base == null || Bars.ActionBars[id].NodeCount == 0) return;
-        var job = CharConfig.Hotbar.Shared[id] ? 0 : GetPlayerJob();
-        Bars.StoredActions[id] = GetSavedBar(job, id);
+        if (Bars.ActionBars[barID].Base == null || Bars.ActionBars[barID].NodeCount == 0) return;
 
-        if (!CharConfig.Hotbar.Visible[id])
+        Actions.Store(barID);
+
+        if (!CharConfig.Hotbar.Visible[barID])
         {
-            Bars.WasHidden[id] = true;
-            CharConfig.Hotbar.Visible[id].Set(1);
+            Bars.WasHidden[barID] = true;
+            CharConfig.Hotbar.Visible[barID].Set(1);
         }
 
-        for (var i = 0; i < 12; i++) Bars.ActionBars[id].Button[i].Node->Flags_2 |= 0xD;
+        for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Button[i].Node->Flags_2 |= 0xD;
     }
 
-    // disable the feature (does not set Config.SepExBar to false; that should be happening before/as this is called)
+    /// <summary>Disable the Separate Expanded Hold Bars feature (does not set Config.SepExBar to false; that should be happening before/as this is called)</summary>
     public void DisableEx()
     {
         ArrangeCrossBar(0, 0, true, false);
@@ -52,50 +51,51 @@ public sealed unsafe partial class CrossUp
         for (var barID = 1; barID <= 9; barID++) Bars.StoredActions[barID] = null;
     }
 
-    // arrange the borrowed hotbars representing the EXHB
+    /// <summary>Arrange the borrowed hotbars representing the EXHB</summary>
     private void ArrangeExBars(int select, int prevSelect, float scale, int anchorX, int anchorY, bool forceArrange = false)
     {
         if (!Bars.Cross.Exist) return;
 
         if (Bars.LR.BorrowBar.Base == null || Bars.RL.BorrowBar.Base == null) return;
 
+        var exAlpha = (byte)((100 - (int)(select == 0 ? CharConfig.Transparency.Active : CharConfig.Transparency.Inactive)) * 2.55);
+        bool mixBar = CharConfig.MixBar;
+        var lX = Config.lX;
+        var lY = Config.lY;
+        var rX = !Config.OnlyOneEx ? Config.rX : Config.lX;
+        var rY = !Config.OnlyOneEx ? Config.rY : Config.lY;
+        var split = Config.Split;
+
         foreach (var button in Bars.LR.BorrowBar.Button)
         {
             button.ChildNode(0).SetVis(true);
             button.ChildNode(1).SetVis(false);
+            button.SetAlpha(exAlpha);
         }
 
         foreach (var button in Bars.RL.BorrowBar.Button)
         {
             button.ChildNode(0).SetVis(true);
             button.ChildNode(1).SetVis(false);
+            button.SetAlpha(exAlpha);
         }
-
-        bool mixBar = CharConfig.MixBar ;
-
-        var lX = Config.lX;
-        var lY = Config.lY;
-        var rX = !Config.OnlyOneEx ? Config.rX : Config.lX;
-        var rY = !Config.OnlyOneEx ? Config.rY : Config.lY;
 
         Bars.LR.BorrowBar.Root.SetScale(scale)
                               .SetVis(true)
                               .SetSize(295, 120)
-                              .SetPos(anchorX + (lX + Config.Split) * scale, anchorY + lY * scale);
+                              .SetPos(anchorX + (lX + split) * scale, anchorY + lY * scale);
 
         Bars.RL.BorrowBar.Root.SetScale(scale)
                               .SetVis(true)
                               .SetSize(295, 120)
-                              .SetPos(anchorX + (rX + Config.Split) * scale, anchorY + rY * scale);
+                              .SetPos(anchorX + (rX + split) * scale, anchorY + rY * scale);
 
         Bars.LR.BorrowBar.BarNumText.SetScale(0F);
         Bars.RL.BorrowBar.BarNumText.SetScale(0F);
 
-        var inactiveAlpha = TransToAlpha(CharConfig.Transparency.Inactive);
-        var standardAlpha = TransToAlpha(CharConfig.Transparency.Active);
-        SetExAlpha(select == 0 ? standardAlpha : inactiveAlpha);
-
         for (var i = 0; i < 8; i++) MetaSlots.RL[i].Visible = !Config.OnlyOneEx;
+
+        Bars.Cross.UpdateActions();
 
         switch (select)
         {
@@ -103,109 +103,93 @@ public sealed unsafe partial class CrossUp
             case 5: // LEFT WXHB
             case 6: // RIGHT WXHB
                 {
-                    CopyButtons(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
-                    CopyButtons(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
+                    Actions.Copy(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
+                    Actions.Copy(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
 
                     if (forceArrange || select != prevSelect)
                     {
                         for (var i = 0; i < 4; i++)
                         {
-                            PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.LR[i], 0, 0, select);  //left EXHB
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 4], MetaSlots.LR[i + 4], 0, 0, select);
+                            MetaSlots.LR[i].Insert(Bars.LR.BorrowBar.Button[i]);  //left EXHB
+                            MetaSlots.LR[i + 4].Insert(Bars.LR.BorrowBar.Button[i + 4]);
 
-                            PlaceButton(Bars.RL.BorrowBar.Button[i], MetaSlots.RL[i], 0, 0, select); // right EXHB
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 4], MetaSlots.RL[i + 4], 0, 0, select);
+                            MetaSlots.RL[i].Insert(Bars.RL.BorrowBar.Button[i]); // right EXHB
+                            MetaSlots.RL[i + 4].Insert(Bars.RL.BorrowBar.Button[i + 4]);
 
-                            MetaSlots.Cross.LeftL[i].Visible = false; // hide metaSlots for XHB
-                            MetaSlots.Cross.LeftR[i].Visible = false;
-                            MetaSlots.Cross.RightL[i].Visible = false;
-                            MetaSlots.Cross.RightR[i].Visible = false;
+                            MetaSlots.Left.GroupL[i].SetVis(false); // hide metaSlots for XHB
+                            MetaSlots.Left.GroupR[i].SetVis(false);
+                            MetaSlots.Right.GroupL[i].SetVis(false);
+                            MetaSlots.Right.GroupR[i].SetVis(false);
 
-                            Bars.LR.BorrowBar.Button[i + 8].SetVis(false); // hide unneeded borrowed buttons
-                            Bars.RL.BorrowBar.Button[i + 8].SetVis(false);
+                            Bars.LR.BorrowBar.Button[i + 8].SetVis(false).SetScale(0.85F); // hide unneeded borrowed buttons
+                            Bars.RL.BorrowBar.Button[i + 8].SetVis(false).SetScale(0.85F);
                         }
                     }
                     break;
                 }
             case 1: // LEFT BAR
                 {
-                    CopyButtons(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
-                    CopyButtons(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
+                    Actions.Copy(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
+                    Actions.Copy(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
 
-                    var crossActions = Bars.Cross.Actions;
-                    CopyButtons(crossActions, 8, Bars.LR.BorrowID, 8, 4);
-                    CopyButtons(crossActions, 12, Bars.RL.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 8, Bars.LR.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 12, Bars.RL.BorrowID, 8, 4);
 
                     if (forceArrange || select != prevSelect)
                     {
                         for (var i = 0; i < 4; i++)
                         {
-                            MetaSlots.Cross.LeftL[i].Visible = false;
-                            MetaSlots.Cross.LeftR[i].Visible = prevSelect == 3 && mixBar;
-                            MetaSlots.Cross.RightL[i].Visible = prevSelect == 3 && !mixBar;
-                            MetaSlots.Cross.RightR[i].Visible = prevSelect == 3;
+                            MetaSlots.Left.GroupL[i].SetVis(false).SetScale(1.1F);
+                            MetaSlots.Left.GroupR[i].SetVis(prevSelect == 3 && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
+                            MetaSlots.Right.GroupL[i].SetVis(prevSelect == 3 && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
+                            MetaSlots.Right.GroupR[i].SetVis(prevSelect == 3).SetScale(0.85F).Insert(Bars.RL.BorrowBar.Button[i + 8], -rX + split, -rY,0.85F);
 
-                            MetaSlots.Cross.LeftL[i].Scale = MetaSlots.ScaleMap[1, 0];
-                            MetaSlots.Cross.LeftR[i].Scale = MetaSlots.ScaleMap[1, mixBar ? 1 : 0];
-                            MetaSlots.Cross.RightL[i].Scale = MetaSlots.ScaleMap[1, mixBar ? 0 : 1];
-                            MetaSlots.Cross.RightR[i].Scale = MetaSlots.ScaleMap[1, 1];
+                            MetaSlots.LR[i].Insert(Bars.LR.BorrowBar.Button[i],  0, 0,0.85F);
+                            MetaSlots.LR[i + 4].Insert(Bars.LR.BorrowBar.Button[i + 4], 0, 0, 0.85F);
 
-                            PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.LR[i], 0, 0, select);  //left EXHB
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 4], MetaSlots.LR[i + 4], 0, 0, select);
+                            MetaSlots.RL[i].Insert(Bars.RL.BorrowBar.Button[i],  0, 0, 0.85F);
+                            MetaSlots.RL[i + 4].Insert(Bars.RL.BorrowBar.Button[i + 4],  0, 0, 0.85F);
 
-                            PlaceButton(Bars.RL.BorrowBar.Button[i], MetaSlots.RL[i], 0, 0, select); // right EXHB
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 4], MetaSlots.RL[i + 4], 0, 0, select);
-
-                            if (!mixBar) PlaceButton(Bars.LR.BorrowBar.Button[i + 8], MetaSlots.Cross.RightL[i], -lX + Config.Split, -lY, select); //right XHB (left buttons)
-                            else PlaceButton(Bars.LR.BorrowBar.Button[i + 8], MetaSlots.Cross.LeftR[i], -lX - Config.Split, -lY, select);
-
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 8], MetaSlots.Cross.RightR[i], -rX + Config.Split, -rY, select);              //right XHB (right buttons)
+                            (!mixBar ? MetaSlots.Right.GroupL[i]:
+                                       MetaSlots.Left.GroupR[i]).Insert(Bars.LR.BorrowBar.Button[i + 8], (!mixBar ? split : -split) - lX, -lY, 0.85F);
                         }
                     }
                     break;
                 }
             case 2: // RIGHT BAR
                 {
-                    CopyButtons(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
-                    CopyButtons(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
+                    Actions.Copy(Bars.LR.Actions, 0, Bars.LR.BorrowID, 0, 8);
+                    Actions.Copy(Bars.RL.Actions, 0, Bars.RL.BorrowID, 0, 8);
 
-                    var crossActions = Bars.Cross.Actions;
-                    CopyButtons(crossActions, 0, Bars.LR.BorrowID, 8, 4);
-                    CopyButtons(crossActions, 4, Bars.RL.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 0, Bars.LR.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 4, Bars.RL.BorrowID, 8, 4);
 
                     if (forceArrange || select != prevSelect)
                     {
                         for (var i = 0; i < 4; i++)
                         {
-                            MetaSlots.Cross.LeftL[i].Visible = prevSelect == 4;
-                            MetaSlots.Cross.LeftR[i].Visible = prevSelect == 4 && !mixBar;
-                            MetaSlots.Cross.RightL[i].Visible = prevSelect == 4 && mixBar;
-                            MetaSlots.Cross.RightR[i].Visible = false;
+                            MetaSlots.Left.GroupL[i].SetVis(prevSelect == 4).SetScale(0.85F).Insert(Bars.LR.BorrowBar.Button[i + 8], -lX - split, -lY,0.85F);
+                            MetaSlots.Left.GroupR[i].SetVis(prevSelect == 4 && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
+                            MetaSlots.Right.GroupL[i].SetVis(prevSelect == 4 && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
+                            MetaSlots.Right.GroupR[i].SetVis(false).SetScale(1.1F);
 
-                            MetaSlots.Cross.LeftL[i].Scale = MetaSlots.ScaleMap[2, 0];
-                            MetaSlots.Cross.LeftR[i].Scale = MetaSlots.ScaleMap[2, mixBar ? 1 : 0];
-                            MetaSlots.Cross.RightL[i].Scale = MetaSlots.ScaleMap[2, mixBar ? 0 : 1];
-                            MetaSlots.Cross.RightR[i].Scale = MetaSlots.ScaleMap[2, 1];
+                            MetaSlots.LR[i].Insert(Bars.LR.BorrowBar.Button[i],  0, 0, 0.85F);
+                            MetaSlots.LR[i + 4].Insert(Bars.LR.BorrowBar.Button[i + 4],  0, 0, 0.85F);
 
-                            PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.LR[i], 0, 0, select); // left EXHB
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 4], MetaSlots.LR[i + 4], 0, 0, select);
+                            MetaSlots.RL[i].Insert(Bars.RL.BorrowBar.Button[i], 0, 0, 0.85F);
+                            MetaSlots.RL[i + 4].Insert(Bars.RL.BorrowBar.Button[i + 4],  0, 0, 0.85F);
 
-                            PlaceButton(Bars.RL.BorrowBar.Button[i], MetaSlots.RL[i], 0, 0, select); // right EXHB
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 4], MetaSlots.RL[i + 4], 0, 0, select);
-
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 8], MetaSlots.Cross.LeftL[i], -lX - Config.Split, -lY, select);              // left XHB (left buttons)
-
-                            if (!mixBar) PlaceButton(Bars.RL.BorrowBar.Button[i + 8], MetaSlots.Cross.LeftR[i], -rX - Config.Split, -rY, select); // left XHB (right buttons)
-                            else PlaceButton(Bars.RL.BorrowBar.Button[i + 8], MetaSlots.Cross.RightL[i], -rX + Config.Split, -rY, select);
+                           (!mixBar ? MetaSlots.Left.GroupR[i] : 
+                                      MetaSlots.Right.GroupL[i]).Insert(Bars.RL.BorrowBar.Button[i + 8], (!mixBar ? -split : split) - rX, -rY, 0.85F);
+ 
                         }
                     }
                     break;
                 }
             case 3: // L->R BAR
                 {
-                    var crossActions = Bars.Cross.Actions;
-                    CopyButtons(crossActions, 0, Bars.LR.BorrowID, 0, 12);
-                    CopyButtons(crossActions, 12, Bars.RL.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 0, Bars.LR.BorrowID, 0, 12);
+                    Actions.Copy(Bars.Cross.Actions, 12, Bars.RL.BorrowID, 8, 4);
 
                     if (forceArrange || select != prevSelect)
                     {
@@ -214,55 +198,43 @@ public sealed unsafe partial class CrossUp
                             MetaSlots.LR[i].Scale = 1.1F;
                             MetaSlots.LR[i + 4].Scale = 1.1F;
 
-                            MetaSlots.Cross.LeftL[i].Visible = true;
-                            MetaSlots.Cross.LeftR[i].Visible = true;
-                            MetaSlots.Cross.RightL[i].Visible = true;
-                            MetaSlots.Cross.RightR[i].Visible = true;
+                            MetaSlots.Left.GroupL[i].SetVis(true).Insert(Bars.LR.BorrowBar.Button[i], -lX - split, -lY,0.85F);
+                            MetaSlots.Left.GroupR[i].SetVis(true).Insert(Bars.LR.BorrowBar.Button[i + (!mixBar ? 4 : 8)], -lX - split, -lY, 0.85F);
+                            MetaSlots.Right.GroupL[i].SetVis(true).Insert(Bars.LR.BorrowBar.Button[i + (!mixBar ? 8 : 4)], -lX + split, -lY, 0.85F);
+                            MetaSlots.Right.GroupR[i].SetVis(true).Insert(Bars.RL.BorrowBar.Button[i + 8], -rX + split, -rY, 0.85F);
 
-                            PlaceButton(Bars.RL.BorrowBar.Button[i], MetaSlots.RL[i], 0, 0, select); // right EXHB
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 4], MetaSlots.RL[i + 4], 0, 0, select);
-
-                            PlaceButton(Bars.LR.BorrowBar.Button[i], MetaSlots.Cross.LeftL[i], -lX - Config.Split, -lY, select); // inactive XHB
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + (!mixBar ? 4 : 8)], MetaSlots.Cross.LeftR[i], -lX - Config.Split, -lY, select);
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + (!mixBar ? 8 : 4)], MetaSlots.Cross.RightL[i], -lX + Config.Split, -lY, select);
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 8], MetaSlots.Cross.RightR[i], -rX + Config.Split, -rY, select);
+                            MetaSlots.RL[i].Insert(Bars.RL.BorrowBar.Button[i],  0, 0, 0.85F);
+                            MetaSlots.RL[i + 4].Insert(Bars.RL.BorrowBar.Button[i + 4],  0, 0, 0.85F);
                         }
                     }
                     break;
                 }
             case 4: // R->L BAR
                 {
-                    var crossActions = Bars.Cross.Actions;
-                    CopyButtons(crossActions, 0, Bars.LR.BorrowID, 8, 4);
-                    CopyButtons(crossActions, 4, Bars.RL.BorrowID, 8, 4);
-                    CopyButtons(crossActions, 8, Bars.RL.BorrowID, 0, 8);
+                    Actions.Copy(Bars.Cross.Actions, 0, Bars.LR.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 4, Bars.RL.BorrowID, 8, 4);
+                    Actions.Copy(Bars.Cross.Actions, 8, Bars.RL.BorrowID, 0, 8);
 
                     if (forceArrange || select != prevSelect)
                     {
                         for (var i = 0; i < 4; i++)
                         {
-
-                            MetaSlots.RL[i].Scale = 1.1F;
-                            MetaSlots.RL[i + 4].Scale = 1.1F;
+                            MetaSlots.RL[i].SetScale(1.1F);
+                            MetaSlots.RL[i + 4].SetScale(1.1F);
 
                             if (Config.OnlyOneEx)
                             {
-                                MetaSlots.LR[i].Scale = 1.1F;
-                                MetaSlots.LR[i + 4].Scale = 1.1F;
+                                MetaSlots.LR[i].SetScale(1.1F);
+                                MetaSlots.LR[i + 4].SetScale(1.1F);
                             }
 
-                            MetaSlots.Cross.LeftL[i].Visible = true;
-                            MetaSlots.Cross.LeftR[i].Visible = true;
-                            MetaSlots.Cross.RightL[i].Visible = true;
-                            MetaSlots.Cross.RightR[i].Visible = true;
+                            MetaSlots.Left.GroupL[i].SetVis(true).Insert(Bars.LR.BorrowBar.Button[i + 8], -lX - split, -lY, 0.85F);
+                            MetaSlots.Left.GroupR[i].SetVis(true).Insert(Bars.RL.BorrowBar.Button[i + (!mixBar ? 8 : 0)], -rX - split, -rY, 0.85F);
+                            MetaSlots.Right.GroupL[i].SetVis(true).Insert(Bars.RL.BorrowBar.Button[i + (!mixBar ? 0 : 8)], -rX + split, -rY, 0.85F);
+                            MetaSlots.Right.GroupR[i].SetVis(true).Insert(Bars.RL.BorrowBar.Button[i + 4], -rX + split, -rY, 0.85F);
 
-                            PlaceButton(Bars.LR.BorrowBar.Button[i], !Config.OnlyOneEx ? MetaSlots.LR[i] : MetaSlots.RL[i], 0, 0, select); // left EXHB
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 4], !Config.OnlyOneEx ? MetaSlots.LR[i + 4] : MetaSlots.RL[i + 4], 0, 0, select);
-
-                            PlaceButton(Bars.LR.BorrowBar.Button[i + 8], MetaSlots.Cross.LeftL[i], -lX - Config.Split, -lY, select); // inactive XHB
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + (!mixBar ? 8 : 0)], MetaSlots.Cross.LeftR[i], -rX - Config.Split, -rY, select);
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + (!mixBar ? 0 : 8)], MetaSlots.Cross.RightL[i], -rX + Config.Split, -rY, select);
-                            PlaceButton(Bars.RL.BorrowBar.Button[i + 4], MetaSlots.Cross.RightR[i], -rX + Config.Split, -rY, select);
+                            (!Config.OnlyOneEx ? MetaSlots.LR[i] : MetaSlots.RL[i]).Insert(Bars.LR.BorrowBar.Button[i],  0, 0, 0.85F);
+                            (!Config.OnlyOneEx ? MetaSlots.LR[i + 4] : MetaSlots.RL[i + 4]).Insert(Bars.LR.BorrowBar.Button[i + 4],  0, 0, 0.85F);
                         }
                     }
                     break;
@@ -270,53 +242,9 @@ public sealed unsafe partial class CrossUp
         }
     }
 
-    // move a borrowed button into position and set its scale to animate if needed
-    private static void PlaceButton(NodeRef nodeRef, MetaSlots.MetaSlot mSlot, float xMod = 0, float yMod = 0, int select = 0)
-    {
-        var to = MetaSlots.ScaleMap[select, mSlot.ScaleIndex];
-        mSlot.Xmod = xMod;
-        mSlot.Ymod = yMod;
-        mSlot.NodeRef = nodeRef;
-
-        if (Math.Abs(to - mSlot.Scale) > 0.01f) //only make a new tween if the button isn't already at the target scale, otherwise just set
-        {
-            if (mSlot.Tween == null || Math.Abs(mSlot.Tween.ToScale - to) > 0.01f) //only make a new tween if the button doesn't already have one with the same target scale
-            {
-                mSlot.Tween = new()
-                {
-                    FromScale = mSlot.Scale,
-                    ToScale = to,
-                    Start = DateTime.Now,
-                    Duration = new(0, 0, 0, 0, 40)
-                };
-                MetaSlots.TweensExist = true;
-                return;
-            }
-        }
-        else
-        {
-            mSlot.Tween = null;
-            mSlot.Scale = to;
-        }
-
-        nodeRef.SetProps(mSlot);
-    }
-
-    // convert in-game "transparency" slider to an actual alpha value
-    private static byte TransToAlpha(int t) => (byte)((100 - t) * 2.55);
-
-    // set alpha of borrowed buttons in accordance with in-game settings
-    private static void SetExAlpha(byte alpha)
-    {
-        for (var i = 0; i < 12; i++)
-        {
-            Bars.LR.BorrowBar.Button[i].SetAlpha(alpha);
-            Bars.RL.BorrowBar.Button[i].SetAlpha(alpha);
-        }
-    }
-
-    // MetaSlots = all the potential positions we might place a borrowed button, depending on which bar it's imitating
-
+    /// <summary>
+    /// MetaSlots are various positions that a "borrowed" bar's buttons can be placed in, to imitate elements of the Cross Hotbar.
+    /// </summary>
     public static class MetaSlots
     {
         public class MetaSlot
@@ -334,11 +262,54 @@ public sealed unsafe partial class CrossUp
                 public float FromScale { get; init; }
                 public float ToScale { get; init; }
             }
-            public ScaleTween? Tween { get; set; }
-            public int ScaleIndex { get; set; }
-            public NodeRef? NodeRef { get; set; }
-            public float Xmod { get; set; }
-            public float Ymod { get; set; }
+            private ScaleTween? Tween { get; set; }
+            private NodeWrapper? NodeRef { get; set; }
+            private float Xmod { get; set; }
+            private float Ymod { get; set; }
+            public MetaSlot SetVis(bool show)
+            {
+                Visible = show;
+                return this;
+            }
+            public MetaSlot SetScale(float scale)
+            {
+                Scale = scale;
+                return this;
+            }
+
+            /// <summary>Places a button node into a MetaSlot</summary>
+            public MetaSlot Insert(NodeWrapper nodeWrapper, float xMod = 0, float yMod = 0, float to = 1F)
+            {
+               // var to = ScaleMap[select, ScaleIndex];
+                Xmod = xMod;
+                Ymod = yMod;
+                NodeRef = nodeWrapper;
+
+                if (Math.Abs(to - Scale) > 0.01f) //only make a new tween if the button isn't already at the target scale, otherwise just set
+                {
+                    if (Tween == null || Math.Abs(Tween.ToScale - to) > 0.01f) //only make a new tween if the button doesn't already have one with the same target scale
+                    {
+                        Tween = new()
+                        {
+                            FromScale = Scale,
+                            ToScale = to,
+                            Start = DateTime.Now,
+                            Duration = new(0, 0, 0, 0, 40)
+                        };
+                        TweensExist = true;
+                        return this;
+                    }
+                }
+                else
+                {
+                    Tween = null;
+                    Scale = to;
+                }
+
+                NodeRef.SetProps(this);
+                return this;
+            }
+            /// <summary>Checks if this MetaSlot has an active animation tween, and if so, processes it</summary>
             public void RunTween()
             {
                 if (Tween == null || NodeRef == null || NodeRef.Node == null) return;
@@ -350,95 +321,81 @@ public sealed unsafe partial class CrossUp
                 var to = Tween.ToScale;
                 var from = Tween.FromScale;
 
-                if (progress >= 1)
-                {
-                    Scale = to;
-                    Tween = null;
-                }
-                else
-                {
-                    Scale = (to - from) * progress + from;
-                }
+                Tween = progress < 1 ? Tween : null;
+                Scale = progress < 1 ? (to - from) * progress + from : to;
 
                 NodeRef.SetProps(this);
             }
-            public static implicit operator NodeRef.PropertySet(MetaSlot p) => new() { X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX, OrigY = p.OrigY };
+            public static implicit operator NodeWrapper.PropertySet(MetaSlot p) => new() { X = p.X + p.Xmod, Y = p.Y + p.Ymod, Scale = p.Scale, Visible = p.Visible, OrigX = p.OrigX, OrigY = p.OrigY };
         }
-
-        public static readonly MetaSlot[] LR =
-        {
-            new() { X = 0, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 2 },
-            new() { X = 42, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 2 },
-            new() { X = 84, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 2 },
-            new() { X = 42, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 2 },
-
-            new() { X = 138, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 2 },
-            new() { X = 180, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 2 },
-            new() { X = 222, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 2 },
-            new() { X = 180, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 2 }
-        };
-        public static readonly MetaSlot[] RL =
-        {
-            new() { X = 0, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 3 },
-            new() { X = 42, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 3 },
-            new() { X = 84, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 3 },
-            new() { X = 42, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 3 },
-
-            new() { X = 138, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 3 },
-            new() { X = 180, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 3 },
-            new() { X = 222, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 3 },
-            new() { X = 180, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 3 }
-        };
-        public class Cross
-        {
-            public static readonly MetaSlot[] LeftL = {
-                new() { X = -142, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 0 },
-                new() { X = -100, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 0 },
-                new() { X = -58, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 0 },
-                new() { X = -100, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 0 }
-            };
-            public static readonly MetaSlot[] LeftR = {
-                new() { X = -9, Y = 24, OrigX = 94+1/0.85F, OrigY = 39, ScaleIndex = 0 },
-                new() { X = 33, Y = 0, OrigX = 52+1/0.85F, OrigY = 63, ScaleIndex = 0 },
-                new() { X = 75, Y = 24, OrigX = 10+1/0.85F, OrigY = 39, ScaleIndex = 0 },
-                new() { X = 33, Y = 48, OrigX = 52+1/0.85F, OrigY = 15, ScaleIndex = 0 }
-            };
-            public static readonly MetaSlot[] RightL = {
-                new() { X = 142, Y = 24, OrigX = 94, OrigY = 39, ScaleIndex = 1 },
-                new() { X = 184, Y = 0, OrigX = 52, OrigY = 63, ScaleIndex = 1 },
-                new() { X = 226, Y = 24, OrigX = 10, OrigY = 39, ScaleIndex = 1 },
-                new() { X = 184, Y = 48, OrigX = 52, OrigY = 15, ScaleIndex = 1 }
-            };
-            public static readonly MetaSlot[] RightR = {
-                new() { X = 275, Y = 24, OrigX = 94+1/0.85F, OrigY = 39, ScaleIndex = 1 },
-                new() { X = 317, Y = 0, OrigX = 52+1/0.85F, OrigY = 63, ScaleIndex = 1 },
-                new() { X = 359, Y = 24, OrigX = 10+1/0.85F, OrigY = 39, ScaleIndex = 1 },
-                new() { X = 317, Y = 48, OrigX = 52+1/0.85F, OrigY = 15, ScaleIndex = 1 }
-            };
-        }
-        public static bool TweensExist { get; set; }
+        /// <summary>Whether or not there are currently any animation tweens to run</summary>
+        public static bool TweensExist { get; private set; }
+        /// <summary>Run all animations tweens for all MetaSlots</summary>
         public static void TweenAll()
         {
             TweensExist = false;
-
             foreach (var mSlot in LR) mSlot.RunTween();
             foreach (var mSlot in RL) mSlot.RunTween();
-            foreach (var mSlot in Cross.LeftL) mSlot.RunTween();
-            foreach (var mSlot in Cross.LeftR) mSlot.RunTween();
-            foreach (var mSlot in Cross.RightL) mSlot.RunTween();
-            foreach (var mSlot in Cross.RightR) mSlot.RunTween();
+            foreach (var mSlot in Left.GroupL) mSlot.RunTween();
+            foreach (var mSlot in Left.GroupR) mSlot.RunTween();
+            foreach (var mSlot in Right.GroupL) mSlot.RunTween();
+            foreach (var mSlot in Right.GroupR) mSlot.RunTween();
         }
-
-        // correct scales for specific metaSlots in specific cross bar selections
-        public static readonly float[,] ScaleMap =
+        public static readonly MetaSlot[] LR =
         {
-            { 1F, 1F, 1F, 1F }, //0: none selected
-            { 1.1F, 0.85F, 0.85F, 0.85F }, //1: left selected
-            { 0.85F, 1.1F, 0.85F, 0.85F }, //2: right selected
-            { 0.85F, 0.85F, 1.1F, 0.85F }, //3: LR selected
-            { 0.85F, 0.85F, 0.85F, 1.1F }, //4: RL selected
-            { 0.85F, 0.85F, 0.85F, 0.85F }, //5: WXHB L selected
-            { 0.85F, 0.85F, 0.85F, 0.85F } //6: WXHB R selected
+            new() { X = 0, Y = 24, OrigX = 102, OrigY = 39},
+            new() { X = 42, Y = 0, OrigX = 60, OrigY = 63},
+            new() { X = 84, Y = 24, OrigX = 18, OrigY = 39},
+            new() { X = 42, Y = 48, OrigX = 60, OrigY = 15},
+
+            new() { X = 138, Y = 24, OrigX = 54, OrigY = 39},
+            new() { X = 180, Y = 0, OrigX = 12, OrigY = 63},
+            new() { X = 222, Y = 24, OrigX = -30, OrigY = 39},
+            new() { X = 180, Y = 48, OrigX = 12, OrigY = 15}
         };
+        public static readonly MetaSlot[] RL =
+        {
+            new() { X = 0, Y = 24, OrigX = 102, OrigY = 39},
+            new() { X = 42, Y = 0, OrigX = 60, OrigY = 63},
+            new() { X = 84, Y = 24, OrigX = 18, OrigY = 39},
+            new() { X = 42, Y = 48, OrigX = 60, OrigY = 15},
+
+            new() { X = 138, Y = 24, OrigX = 54, OrigY = 39},
+            new() { X = 180, Y = 0, OrigX = 12, OrigY = 63},
+            new() { X = 222, Y = 24, OrigX = -30, OrigY = 39},
+            new() { X = 180, Y = 48, OrigX = 12, OrigY = 15}
+        };
+        public static class Left
+        {
+            public static readonly MetaSlot[] GroupL = {
+                new() { X = -142, Y = 24, OrigX = 94, OrigY = 39},
+                new() { X = -100, Y = 0, OrigX = 52, OrigY = 63},
+                new() { X = -58, Y = 24, OrigX = 10, OrigY = 39},
+                new() { X = -100, Y = 48, OrigX = 52, OrigY = 15}
+            };
+
+            public static readonly MetaSlot[] GroupR = {
+                new() { X = -4, Y = 24, OrigX = 62, OrigY = 39},
+                new() { X = 38, Y = 0, OrigX = 20, OrigY = 63},
+                new() { X = 80, Y = 24, OrigX = -22, OrigY = 39},
+                new() { X = 38, Y = 48, OrigX = 20, OrigY = 15}
+            };
+        }
+        public static class Right
+        {
+            public static readonly MetaSlot[] GroupL = {
+                new() { X = 142, Y = 24, OrigX = 94, OrigY = 39},
+                new() { X = 184, Y = 0, OrigX = 52, OrigY = 63},
+                new() { X = 226, Y = 24, OrigX = 10, OrigY = 39},
+                new() { X = 184, Y = 48, OrigX = 52, OrigY = 15}
+            };
+
+            public static readonly MetaSlot[] GroupR = {
+                new() { X = 280, Y = 24, OrigX = 62, OrigY = 39},
+                new() { X = 322, Y = 0, OrigX = 20, OrigY = 63},
+                new() { X = 364, Y = 24, OrigX = -22, OrigY = 39},
+                new() { X = 322, Y = 48, OrigX = 20, OrigY = 15}
+            };
+        }
     }
 }

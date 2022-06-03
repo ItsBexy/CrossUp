@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
@@ -7,7 +6,14 @@ namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
-    // arrange all elements of the main Cross Hotbar based on current selection state
+    /// <summary>Checks/updates the Cross Hotbar selection and calls the main arrangement function</summary>
+    public void UpdateBarState(bool forceArrange = false, bool hudFixCheck = false)
+    {
+        ArrangeCrossBar(Bars.Cross.Selection, Bars.Cross.LastKnownSelection, forceArrange, hudFixCheck);
+        Bars.Cross.LastKnownSelection = Bars.Cross.Selection;
+    }
+
+    /// <summary>Arranges all elements of the Cross Hotbar based on current selection state</summary>
     private void ArrangeCrossBar(int select, int prevSelect = 0, bool forceArrange = false, bool hudFixCheck = true, bool resetAll = false)
     {
         //don't do anything if the cross hotbar isn't actually turned on
@@ -21,12 +27,6 @@ public sealed unsafe partial class CrossUp
 
         var scale = Bars.Cross.Root.Node->ScaleX;
         bool mixBar = CharConfig.MixBar;
-
-        for (var i = 0; i < 4; i++)
-        {
-            MetaSlots.Cross.LeftR[i].ScaleIndex = mixBar ? 1 : 0;
-            MetaSlots.Cross.RightL[i].ScaleIndex = mixBar ? 0 : 1;
-        }
 
         var split = resetAll ? 0 : Config.Split;
 
@@ -43,7 +43,7 @@ public sealed unsafe partial class CrossUp
         var anchorY = (int)(Bars.Cross.Root.Node->Y + 70 * scale);
 
         // arrange the EXHB if that feature is turned on and two borrowed bars are selected
-        var arrangeEx = Config.SepExBar && !resetAll && Config.borrowBarL > 0 && Config.borrowBarR > 0;
+        var arrangeEx = ExBarsOk && !resetAll;
         if (arrangeEx) ArrangeExBars(select, prevSelect, scale, anchorX, anchorY, forceArrange);
 
         var lX = arrangeEx ? Config.lX : 0;
@@ -73,20 +73,20 @@ public sealed unsafe partial class CrossUp
                 Bars.Cross.LTtext.SetRelativePos();
                 Bars.Cross.RTtext.SetRelativePos(split * 2);
 
-                Bars.Cross.LeftL.ChildVis(true).SetRelativePos();
-                Bars.Cross.LeftR.ChildVis(true).SetRelativePos();
-                Bars.Cross.RightL.ChildVis(true).SetRelativePos(split * 2);
-                Bars.Cross.RightR.ChildVis(true).SetRelativePos(split * 2);
+                Bars.Cross.Left.GroupL.ChildVis(true).SetRelativePos();
+                Bars.Cross.Left.GroupR.ChildVis(true).SetRelativePos();
+                Bars.Cross.Right.GroupL.ChildVis(true).SetRelativePos(split * 2);
+                Bars.Cross.Right.GroupR.ChildVis(true).SetRelativePos(split * 2);
                 break;
             case 1: //LEFT BAR
                 Bars.Cross.Component.SetRelativePos();
                 Bars.Cross.LTtext.SetRelativePos();
                 Bars.Cross.RTtext.SetRelativePos(split * 2);
 
-                Bars.Cross.LeftL.ChildVis(true).SetRelativePos();
-                Bars.Cross.LeftR.ChildVis(!(prevSelect == 3 && arrangeEx && mixBar)).SetRelativePos();
-                Bars.Cross.RightL.ChildVis(!(prevSelect == 3 && arrangeEx && !mixBar)).SetRelativePos(split * 2);
-                Bars.Cross.RightR.ChildVis(!(prevSelect == 3 && arrangeEx)).SetRelativePos(split * 2);
+                Bars.Cross.Left.GroupL.ChildVis(true).SetRelativePos();
+                Bars.Cross.Left.GroupR.ChildVis(!(prevSelect == 3 && arrangeEx && mixBar)).SetRelativePos();
+                Bars.Cross.Right.GroupL.ChildVis(!(prevSelect == 3 && arrangeEx && !mixBar)).SetRelativePos(split * 2);
+                Bars.Cross.Right.GroupR.ChildVis(!(prevSelect == 3 && arrangeEx)).SetRelativePos(split * 2);
 
                 Bars.Cross.MiniSelectL.SetSize((ushort)(Config.selectHide || (mixBar && split > 0) ? 0 : 166), 140);
                 Bars.Cross.MiniSelectR.SetSize((ushort)(Config.selectHide || (mixBar && split > 0) ? 0 : 166), 140);
@@ -96,10 +96,10 @@ public sealed unsafe partial class CrossUp
                 Bars.Cross.LTtext.SetRelativePos(-split * 2);
                 Bars.Cross.RTtext.SetRelativePos();
 
-                Bars.Cross.LeftL.ChildVis(!(prevSelect == 4 && arrangeEx)).SetRelativePos(-split * 2);
-                Bars.Cross.LeftR.ChildVis(!(prevSelect == 4 && arrangeEx && !mixBar)).SetRelativePos(-split * 2);
-                Bars.Cross.RightL.ChildVis(!(prevSelect == 4 && arrangeEx && mixBar)).SetRelativePos();
-                Bars.Cross.RightR.ChildVis(true).SetRelativePos();
+                Bars.Cross.Left.GroupL.ChildVis(!(prevSelect == 4 && arrangeEx)).SetRelativePos(-split * 2);
+                Bars.Cross.Left.GroupR.ChildVis(!(prevSelect == 4 && arrangeEx && !mixBar)).SetRelativePos(-split * 2);
+                Bars.Cross.Right.GroupL.ChildVis(!(prevSelect == 4 && arrangeEx && mixBar)).SetRelativePos();
+                Bars.Cross.Right.GroupR.ChildVis(true).SetRelativePos();
 
                 Bars.Cross.MiniSelectL.SetSize((ushort)(Config.selectHide || (mixBar && split > 0) ? 0 : 166), 140);
                 Bars.Cross.MiniSelectR.SetSize((ushort)(Config.selectHide || (mixBar && split > 0) ? 0 : 166), 140);
@@ -109,25 +109,25 @@ public sealed unsafe partial class CrossUp
                 Bars.Cross.LTtext.SetRelativePos(-lX - split, -lY);
                 Bars.Cross.RTtext.SetRelativePos(-lX + split, -lY);
 
-                Bars.Cross.LeftL.ChildVis(false).SetRelativePos();
-                Bars.Cross.LeftR.ChildVis(true).SetRelativePos();
-                Bars.Cross.RightL.ChildVis(true).SetRelativePos();
-                Bars.Cross.RightR.ChildVis(false).SetRelativePos();
+                Bars.Cross.Left.GroupL.ChildVis(false).SetRelativePos();
+                Bars.Cross.Left.GroupR.ChildVis(true).SetRelativePos();
+                Bars.Cross.Right.GroupL.ChildVis(true).SetRelativePos();
+                Bars.Cross.Right.GroupR.ChildVis(false).SetRelativePos();
                 break;
             case 4: // R->L BAR
                 Bars.Cross.Component.SetRelativePos(rX + split, rY);
                 Bars.Cross.LTtext.SetRelativePos(-rX - split, -rY);
                 Bars.Cross.RTtext.SetRelativePos(-rX + split, -rY);
 
-                Bars.Cross.LeftL.ChildVis(false).SetRelativePos();
-                Bars.Cross.LeftR.ChildVis(true).SetRelativePos();
-                Bars.Cross.RightL.ChildVis(true).SetRelativePos();
-                Bars.Cross.RightR.ChildVis(false).SetRelativePos();
+                Bars.Cross.Left.GroupL.ChildVis(false).SetRelativePos();
+                Bars.Cross.Left.GroupR.ChildVis(true).SetRelativePos();
+                Bars.Cross.Right.GroupL.ChildVis(true).SetRelativePos();
+                Bars.Cross.Right.GroupR.ChildVis(false).SetRelativePos();
                 break;
         }
     }
 
-    // reset all the node properties we've messed with and restore actions to borrowed bars
+    /// <summary>Reset all the node properties we've messed with and reset any borrowed bars</summary>
     public static void ResetHud()
     {
         if (!Bars.Cross.Exist) return;
@@ -145,13 +145,12 @@ public sealed unsafe partial class CrossUp
         for (var barID = 1; barID <= 9; barID++)
         {
             // restore the bar's proper saved actions, including those affected by drag/drop
-            var job = CharConfig.Hotbar.Shared[barID] ? 0 : GetPlayerJob();
-            CopyButtons(GetSavedBar(job, barID), 0, barID, 0, 12);
+            Actions.Copy(Actions.GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : PlayerJob, barID), 0, barID, 0, 12);
             ResetBarPos(barID);
         }
     }
 
-    //put a borrowed hotbar back the way we found it based on HUD layout settings
+    /// <summary>Put a borrowed hotbar back the way we found it based on HUD layout settings</summary>
     private static void ResetBarPos(int barID)
     {
         var bar = Bars.ActionBars[barID];
@@ -173,29 +172,6 @@ public sealed unsafe partial class CrossUp
         }
 
         foreach (var button in bar.Button) button.ChildNode(1).SetVis(true);
-    }
-
-    //fix for misaligned frame around XHB when using the HUD Layout Interface
-    private static bool AdjustHudEditorNode()
-    {
-        var hudScreen = (AtkUnitBase*)Service.GameGui.GetAddonByName("_HudLayoutScreen", 1);
-        var root = Bars.Cross.Root.Node;
-        if (hudScreen == null || root == null) return false;
-
-        var scale = root->ScaleX;
-        var hudNodes = hudScreen->UldManager.NodeList;
-
-        for (var i = 0; i < hudScreen->UldManager.NodeListCount; i++)
-        {
-            if (!hudNodes[i]->IsVisible || Math.Abs(hudNodes[i]->Y - root->Y) > 1 ||
-                Math.Abs(hudNodes[i]->Width - root->Width * scale) > 1 ||
-                Math.Abs(hudNodes[i]->Height - root->Height * scale) > 1 ||
-                Math.Abs(hudNodes[i]->X - root->X) < 1) continue;
-            hudNodes[i]->X = root->X;
-            hudNodes[i]->Flags_2 |= 0xD;
-            return true;
-        }
-        return false;
     }
 }
 

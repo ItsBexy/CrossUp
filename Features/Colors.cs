@@ -4,7 +4,7 @@ namespace CrossUp;
 
 public sealed partial class CrossUp
 {
-    // apply selected highlight colour to all XHB and WXHB highlight ninegrids
+    /// <summary>Apply selected highlight colour to all XHB and WXHB highlight ninegrids</summary>
     public void SetSelectColor(bool reset = false)
     {
         if (!Bars.Cross.Exist) return;
@@ -25,7 +25,7 @@ public sealed partial class CrossUp
         Bars.WXRR.MiniSelect.SetColor(selectColor).SetSize(hide ? hideSize : miniSize);
     }
 
-    // set colors of pressed buttons
+    /// <summary>Set/Reset colors of pressed buttons</summary>
     public void SetPulseColor(bool reset = false)
     {
         if (!Bars.Cross.Exist) return;
@@ -35,15 +35,15 @@ public sealed partial class CrossUp
 
         for (var i = 0; i <= 3; i++)
         {
-            Bars.Cross.LeftL.ChildNode(i, 2, 10).SetColor(glowA);
-            Bars.Cross.LeftR.ChildNode(i, 2, 10).SetColor(glowA);
-            Bars.Cross.RightL.ChildNode(i, 2, 10).SetColor(glowA);
-            Bars.Cross.RightR.ChildNode(i, 2, 10).SetColor(glowA);
+            Bars.Cross.Left.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
+            Bars.Cross.Left.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
+            Bars.Cross.Right.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
+            Bars.Cross.Right.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
             
-            Bars.Cross.LeftL.ChildNode(i, 2, 14).SetColor(glowB);
-            Bars.Cross.LeftR.ChildNode(i, 2, 14).SetColor(glowB);
-            Bars.Cross.RightL.ChildNode(i, 2, 14).SetColor(glowB);
-            Bars.Cross.RightR.ChildNode(i, 2, 14).SetColor(glowB);
+            Bars.Cross.Left.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
+            Bars.Cross.Left.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
+            Bars.Cross.Right.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
+            Bars.Cross.Right.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
         }
 
         if ((!Config.SepExBar && !reset) || !Bars.LR.BorrowBar.Exist || !Bars.RL.BorrowBar.Exist) return;
@@ -60,7 +60,7 @@ public sealed partial class CrossUp
         }
     }
 
-    // reset all colours to #FFFFFF (called on dispose)
+    /// <summary>Reset all colours to #FFFFFF (called on dispose)</summary>
     private void ResetColors()
     {
         SetSelectColor(true);

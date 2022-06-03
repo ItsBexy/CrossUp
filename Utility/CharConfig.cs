@@ -3,8 +3,16 @@ using Dalamud.Logging;
 // ReSharper disable UnusedMember.Global
 
 namespace CrossUp;
+
+/// <summary>Class for retrieving/setting character configuration options</summary>
 public class CharConfig
 {
+    /// <summary>
+    /// Represents a Character Configuration value<br/><br/>
+    /// Set() Updates the value in-game<br/>
+    /// (int) Returns the value itself<br/>
+    /// (bool) Returns true if value > 0<br/>
+    /// </summary>
     public class Config
     {
         public short? ID;
@@ -24,23 +32,68 @@ public class CharConfig
     }
 
     private static readonly unsafe ConfigModule* Instance = ConfigModule.Instance();
-    public static readonly Config CrossEnabled = new() { ID = 378 }; // checkbox -- Cross Hotbar Enabled
-    public static readonly Config SepPvP = new() { ID = 400 };       // checkbox -- Enable PvP Settings
-    public static readonly Config MixBar = new() { ID = 370 };       // radio -- Cross Hotbar Display Type
-    public static readonly Config[] LRset = { new() { ID = 399 }, new() { ID = 422 } };  // dropdowns -- selected sets for EXHB and WXHB [PvE, PvP]
-    public static readonly Config[] RLset = { new() { ID = 398 }, new() { ID = 421 } };  //    each setting returns  0-19
-    public static readonly Config[] LLset = { new() { ID = 424 }, new() { ID = 427 } };  //     0-15 = Left/Right (Alternating) sides of the 8 Cross Hotbar sets
-    public static readonly Config[] RRset = { new() { ID = 425 }, new() { ID = 428 } };  //    16-19 = "Cycle" options that grab Right/Left sides of next/prev bar
 
-    public class Transparency   // sliders -- transparency for cross hotbar buttons
+    /// <summary>Checkbox: The Cross Hotbar is Enabled</summary>
+    public static readonly Config CrossEnabled = new() { ID = 378 }; // checkbox -- Cross Hotbar Enabled
+
+    /// <summary>Checkbox: User has enabled different settings for PvP vs PvE</summary>
+    public static readonly Config SepPvP = new() { ID = 400 };
+
+    /// <summary>
+    /// Radio: Cross Hotbar Display Type<br/>
+    /// 0 = D-Pad / Buttons / D-Pad / Buttons<br/>
+    /// 1 = D-Pad / D-Pad / Buttons / Buttons
+    /// </summary>
+    public static readonly Config MixBar = new() { ID = 370 };
+
+    /// <summary>Dropdowns: Mappings for Additional Cross Hotbars [0: PvE, 1: PvP] <br/>
+    /// 0 = Set 1 (Left)<br/>
+    /// 1 = Set 1 (Right)<br/>
+    /// 2 = Set 2 (Left)<br/>
+    /// 3 = Set 3 (Right)<br/>
+    /// 4 = Set 3 (Left)<br/>
+    /// 5 = Set 3 (Right)<br/>
+    /// 6 = Set 4 (Left)<br/>
+    /// 7 = Set 4 (Right)<br/>
+    /// 8 = Set 5 (Left)<br/>
+    /// 9 = Set 5 (Right)<br/>
+    /// 10 = Set 6 (Left)<br/>
+    /// 11 = Set 6 (Right)<br/>
+    /// 12 = Set 7 (Left)<br/>
+    /// 13 = Set 7 (Right)<br/>
+    /// 14 = Set 8 (Left)<br/>
+    /// 15 = Set 8 (Right)<br/>
+    /// 16 = Cycle Up (Right)<br/>
+    /// 17 = Cycle Up (Left)<br/>
+    /// 18 = Cycle Down (Right)<br/>
+    /// 19 = Cycle Down (Left)<br/>
+    /// </summary>
+    public static class ExtraBarMaps
+    {
+        /// <summary>L->R Expanded Hold Controls</summary>
+        public static readonly Config[] LR = { new() { ID = 399 }, new() { ID = 422 } };
+        /// <summary>R->L Expanded Hold Controls</summary>
+        public static readonly Config[] RL = { new() { ID = 398 }, new() { ID = 421 } };
+        /// <summary>Left WXHB</summary>
+        public static readonly Config[] LL = { new() { ID = 424 }, new() { ID = 427 } };
+        /// <summary>Right WXHB</summary>
+        public static readonly Config[] RR = { new() { ID = 425 }, new() { ID = 428 } };
+    }
+
+    /// <summary>Sliders: Transparency settings for Cross Hotbar<br/><br/>0-100 (Converted by game to alpha 0-255)</summary>
+    public class Transparency
     {
         public static readonly Config Standard = new() { ID = 435 };
         public static readonly Config Active = new() { ID = 436 };
         public static readonly Config Inactive = new() { ID = 437 };
     }
+    /// <summary>Per-bar configuration settings, by [int BarID]</summary>
     public class Hotbar
     {
-        public static readonly Config[] Shared = //checkbox -- bar is shared between jobs
+        /// <summary>Checkbox: Whether the hotbar is shared between all jobs<br/><br/>
+        /// 0 = Job-specific<br/>
+        /// 1 = Shared</summary>
+        public static readonly Config[] Shared =
         {   new() { ID = 350 },
             new() { ID = 351 },
             new() { ID = 352 },
@@ -61,7 +114,10 @@ public class CharConfig
             new() { ID = 366 },
             new() { ID = 367 }
         };
-        public static readonly Config[] Visible = // checkbox -- bar is visible
+        /// <summary>Checkbox: Whether the bar is set to visible<br/><br/>
+        /// 0 = Hidden<br/>
+        /// 1 = Visible</summary>
+        public static readonly Config[] Visible =
         {   
             new() { Index = 485 },
             new() { Index = 486 },
@@ -74,6 +130,14 @@ public class CharConfig
             new() { Index = 493 },
             new() { Index = 494 }
         };
+        /// <summary>Radio: The bar's grid layout setting<br/><br/>
+        /// 0 = 12x1<br/>
+        /// 2 = 6x2<br/>
+        /// 3 = 4x3<br/>
+        /// 4 = 3x4<br/>
+        /// 5 = 2x6<br/>
+        /// 6 = 1x12<br/>
+        /// </summary>
         public static readonly Config[] GridType = // radio    -- bar grid type (0-5)
         {
             new() { Index = 501 },
