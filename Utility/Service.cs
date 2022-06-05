@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dalamud.Game;
-using Dalamud.Hooking;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
+using Dalamud.Hooking;
 using Dalamud.IoC;
 
 namespace CrossUp;
@@ -16,7 +16,7 @@ public class Service    // from https://github.com/Caraxi/SimpleTweaksPlugin/blo
     [PluginService] public static GameGui GameGui { get; private set; }
     [PluginService] public static SigScanner SigScanner { get; private set; }
 }
-public unsafe class Common {  // from https://github.com/Caraxi/SimpleTweaksPlugin/blob/main/Utility/Common.cs
+public class Common {  // from https://github.com/Caraxi/SimpleTweaksPlugin/blob/main/Utility/Common.cs
     public static SigScanner Scanner => Service.SigScanner;
     public static HookWrapper<T> Hook<T>(string signature, T detour, int addressOffset = 0) where T : Delegate {
         var addr = Scanner.ScanText(signature);
@@ -41,7 +41,7 @@ public class HookWrapper<T> : IHookWrapper where T : Delegate
 {
     private Hook<T> wrappedHook;
     private bool disposed;
-    public HookWrapper(Hook<T> hook) { this.wrappedHook = hook; }
+    public HookWrapper(Hook<T> hook) { wrappedHook = hook; }
     public void Enable()
     {
         if (disposed) return;

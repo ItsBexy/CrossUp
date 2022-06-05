@@ -1,5 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using Dalamud.Logging;
+
 // ReSharper disable UnusedMember.Global
 
 namespace CrossUp;
@@ -9,9 +9,9 @@ public class CharConfig
 {
     /// <summary>
     /// Represents a Character Configuration value<br/><br/>
-    /// Set() Updates the value in-game<br/>
-    /// (int) Returns the value itself<br/>
-    /// (bool) Returns true if value > 0<br/>
+    /// <term cref="Set">Set()</term> Updates the value in-game<br/>
+    /// <term>(int)</term> Returns the value itself<br/>
+    /// <term>(bool)</term> Returns true if value > 0
     /// </summary>
     public class Config
     {
@@ -29,44 +29,46 @@ public class CharConfig
         }
         public static implicit operator int(Config cfg) => cfg.Get();
         public static implicit operator bool(Config cfg) => cfg.Get() > 0;
+        public byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
     }
 
     private static readonly unsafe ConfigModule* Instance = ConfigModule.Instance();
 
-    /// <summary>Checkbox: The Cross Hotbar is Enabled</summary>
+    /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
     public static readonly Config CrossEnabled = new() { ID = 378 }; // checkbox -- Cross Hotbar Enabled
 
-    /// <summary>Checkbox: User has enabled different settings for PvP vs PvE</summary>
+    /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
     public static readonly Config SepPvP = new() { ID = 400 };
 
     /// <summary>
-    /// Radio: Cross Hotbar Display Type<br/>
-    /// 0 = D-Pad / Buttons / D-Pad / Buttons<br/>
-    /// 1 = D-Pad / D-Pad / Buttons / Buttons
+    /// <term>Radio Button</term> Cross Hotbar Display Type<br/>
+    /// <term>0</term> D-Pad / Buttons / D-Pad / Buttons<br/>
+    /// <term>1</term> D-Pad / D-Pad / Buttons / Buttons
     /// </summary>
     public static readonly Config MixBar = new() { ID = 370 };
 
-    /// <summary>Dropdowns: Mappings for Additional Cross Hotbars [0: PvE, 1: PvP] <br/>
-    /// 0 = Set 1 (Left)<br/>
-    /// 1 = Set 1 (Right)<br/>
-    /// 2 = Set 2 (Left)<br/>
-    /// 3 = Set 3 (Right)<br/>
-    /// 4 = Set 3 (Left)<br/>
-    /// 5 = Set 3 (Right)<br/>
-    /// 6 = Set 4 (Left)<br/>
-    /// 7 = Set 4 (Right)<br/>
-    /// 8 = Set 5 (Left)<br/>
-    /// 9 = Set 5 (Right)<br/>
-    /// 10 = Set 6 (Left)<br/>
-    /// 11 = Set 6 (Right)<br/>
-    /// 12 = Set 7 (Left)<br/>
-    /// 13 = Set 7 (Right)<br/>
-    /// 14 = Set 8 (Left)<br/>
-    /// 15 = Set 8 (Right)<br/>
-    /// 16 = Cycle Up (Right)<br/>
-    /// 17 = Cycle Up (Left)<br/>
-    /// 18 = Cycle Down (Right)<br/>
-    /// 19 = Cycle Down (Left)<br/>
+    /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
+    /// Returns:<br/>
+    /// <term>0</term> Cross Hotbar 1 (Left)<br/>
+    /// <term>1</term> Cross Hotbar 1 (Right)<br/>
+    /// <term>2</term> Cross Hotbar 2 (Left)<br/>
+    /// <term>3</term> Cross Hotbar 3 (Right)<br/>
+    /// <term>4</term> Cross Hotbar 3 (Left)<br/>
+    /// <term>5</term> Cross Hotbar 3 (Right)<br/>
+    /// <term>6</term> Cross Hotbar 4 (Left)<br/>
+    /// <term>7</term> Cross Hotbar 4 (Right)<br/>
+    /// <term>8</term> Cross Hotbar 5 (Left)<br/>
+    /// <term>9</term> Cross Hotbar 5 (Right)<br/>
+    /// <term>10</term> Cross Hotbar 6 (Left)<br/>
+    /// <term>11</term> Cross Hotbar 6 (Right)<br/>
+    /// <term>12</term> Cross Hotbar 7 (Left)<br/>
+    /// <term>13</term> Cross Hotbar 7 (Right)<br/>
+    /// <term>14</term> Cross Hotbar 8 (Left)<br/>
+    /// <term>15</term> Cross Hotbar 8 (Right)<br/>
+    /// <term>16</term> Cycle Up (Right)<br/>
+    /// <term>17</term> Cycle Up (Left)<br/>
+    /// <term>18</term> Cycle Down (Right)<br/>
+    /// <term>19</term> Cycle Down (Left)<br/>
     /// </summary>
     public static class ExtraBarMaps
     {
@@ -80,7 +82,7 @@ public class CharConfig
         public static readonly Config[] RR = { new() { ID = 425 }, new() { ID = 428 } };
     }
 
-    /// <summary>Sliders: Transparency settings for Cross Hotbar<br/><br/>0-100 (Converted by game to alpha 0-255)</summary>
+    /// <summary><term>Sliders</term> Transparency settings for Cross Hotbar buttons<br/><br/>Returns 0-100 (Converted by game to alpha 0-255)</summary>
     public class Transparency
     {
         public static readonly Config Standard = new() { ID = 435 };
@@ -90,9 +92,9 @@ public class CharConfig
     /// <summary>Per-bar configuration settings, by [int BarID]</summary>
     public class Hotbar
     {
-        /// <summary>Checkbox: Whether the hotbar is shared between all jobs<br/><br/>
-        /// 0 = Job-specific<br/>
-        /// 1 = Shared</summary>
+        /// <summary><term>CheckBox</term> Whether the hotbar is shared between all jobs<br/><br/>
+        /// <term>0</term> Job-specific<br/>
+        /// <term>1</term> Shared</summary>
         public static readonly Config[] Shared =
         {   new() { ID = 350 },
             new() { ID = 351 },
@@ -114,9 +116,9 @@ public class CharConfig
             new() { ID = 366 },
             new() { ID = 367 }
         };
-        /// <summary>Checkbox: Whether the bar is set to visible<br/><br/>
-        /// 0 = Hidden<br/>
-        /// 1 = Visible</summary>
+        /// <summary><term>CheckBox</term> Whether the bar is set to visible<br/><br/>
+        /// <term>0</term> Hidden<br/>
+        /// <term>1</term> Visible</summary>
         public static readonly Config[] Visible =
         {   
             new() { Index = 485 },
@@ -130,15 +132,15 @@ public class CharConfig
             new() { Index = 493 },
             new() { Index = 494 }
         };
-        /// <summary>Radio: The bar's grid layout setting<br/><br/>
-        /// 0 = 12x1<br/>
-        /// 2 = 6x2<br/>
-        /// 3 = 4x3<br/>
-        /// 4 = 3x4<br/>
-        /// 5 = 2x6<br/>
-        /// 6 = 1x12<br/>
+        /// <summary><term>Radio Button</term> The bar's grid layout setting<br/><br/>
+        /// <term>0</term> 12x1<br/>
+        /// <term>1</term> 6x2<br/>
+        /// <term>2</term> 4x3<br/>
+        /// <term>3</term> 3x4<br/>
+        /// <term>4</term> 2x6<br/>
+        /// <term>5</term> 1x12<br/>
         /// </summary>
-        public static readonly Config[] GridType = // radio    -- bar grid type (0-5)
+        public static readonly Config[] GridType =
         {
             new() { Index = 501 },
             new() { Index = 502 },

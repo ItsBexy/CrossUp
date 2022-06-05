@@ -2,36 +2,39 @@
 
 public sealed partial class CrossUp
 {
-    // EXHB/WXHB CUSTOM MAPPING
 
-    /// <summary>Set Character Configs for EXHB/WXHB to match user's override preferences</summary>
-    private void OverrideMappings(int barID)
+    /// <summary>Feature enabling the player to change the mapping for WXHB or Expanded Hold based on which Cross Hotbar set is currently selected</summary>
+    public class Remap
     {
-        var pvp = CharConfig.SepPvP && Service.ClientState.IsPvP ? 1 : 0;
-        var index = barID - 10;
-
-        if (Config.RemapEx)
+        /// <summary>Overwrites the relevant Character Configuration settings</summary>
+        public static void Override(int barID)
         {
-            var overrideLR = Config.MappingsEx[0, index];
-            var overrideRL = Config.MappingsEx[1, index];
+            var pvp = CharConfig.SepPvP && Service.ClientState.IsPvP ? 1 : 0;
+            var set = barID - 10;
+
+            if (Config.RemapEx)
+            {
+                var overrideLR = Config.MappingsEx[0, set];
+                var overrideRL = Config.MappingsEx[1, set];
             
-            var configLR = CharConfig.ExtraBarMaps.LR[pvp];
-            var configRL = CharConfig.ExtraBarMaps.RL[pvp];
+                var configLR = CharConfig.ExtraBarMaps.LR[pvp];
+                var configRL = CharConfig.ExtraBarMaps.RL[pvp];
 
-            if (configLR != overrideLR) configLR.Set(overrideLR);
-            if (configRL != overrideRL) configRL.Set(overrideRL);
-        }
+                if (configLR != overrideLR) configLR.Set(overrideLR);
+                if (configRL != overrideRL) configRL.Set(overrideRL);
+            }
 
-        if (Config.RemapW)
-        {
-            var overrideLL = Config.MappingsW[0, index];
-            var overrideRR = Config.MappingsW[1, index];
+            if (Config.RemapW)
+            {
+                var overrideLL = Config.MappingsW[0, set];
+                var overrideRR = Config.MappingsW[1, set];
 
-            var configLL = CharConfig.ExtraBarMaps.LL[pvp];
-            var configRR = CharConfig.ExtraBarMaps.RR[pvp];
+                var configLL = CharConfig.ExtraBarMaps.LL[pvp];
+                var configRR = CharConfig.ExtraBarMaps.RR[pvp];
 
-            if (configLL != overrideLL) configLL.Set(overrideLL);
-            if (configRR != overrideRR) configRR.Set(overrideRR);
+                if (configLL != overrideLL) configLL.Set(overrideLL);
+                if (configRR != overrideRR) configRR.Set(overrideRR);
+            }
         }
     }
 }

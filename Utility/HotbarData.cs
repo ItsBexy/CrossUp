@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global
@@ -15,7 +14,6 @@ public sealed unsafe partial class CrossUp
         /// <summary>The Main Cross Hotbar</summary>
         public class Cross
         {
-            public string Name => $"Cross Hotbar Set {SetID}";
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base;
             private static AddonActionCross* AddonCross => (AddonActionCross*)Base;
@@ -23,7 +21,7 @@ public sealed unsafe partial class CrossUp
             public static int NodeCount => Base->UldManager.NodeListSize;
             public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1));
             public static bool Enabled => LastEnabledState= CharConfig.CrossEnabled;
-            public static bool LastEnabledState = true;
+            private static bool LastEnabledState = true;
             public static bool EnableStateChanged => LastEnabledState != Enabled;
             public static int LastKnownSelection = 0;
             public static int Selection => Exist ? 
@@ -32,7 +30,7 @@ public sealed unsafe partial class CrossUp
                        AddonCross->LRBar > 0     ? 3 :
                        AddonCross->RLBar > 0     ? 4 :
                        WXLL.AddonCross->Selected ? 5 :
-                       WXLL.AddonCross->Selected ? 6 : 
+                       WXRR.AddonCross->Selected ? 6 : 
                                                    0 :
                                    LastKnownSelection;
             public static NodeWrapper Root => new() { Node = NodeList[0] };
@@ -43,10 +41,12 @@ public sealed unsafe partial class CrossUp
             public static NodeWrapper VertLine => new() { Node = NodeList[7], DefaultPos = { X = 271F, Y = 21F }, DefaultSize = { X = 9, Y = 76 } };
             public static NodeWrapper RTtext => new() { Node = NodeList[19], DefaultPos = { X = 367F, Y = 11F }};
             public static NodeWrapper LTtext => new() { Node = NodeList[20], DefaultPos = { X = 83F, Y = 11F } };
-            public static NodeWrapper SetText => new() { Node = NodeList[21], DefaultPos = { X = 230F, Y = 170F } };
+            public static NodeWrapper SetDisplay => new() { Node = NodeList[21], DefaultPos = { X = 230F, Y = 170F } };
+            public static NodeWrapper SetText => new() { Node = NodeList[25] };
             public static NodeWrapper Padlock => new() { Node = NodeList[26], DefaultPos = { X = 284F, Y = 152F } };
             public static NodeWrapper PadlockIcon => new() { Node = Padlock.ChildNode(1) };
             public static NodeWrapper ChangeSet => new() { Node = NodeList[27], DefaultPos = { X = 146F, Y = 0F } };
+            public static NodeWrapper ChangeSetText => new() { Node = NodeList[41] };
             public static class Left
             {
                 public static NodeWrapper GroupL => new() { Node = NodeList[11], DefaultPos = { X = 0F, Y = 0F } };
@@ -62,35 +62,36 @@ public sealed unsafe partial class CrossUp
             public static int LastKnownSetID;
             private static int SetID => AddonBase->HotbarID;
         }
-
         /// <summary>The Left WXHB</summary>
         public class WXLL
         {
-            public string Name = "Left WXHB";
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
+            public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1));
             public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
             private static AtkResNode** NodeList => Base->UldManager.NodeList;
             public static int NodeCount => Base->UldManager.NodeListSize;
             public static NodeWrapper SelectBG => new() { Node = NodeList[3], DefaultSize = { X = 304, Y = 140 } };
             public static NodeWrapper MiniSelect => new() { Node = NodeList[4], DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper GroupL => new() { Node = NodeList[5]};
+            public static NodeWrapper GroupR => new() { Node = NodeList[6]};
         }
         /// <summary>The Right WXHB</summary>
         public class WXRR
         {
-            public string Name = "Right WXHB";
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
+            public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1));
             public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
             private static AtkResNode** NodeList => Base->UldManager.NodeList;
             public static int NodeCount => Base->UldManager.NodeListSize;
             public static NodeWrapper SelectBG => new() { Node = NodeList[3], DefaultSize = { X = 304, Y = 140 } };
             public static NodeWrapper MiniSelect => new() { Node = NodeList[4], DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper GroupL => new() { Node = NodeList[5] };
+            public static NodeWrapper GroupR => new() { Node = NodeList[6] };
         }
-
         /// <summary>The L->R Expanded Hold Bar</summary>
         public class LR
         {
-            public string Name = "Expanded Hold L->R";
-            public static int BorrowID = -1;
+            public static int BorrowID => Config.borrowBarL;
             public static ActionBar BorrowBar => ActionBars[BorrowID];
             public static Action[] Actions
             {
@@ -100,12 +101,12 @@ public sealed unsafe partial class CrossUp
                     return CrossUp.Actions.GetByBarID(mapSet.BarID, 8, mapSet.UseLeft ? 0 : 8);
                 }
             }
+            public static bool Exist => BaseCheck(BorrowID);
         }
         /// <summary>The R->L Expanded Hold Bar</summary>
         public class RL
         {
-            public string Name = "Expanded Hold R->L";
-            public static int BorrowID = -1;
+            public static int BorrowID => Config.borrowBarR;
             public static ActionBar BorrowBar => ActionBars[BorrowID];
             public static Action[] Actions
             {
@@ -115,14 +116,24 @@ public sealed unsafe partial class CrossUp
                     return CrossUp.Actions.GetByBarID(mapSet.BarID, 8, mapSet.UseLeft ? 0 : 8);
                 }
             }
+            public static bool Exist => BaseCheck(BorrowBar.BarID);
         }
-
+        /// <summary>The "Duty Action" pane (ie, in Bozja/Eureka)</summary>
+        public class ActionContents
+        {
+            private static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1);
+            public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1));
+            private static AtkResNode** NodeList => Base->UldManager.NodeList;
+            public static NodeWrapper BG1 => new() { Node = NodeList[3] };
+            public static NodeWrapper BG2 => new() { Node = NodeList[4] };
+            public static NodeWrapper BG3 => new() { Node = NodeList[6] };
+            public static NodeWrapper BG4 => new() { Node = NodeList[7] };
+        }
         /// <summary>Mouse/KB Action Bars</summary>
         public static readonly ActionBar[] ActionBars = new ActionBar[10];
         public class ActionBar
         {
             public int BarID;
-            public string Name => $"Hotbar {BarID+1}";
             public AtkUnitBase* Base;
             private AtkResNode** NodeList => Base->UldManager.NodeList;
             public bool Exist => BaseCheck(Base);
@@ -158,10 +169,10 @@ public sealed unsafe partial class CrossUp
         }
         /// <summary>Check the existence of a particular AtkUnitBase</summary>
         private static bool BaseCheck(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && unitBase->X > 0 && unitBase->Y > 0;
-
+        /// <summary>Check the existence of a particular bar's AtkUnitBase</summary>
+        public static bool BaseCheck(int barID) => BaseCheck(ActionBars[barID].Base);
         /// <summary>Keeps track of the original actions from the Mouse/KB bars, before being borrowed/altered</summary>
         public static readonly Action[]?[] StoredActions = new Action[10][];
-
         /// <summary>Original sizes for the Mouse/KB bars, by [int gridType]</summary>
         private static readonly Vector2[] DefaultBarSizes =
         {
@@ -260,7 +271,6 @@ public sealed unsafe partial class CrossUp
                 new() { X = 0, Y = 509 }
             }
         };
-
         /// <summary>Visibility status of Mouse/KB  bars before they were borrowed</summary>
         public static readonly bool[] WasHidden = new bool[10];
     }
