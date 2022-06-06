@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 // ReSharper disable UnusedMember.Global
@@ -17,8 +16,7 @@ public sealed unsafe partial class CrossUp
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base;
             private static AddonActionCross* AddonCross => (AddonActionCross*)Base;
-            private static AtkResNode** NodeList => Base->UldManager.NodeList;
-            public static int NodeCount => Base->UldManager.NodeListSize;
+            private static AtkResNode* NodeAtIndex(int i) => Base->UldManager.NodeListSize > i ? Base->UldManager.NodeList[i] : null;
             public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1));
             public static bool Enabled => LastEnabledState= CharConfig.CrossEnabled;
             private static bool LastEnabledState = true;
@@ -33,29 +31,29 @@ public sealed unsafe partial class CrossUp
                        WXRR.AddonCross->Selected ? 6 : 
                                                    0 :
                                    LastKnownSelection;
-            public static NodeWrapper Root => new() { Node = NodeList[0] };
-            public static NodeWrapper Component => new() { Node = NodeList[1], DefaultPos = { X = 18F, Y = 79F } };
-            public static NodeWrapper SelectBG => new() { Node = NodeList[4], DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelectL => new() { Node = NodeList[5], DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper MiniSelectR => new() { Node = NodeList[6], DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper VertLine => new() { Node = NodeList[7], DefaultPos = { X = 271F, Y = 21F }, DefaultSize = { X = 9, Y = 76 } };
-            public static NodeWrapper RTtext => new() { Node = NodeList[19], DefaultPos = { X = 367F, Y = 11F }};
-            public static NodeWrapper LTtext => new() { Node = NodeList[20], DefaultPos = { X = 83F, Y = 11F } };
-            public static NodeWrapper SetDisplay => new() { Node = NodeList[21], DefaultPos = { X = 230F, Y = 170F } };
-            public static NodeWrapper SetText => new() { Node = NodeList[25] };
-            public static NodeWrapper Padlock => new() { Node = NodeList[26], DefaultPos = { X = 284F, Y = 152F } };
+            public static NodeWrapper Root => new() { Node = NodeAtIndex(0) };
+            public static NodeWrapper Component => new() { Node = NodeAtIndex(1), DefaultPos = { X = 18F, Y = 79F } };
+            public static NodeWrapper SelectBG => new() { Node = NodeAtIndex(4), DefaultSize = { X = 304, Y = 140 } };
+            public static NodeWrapper MiniSelectL => new() { Node = NodeAtIndex(5), DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper MiniSelectR => new() { Node = NodeAtIndex(6), DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper VertLine => new() { Node = NodeAtIndex(7), DefaultPos = { X = 271F, Y = 21F }, DefaultSize = { X = 9, Y = 76 } };
+            public static NodeWrapper RTtext => new() { Node = NodeAtIndex(19), DefaultPos = { X = 367F, Y = 11F }};
+            public static NodeWrapper LTtext => new() { Node = NodeAtIndex(20), DefaultPos = { X = 83F, Y = 11F } };
+            public static NodeWrapper SetDisplay => new() { Node = NodeAtIndex(21), DefaultPos = { X = 230F, Y = 170F } };
+            public static NodeWrapper SetText => new() { Node = NodeAtIndex(25) };
+            public static NodeWrapper Padlock => new() { Node = NodeAtIndex(26), DefaultPos = { X = 284F, Y = 152F } };
             public static NodeWrapper PadlockIcon => new() { Node = Padlock.ChildNode(1) };
-            public static NodeWrapper ChangeSet => new() { Node = NodeList[27], DefaultPos = { X = 146F, Y = 0F } };
-            public static NodeWrapper ChangeSetText => new() { Node = NodeList[41] };
+            public static NodeWrapper ChangeSet => new() { Node = NodeAtIndex(27), DefaultPos = { X = 146F, Y = 0F } };
+            public static NodeWrapper ChangeSetText => new() { Node = NodeAtIndex(41) };
             public static class Left
             {
-                public static NodeWrapper GroupL => new() { Node = NodeList[11], DefaultPos = { X = 0F, Y = 0F } };
-                public static NodeWrapper GroupR => new() { Node = NodeList[10], DefaultPos = { X = 138F, Y = 0F } };
+                public static NodeWrapper GroupL => new() { Node = NodeAtIndex(11), DefaultPos = { X = 0F, Y = 0F } };
+                public static NodeWrapper GroupR => new() { Node = NodeAtIndex(10), DefaultPos = { X = 138F, Y = 0F } };
             }
             public static class Right
             {
-                public static NodeWrapper GroupL => new() { Node = NodeList[9], DefaultPos = { X = 284F, Y = 0F } };
-                public static NodeWrapper GroupR => new() { Node = NodeList[8], DefaultPos = { X = 422F, Y = 0F } };
+                public static NodeWrapper GroupL => new() { Node = NodeAtIndex(9), DefaultPos = { X = 284F, Y = 0F } };
+                public static NodeWrapper GroupR => new() { Node = NodeAtIndex(8), DefaultPos = { X = 422F, Y = 0F } };
             }
             public static Action[] Actions { get; private set; } = new Action[16];
             public static void UpdateActions() => Actions = CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID, 16);
@@ -68,12 +66,11 @@ public sealed unsafe partial class CrossUp
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
             public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1));
             public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
-            private static AtkResNode** NodeList => Base->UldManager.NodeList;
-            public static int NodeCount => Base->UldManager.NodeListSize;
-            public static NodeWrapper SelectBG => new() { Node = NodeList[3], DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelect => new() { Node = NodeList[4], DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper GroupL => new() { Node = NodeList[5]};
-            public static NodeWrapper GroupR => new() { Node = NodeList[6]};
+            private static AtkResNode* NodeAtIndex(int i) => Base->UldManager.NodeListSize > i ? Base->UldManager.NodeList[i] : null;
+            public static NodeWrapper SelectBG => new() { Node = NodeAtIndex(3), DefaultSize = { X = 304, Y = 140 } };
+            public static NodeWrapper MiniSelect => new() { Node = NodeAtIndex(4), DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper GroupL => new() { Node = NodeAtIndex(5) };
+            public static NodeWrapper GroupR => new() { Node = NodeAtIndex(6) };
         }
         /// <summary>The Right WXHB</summary>
         public class WXRR
@@ -81,12 +78,11 @@ public sealed unsafe partial class CrossUp
             public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
             public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1));
             public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
-            private static AtkResNode** NodeList => Base->UldManager.NodeList;
-            public static int NodeCount => Base->UldManager.NodeListSize;
-            public static NodeWrapper SelectBG => new() { Node = NodeList[3], DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelect => new() { Node = NodeList[4], DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper GroupL => new() { Node = NodeList[5] };
-            public static NodeWrapper GroupR => new() { Node = NodeList[6] };
+            private static AtkResNode* NodeAtIndex(int i) => Base->UldManager.NodeListSize > i ? Base->UldManager.NodeList[i] : null;
+            public static NodeWrapper SelectBG => new() { Node = NodeAtIndex(3), DefaultSize = { X = 304, Y = 140 } };
+            public static NodeWrapper MiniSelect => new() { Node = NodeAtIndex(4), DefaultSize = { X = 166, Y = 140 } };
+            public static NodeWrapper GroupL => new() { Node = NodeAtIndex(5) };
+            public static NodeWrapper GroupR => new() { Node = NodeAtIndex(6) };
         }
         /// <summary>The L->R Expanded Hold Bar</summary>
         public class LR
@@ -121,13 +117,13 @@ public sealed unsafe partial class CrossUp
         /// <summary>The "Duty Action" pane (ie, in Bozja/Eureka)</summary>
         public class ActionContents
         {
-            private static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1);
+            public static AtkUnitBase* Base { get; set; } = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1);
             public static bool Exist => BaseCheck(Base) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1));
-            private static AtkResNode** NodeList => Base->UldManager.NodeList;
-            public static NodeWrapper BG1 => new() { Node = NodeList[3] };
-            public static NodeWrapper BG2 => new() { Node = NodeList[4] };
-            public static NodeWrapper BG3 => new() { Node = NodeList[6] };
-            public static NodeWrapper BG4 => new() { Node = NodeList[7] };
+            private static AtkResNode* NodeAtIndex(int i) => Base->UldManager.NodeListSize > i ? Base->UldManager.NodeList[i] : null;
+            public static NodeWrapper BG1 => new() { Node = NodeAtIndex(3) };
+            public static NodeWrapper BG2 => new() { Node = NodeAtIndex(4) };
+            public static NodeWrapper BG3 => new() { Node = NodeAtIndex(6) };
+            public static NodeWrapper BG4 => new() { Node = NodeAtIndex(7) };
         }
         /// <summary>Mouse/KB Action Bars</summary>
         public static readonly ActionBar[] ActionBars = new ActionBar[10];
@@ -135,11 +131,10 @@ public sealed unsafe partial class CrossUp
         {
             public int BarID;
             public AtkUnitBase* Base;
-            private AtkResNode** NodeList => Base->UldManager.NodeList;
             public bool Exist => BaseCheck(Base);
-            public int NodeCount => Base->UldManager.NodeListSize;
-            public NodeWrapper Root => new() {Node = NodeList[0], DefaultSize = DefaultBarSizes[CharConfig.Hotbar.GridType[BarID]] };
-            public NodeWrapper BarNumText => NodeList[24];
+            private AtkResNode* NodeAtIndex(int i) => Base->UldManager.NodeListSize > i ? Base->UldManager.NodeList[i] : null;
+            public NodeWrapper Root => new() {Node = NodeAtIndex(0), DefaultSize = DefaultBarSizes[CharConfig.Hotbar.GridType[BarID]] };
+            public NodeWrapper BarNumText => NodeAtIndex(24);
             public NodeWrapper[] Button = new NodeWrapper[12];
             public Action[] Actions => CrossUp.Actions.GetByBarID(BarID, 12);
         }
@@ -149,6 +144,7 @@ public sealed unsafe partial class CrossUp
             Cross.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
             WXLL.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
             WXRR.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
+            ActionContents.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1);
 
             for (var i = 0; i < 10; i++)
             {

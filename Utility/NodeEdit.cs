@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
@@ -154,14 +156,21 @@ public sealed unsafe partial class CrossUp
         }
         public NodeWrapper ChildNode(params int[] path)
         {
-            if (Node == null) return this;
+            if (Node == null)
+            {
+                PluginLog.LogWarning($"NodeWrapper is null and has no child nodes \n{new System.Diagnostics.StackTrace()}");
+                return this;
+            }
             var node = Node;
             foreach (var i in path)
             {
                 var comp = node->GetAsAtkComponentNode();
-                if (comp == null || comp->Component->UldManager.NodeListSize < i) return this;
+                if (comp == null || comp->Component->UldManager.NodeListSize < i)
+                {
+                    PluginLog.LogWarning($"No Child node found for NodeWrapper at index {i}\n{new System.Diagnostics.StackTrace()}");
+                    return this;
+                }
                 node = comp->Component->UldManager.NodeList[i];
-                if (node == null) return this;
             }
             return node;
         }

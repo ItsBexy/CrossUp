@@ -44,7 +44,7 @@ internal partial class CrossUpUI : IDisposable
         var changeSetX = (int)Config.ChangeSetOffset.X;
         var changeSetY = (int)Config.ChangeSetOffset.Y;
 
-        var columnSize = new int[] { 140,22,215,60 };
+        var columnSize = new[] { 140,22,215,60 };
 
         ImGui.Spacing();
         ImGui.Indent(10);
@@ -232,9 +232,10 @@ internal partial class CrossUpUI : IDisposable
 
         ImGui.BeginTable("Colors", 4, ImGuiTableFlags.SizingFixedFit);
 
-        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, 140 * scale);
-        ImGui.TableSetupColumn("reset");
-        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, 215 * scale);
+        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * scale);
+        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * scale);
+        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, columnSize[2] * scale);
+        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed, columnSize[3] * scale);
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -597,7 +598,7 @@ internal partial class CrossUpUI : IDisposable
     }
     private void DrawSettingsWindow()
     {
-        if (!SettingsVisible) return;
+        if (!SettingsVisible || !CrossUp.Initialized) return;
 
         var scale = ImGuiHelpers.GlobalScale;
 

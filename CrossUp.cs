@@ -43,7 +43,7 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     }
 
     /// <summary>Whether the plugin has set itself up</summary>
-    private static bool Initialized;
+    public static bool Initialized;
 
     /// <summary>Sets up the plugin's main function and applies user configs</summary>
     private static void Initialize()
@@ -122,7 +122,7 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     }
 
     /// <summary>"/xup" Command</summary>
-    private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = true;
+    private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
 }

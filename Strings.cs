@@ -1,6 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.System.String;
-
-namespace CrossUp;
+﻿namespace CrossUp;
 
 internal partial class CrossUpUI
 {

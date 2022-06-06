@@ -204,8 +204,8 @@ public sealed unsafe partial class CrossUp
         /// <summary>Put a borrowed hotbar back the way we found it based on HUD layout settings</summary>
         private static void ResetBar(int barID)
         {
+            if (!Bars.ActionBars[barID].Exist) return;
             var bar = Bars.ActionBars[barID];
-            if (!bar.Exist) return;
 
             bar.Root.SetPos(bar.Base->X, bar.Base->Y)
                     .SetSize()

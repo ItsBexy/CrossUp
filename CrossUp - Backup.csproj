@@ -32,7 +32,7 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>0.3.1.1</FileVersion>
+	  <FileVersion>0.3.1.0</FileVersion>
 	  <AssemblyVersion>0.3.1.1</AssemblyVersion>
   </PropertyGroup>
 
