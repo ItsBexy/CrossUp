@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Dalamud.Logging;
 
 namespace CrossUp;
 
@@ -9,110 +8,155 @@ public sealed partial class CrossUp
     /// <summary>Color Customization features</summary>
     public class Color
     {
+        public struct Preset
+        {
+            public static readonly Vector3 White = new(1F, 1F, 1F);
+            public static readonly Vector3 TextGlow = new(157f / 255f, 131f / 255f, 91f / 255f);
+            public static readonly Vector3 MultiplyNeutral = new(100f / 255f, 100f / 255f, 100f / 255f);
+        }
+
         /// <summary>Apply selected highlight colour to all XHB and WXHB highlight ninegrids</summary>
         public static void SetSelectBG(bool reset = false)
         {
-            var selectColor = reset ? new(1F, 1F, 1F) : Config.selectColor;
-            var hide = !reset && Config.selectHide; // we can't hide these by toggling visibility or changing alpha, so instead we do it by setting width to 0
-            var miniSize = new Vector2 { X = 166, Y = 140 };
-            var regSize = new Vector2 { X = 304, Y = 140 };
-            var hideSize = new Vector2 { X = 0, Y = 0 };
+            var multiply = reset ? Preset.MultiplyNeutral : Config.SelectColorMultiply;
+            var displayType = reset ? 0 : Config.SelectDisplayType;
 
-            if (Bars.Cross.Exist)
+            var blend = (uint)(displayType == 2 ? 2 : 0);
+            var hide = displayType == 1;
+
+            var normSize = hide ? new Vector2 { X = 0, Y = 0 } : new Vector2 { X = 304, Y = 140 };
+            var miniSize = hide ? new Vector2 { X = 0, Y = 0 } : new Vector2 { X = 166, Y = 140 };
+
+            if (Bars.Cross.Exists)
             {
-                Bars.Cross.SelectBG.SetColor(selectColor).SetSize(hide ? hideSize : regSize);
-                Bars.Cross.MiniSelectR.SetColor(selectColor).SetSize(hide ? hideSize : miniSize);
-                Bars.Cross.MiniSelectL.SetColor(selectColor).SetSize(hide ? hideSize : miniSize);
+                Bars.Cross.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
+                Bars.Cross.MiniSelectR.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.Cross.MiniSelectL.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
             }
 
-            if (Bars.WXLL.Exist)
+            if (Bars.WXLL.Exists && Bars.WXRR.Exists)
             {
-                Bars.WXLL.SelectBG.SetColor(selectColor).SetSize(hide ? hideSize : regSize);
-                Bars.WXLL.MiniSelect.SetColor(selectColor).SetSize(hide ? hideSize : miniSize);
+                Bars.WXLL.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
+                Bars.WXLL.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+        
+                Bars.WXRR.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
+                Bars.WXRR.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
             }
 
-            if (Bars.WXRR.Exist)
+            if (Bars.ActionContents.Exists)
             {
-                Bars.WXRR.SelectBG.SetColor(selectColor).SetSize(hide ? hideSize : regSize);
-                Bars.WXRR.MiniSelect.SetColor(selectColor).SetSize(hide ? hideSize : miniSize);
-            }
+                var dutyActionColor = Preset.White;
+                if (!reset)
+                {
+                    var saturation = System.Drawing.Color.FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255)).GetSaturation();
 
-            if (Bars.ActionContents.Exist)
-            {
-                Bars.ActionContents.BG1.SetColor(selectColor);
-                Bars.ActionContents.BG2.SetColor(selectColor);
-                Bars.ActionContents.BG3.SetColor(selectColor);
-                Bars.ActionContents.BG4.SetColor(selectColor);
+                    dutyActionColor = new Vector3
+                    {
+                        X = multiply.X * saturation + Math.Min(1f, multiply.X * 2.55f) * (1f - saturation),
+                        Y = multiply.Y * saturation + Math.Min(1f, multiply.Y * 2.55f) * (1f - saturation),
+                        Z = multiply.Z * saturation + Math.Min(1f, multiply.Z * 2.55f) * (1f - saturation)
+                    };
+                }
+
+                Bars.ActionContents.BG1.SetColor(dutyActionColor);
+                Bars.ActionContents.BG2.SetColor(dutyActionColor).SetBlend(blend);
+                Bars.ActionContents.BG3.SetColor(dutyActionColor).SetBlend(blend);
+                Bars.ActionContents.BG4.SetColor(dutyActionColor).SetBlend(blend);
             }
         }
 
         /// <summary>Set/Reset colors of pressed buttons</summary>
         public static void SetPulse(bool reset = false)
         {
-            var glowA = reset ? new(1F, 1F, 1F) : Config.GlowA;
-            var glowB = reset ? new(1F, 1F, 1F) : Config.GlowB;
+            var glowA = reset ? Preset.White : Config.GlowA;
+            var glowB = reset ? Preset.White : Config.GlowB;
 
-            if (Bars.Cross.Exist)
+            if (Bars.Cross.Exists)
             {
-                for (var i = 0; i < 4; i++)
-                {
-                    Bars.Cross.Left.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
-                    Bars.Cross.Left.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
-                    Bars.Cross.Right.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
-                    Bars.Cross.Right.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
+                var groups = new[] {
+                    Bars.Cross.Left.GroupL,
+                    Bars.Cross.Left.GroupR,
+                    Bars.Cross.Right.GroupL,
+                    Bars.Cross.Right.GroupR
+                };
 
-                    Bars.Cross.Left.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
-                    Bars.Cross.Left.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
-                    Bars.Cross.Right.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
-                    Bars.Cross.Right.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
+                foreach (var group in groups)
+                {
+                    for (var i = 0; i < 4; i++)
+                    {
+                        group.ChildNode(i, 2, 10).SetColor(glowA);
+                        group.ChildNode(i, 2, 14).SetColor(glowB);
+                    }
                 }
             }
 
-            if (Bars.WXLL.Exist)
+            if (Bars.WXLL.Exists && Bars.WXRR.Exists)
             {
-                for (var i = 0; i < 4; i++)
-                {
-                    Bars.WXLL.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
-                    Bars.WXLL.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
+                var groups = new[] {
+                    Bars.WXLL.GroupL,
+                    Bars.WXLL.GroupR,
+                    Bars.WXRR.GroupL,
+                    Bars.WXRR.GroupR
+                };
 
-                    Bars.WXLL.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
-                    Bars.WXLL.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
+                foreach (var group in groups)
+                {
+                    for (var i = 0; i < 4; i++)
+                    {
+                        group.ChildNode(i, 2, 10).SetColor(glowA);
+                        group.ChildNode(i, 2, 14).SetColor(glowB);
+                    }
                 }
             }
 
-            if (Bars.WXRR.Exist)
+            if (Layout.SeparateEx.Ready && Bars.LR.BorrowBar.Exists && Bars.RL.BorrowBar.Exists)
             {
-                for (var i = 0; i < 4; i++)
+                for (var i = 0; i < 12; i++)
                 {
-                    Bars.WXRR.GroupL.ChildNode(i, 2, 10).SetColor(glowA);
-                    Bars.WXRR.GroupR.ChildNode(i, 2, 10).SetColor(glowA);
-
-                    Bars.WXRR.GroupL.ChildNode(i, 2, 14).SetColor(glowB);
-                    Bars.WXRR.GroupR.ChildNode(i, 2, 14).SetColor(glowB);
-                }
-            }
-
-            if (SeparateEx.Ready && Bars.LR.BorrowBar.Exist && Bars.RL.BorrowBar.Exist)
-            {
-                foreach (var button in Bars.LR.BorrowBar.Button)
-                {
-                    button.ChildNode(0, 2, 10).SetColor(glowA);
-                    button.ChildNode(0, 2, 14).SetColor(glowB);
-                }
-
-                foreach (var button in Bars.RL.BorrowBar.Button)
-                {
-                    button.ChildNode(0, 2, 10).SetColor(glowA);
-                    button.ChildNode(0, 2, 14).SetColor(glowB);
+                    var buttonLR = Bars.LR.BorrowBar.GetButton(i);
+                    buttonLR.ChildNode(0, 2, 10).SetColor(glowA);
+                    buttonLR.ChildNode(0, 2, 14).SetColor(glowB);
+    
+                    var buttonRL = Bars.RL.BorrowBar.GetButton(i);
+                    buttonRL.ChildNode(0, 2, 10).SetColor(glowA);
+                    buttonRL.ChildNode(0, 2, 14).SetColor(glowB);
                 }
             }
         }
 
-        /// <summary>Reset all colours to #FFFFFF (called on dispose)</summary>
+        /// <summary>Set/Reset Text and border colors</summary>
+        public static void SetText(bool reset=false)
+        {
+            if (!Bars.Cross.Exists) return;
+
+            var color = reset ? Preset.White : Config.TextColor;
+            var glow = reset ? Preset.TextGlow : Config.TextGlow;
+            var border = reset ? Preset.White : Config.BorderColor;
+
+            Bars.Cross.LTtext.SetTextColor(color,glow);
+            Bars.Cross.RTtext.SetTextColor(color, glow);
+            Bars.Cross.SetText.SetTextColor(color, glow);
+            Bars.Cross.SetNum.SetTextColor(color, glow);
+            Bars.Cross.SetButton.SetTextColor(color, glow);
+
+            var numText = Bars.Cross.ChangeSetDisplay.Nums;
+            foreach (var num in numText)
+            {
+                num.ChildNode(1).SetTextColor(color, glow);
+                num.ChildNode(0).SetColor(border);
+            }
+
+            Bars.Cross.ChangeSetDisplay.Text.SetTextColor(color, glow);
+            Bars.Cross.VertLine.SetColor(border);
+            Bars.Cross.SetBorder.SetColor(border);
+        }
+
+        /// <summary>Reset all colours to defaults (called on dispose)</summary>
         public static void Reset()
         {
             SetSelectBG(true);
             SetPulse(true);
+            SetText(true);
         }
     }
 }

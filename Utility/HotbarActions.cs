@@ -8,57 +8,50 @@ public sealed unsafe partial class CrossUp
     private static readonly RaptureHotbarModule* RaptureModule = (RaptureHotbarModule*)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar</summary>
-    public struct Action
+    public struct Command
     {
-        public uint ID;
-        public HotbarSlotType Type;
+        public uint CommandId;
+        public HotbarSlotType CommandType;
     }
-    /// <summary>Represents the portion of a Cross Hotbar set that an additional bar (WXHB or Expanded Hold) is mapped to<br/>
-    /// <term>BarID</term> The ID of the bar set<br/>
-    /// <term>UseLeft</term> If true, indicates to use first 8 buttons of the set. If false, indicates to use the last 8.
-    /// </summary>
-    public struct MappedSet
-    {
-        public int BarID;
-        public bool UseLeft;
-    }
+
+    /// <summary>Methods pertaining to hotbar actions</summary>
     public static class Actions
     {
         /// <summary>Gets the actions saved to a specific Hotbar</summary>
-        public static Action[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
+        public static Command[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
         {
-            var contents = new Action[slotCount];
+            var contents = new Command[slotCount];
             var hotbar = RaptureModule->HotBar[barID];
 
             for (var i = 0; i < slotCount; i++)
             {
                 var slot = hotbar->Slot[i + fromSlot];
                 if (slot == null) continue;
-                contents[i].Type = slot->CommandType;
-                contents[i].ID = slot->CommandId;
+                contents[i].CommandType = slot->CommandType;
+                contents[i].CommandId = slot->CommandId;
             }
             return contents;
         }
 
         /// <summary>Retrieves the saved contents of a hotbar</summary>
-        public static Action[] GetSaved(int job, int barID, int slotCount = 12)
+        public static Command[] GetSaved(int job, int barID, int slotCount = 12)
         {
             if (IsPvP) {job = Job.PvpID(job);}
-            var contents = new Action[slotCount];
+            var contents = new Command[slotCount];
             var saveBar = RaptureModule->SavedClassJob[job]->Bar[barID];
 
             for (var i = 0; i < slotCount; i++)
             {
                 var savedSlot = saveBar->Slot[i];
-                contents[i].Type = savedSlot->Type;
-                contents[i].ID = savedSlot->ID;
+                contents[i].CommandType = savedSlot->Type;
+                contents[i].CommandId = savedSlot->ID;
             }
 
             return contents;
         }
 
         /// <summary>Writes a list of actions to the user's saved hotbar settings</summary>
-        public static void Save(IList<Action> sourceButtons, int sourceStart, int targetID, int targetStart, int count, int job)
+        public static void Save(IList<Command> sourceButtons, int sourceStart, int targetID, int targetStart, int count, int job)
         {
             if (sourceButtons == null) return;
             if (IsPvP) job = Job.PvpID(job);
@@ -70,17 +63,17 @@ public sealed unsafe partial class CrossUp
 
                 var saveSlot = saveBar->Slot[i + targetStart];
                 var sourceSlot = sourceButtons[i + sourceStart];
-                if (saveSlot->ID == sourceSlot.ID && saveSlot->Type == sourceSlot.Type) continue;
+                if (saveSlot->ID == sourceSlot.CommandId && saveSlot->Type == sourceSlot.CommandType) continue;
 
-                PluginLog.LogDebug($"Saving {sourceSlot.Type} {sourceSlot.ID} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
-                saveSlot->Type = sourceSlot.Type;
-                saveSlot->ID = sourceSlot.ID;
+                PluginLog.LogDebug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+                saveSlot->Type = sourceSlot.CommandType;
+                saveSlot->ID = sourceSlot.CommandId;
 
             }
         }
 
         /// <summary>Copies a list of actions to a hotbar (without permanently saving them to that bar)</summary>
-        public static void Copy(IReadOnlyList<Action> sourceButtons, int sourceStart, int targetBarID, int targetStart, int count)
+        public static void Copy(IReadOnlyList<Command> sourceButtons, int sourceStart, int targetBarID, int targetStart, int count)
         {
             var targetBar = RaptureModule->HotBar[targetBarID];
             for (var i = 0; i < count; i++)
@@ -88,22 +81,22 @@ public sealed unsafe partial class CrossUp
                 var targetSlot = targetBar->Slot[i + targetStart];
                 var sourceSlot = sourceButtons[i + sourceStart];
 
-                if (targetSlot->CommandId != sourceSlot.ID || targetSlot->CommandType != sourceSlot.Type) targetSlot->Set(sourceSlot.Type, sourceSlot.ID);
+                if (targetSlot->CommandId != sourceSlot.CommandId || targetSlot->CommandType != sourceSlot.CommandType) targetSlot->Set(sourceSlot.CommandType, sourceSlot.CommandId);
             }
         }
 
         /// <summary>Stores a set of hotbar actions for the plugin to reference later</summary>
         public static void Store(int barID) => Bars.StoredActions[barID] = GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : Job.Current, barID);
-        public static MappedSet LRMap => GetExMap(true);
-        public static MappedSet RLMap => GetExMap(false);
-        private static MappedSet GetExMap(bool lr)
+        public static (int barID, bool useLeft) LRMap => GetExMap(true);
+        public static (int barID, bool useLeft) RLMap => GetExMap(false);
+
+        private static (int barID, bool useLeft) GetExMap(bool lr)
         {
             int conf = (lr ? CharConfig.ExtraBarMaps.LR : CharConfig.ExtraBarMaps.RL)[CharConfig.SepPvP && IsPvP ? 1 : 0];
-            return new MappedSet
-            {
-                BarID = conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.LastKnownSetID + (conf < 18 ? -1 : 1) - 2) % 8 + 10,
-                UseLeft = conf % 2 == (conf < 16 ? 0 : 1)
-            };
+            return (
+                barID: conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.LastKnownSetID + (conf < 18 ? -1 : 1) - 2) % 8 + 10, 
+                useLeft: conf % 2 == (conf < 16 ? 0 : 1)
+                );
         }
     }
 }

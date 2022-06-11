@@ -3,6 +3,7 @@ using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+// ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
 namespace CrossUp;
 
@@ -14,12 +15,12 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     private CommandManager CommandManager { get; }
     private static Configuration Config { get; set; } = null!;
     private CrossUpUI CrossUpUI { get; }
+
     public CrossUp(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
         [RequiredVersion("1.0")] CommandManager commandManager)
     {
         CommandManager = commandManager;
-
         CommandManager.AddHandler(MainCommand, new CommandInfo(OnMainCommand) { HelpMessage = CrossUpUI.Strings.HelpMsg });
 
         PluginInterface = pluginInterface;
@@ -27,52 +28,46 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
         Config.Initialize(PluginInterface);
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
-
         pluginInterface.Create<Service>();
 
-        CrossUpUI = new CrossUpUI(Config, this);
+        CrossUpUI = new CrossUpUI(Config, this, PluginInterface, CommandManager);
 
-        ActionBarBaseUpdateHook ??= Common.Hook<ActionBarBaseUpdate>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
-        ActionBarBaseUpdateHook?.Enable();
+        EnableHooks();
 
-        ActionBarReceiveEventHook ??= Common.Hook<ActionBarReceiveEvent>("E8 ?? ?? ?? FF 66 83 FB ?? ?? ?? ?? BF 3F", ActionBarReceiveEventDetour);
-        ActionBarReceiveEventHook?.Enable();
-
-        Service.Framework.Update += FrameworkUpdate;
-        Initialized = false;
+        IsSetUp = false;
     }
 
-    /// <summary>Whether the plugin has set itself up</summary>
-    public static bool Initialized;
+    /// <summary>Whether the plugin has set its features up</summary>
+    internal static bool IsSetUp;
 
-    /// <summary>Sets up the plugin's main function and applies user configs</summary>
-    private static void Initialize()
+    /// <summary>Sets up the plugin's main features and applies user configs</summary>
+    private static void Setup()
     {
         try
         {
-            Initialized = true;
+            IsSetUp = true;
             Bars.Init();
 
-            if (SeparateEx.Ready) SeparateEx.Enable();
+            if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable();
             Color.SetSelectBG();
             Color.SetPulse();
-
+            Color.SetText();
             Layout.Update(true, true);
             Layout.ScheduleNudges(10);
         }
         catch (Exception ex)
         {
-            PluginLog.LogError("Exception: Initialization Failed!\n"+ex);
-            Initialized = false;
+            PluginLog.LogError("Exception: Setup Failed!\n"+ex);
+            IsSetUp = false;
         }
     }
 
     /// <summary>Restores the last known X coordinates of the Cross Hotbar's AtkUnitBase and root node</summary>
-    private static void RestoreDisposalXPos()
+    private static void RestoreCrossXPos()
     {
         try
         {
-            if (!Bars.Cross.Exist) return;
+            if (!Bars.Cross.Exists || Config.LockCenter) return;
             if (Bars.Cross.Base->X != (short)Config.DisposeBaseX! || Math.Abs(Bars.Cross.Root.Node->X - (float)Config.DisposeRootX!) > 0.5F) PluginLog.LogDebug("Correcting Cross Hotbar X Position");
 
             Bars.Cross.Base->X = (short)Config.DisposeBaseX!;
@@ -81,9 +76,9 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     }
 
     /// <summary>Records the X coordinates of the Cross Hotbar's AtkUnitBase and root node on disable/dispose</summary>
-    private static void StoreDisposalXPos()
+    internal static void StoreCrossXPos()
     {
-        if (!Bars.Cross.Exist) { return; }
+        if (!Bars.Cross.Exists) { return; }
         PluginLog.LogDebug($"Storing Cross Hotbar X Position; UnitBase: {Bars.Cross.Base->X}, Root Node: {Bars.Cross.Root.Node->X}");
         Config.DisposeBaseX = Bars.Cross.Base->X;
         Config.DisposeRootX = Bars.Cross.Root.Node->X;
@@ -93,36 +88,23 @@ public sealed unsafe partial class CrossUp : IDalamudPlugin
     /// <summary>Put all modified nodes back in place and remove hooks</summary>
     public void Dispose()
     {
-        try
-        {
-            ActionBarBaseUpdateHook?.Disable();
-            ActionBarReceiveEventHook?.Disable();
-            Service.Framework.Update -= FrameworkUpdate;
-        }   catch (Exception ex) { PluginLog.LogError("Exception on Dispose: Couldn't Remove hooks!\n" + ex); }
+        try { DisableHooks();     } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Remove hooks!\n{ex}"); }
+        try { StoreCrossXPos();   } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't store Cross Hotbar X Position!\n{ex}"); }
+        try { Layout.TidyUp();    } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Cross Hotbar layout!\n{ex}"); }
+        try { Layout.ResetBars(); } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
+        try { Color.Reset();      } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
+        try { DisposeUI();        } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose Plugin Interface!\n{ex}"); }
 
-        try { StoreDisposalXPos(); }
-            catch (Exception ex) { PluginLog.LogWarning("Exception on Dispose: Couldn't store Cross Hotbar X Position!\n" + ex); }
-
-        try { Layout.Arrange(0, 0, true, true, true); }
-            catch (Exception ex) { PluginLog.LogWarning("Exception on Dispose: Couldn't reset Cross Hotbar layout!\n" + ex); }
-
-        try { Layout.Reset(); }
-            catch (Exception ex) { PluginLog.LogWarning("Exception on Dispose: Couldn't reset Action Bars!\n" + ex); }
-
-        try { Color.Reset(); }
-            catch (Exception ex) { PluginLog.LogWarning("Exception on Dispose: Couldn't reset colors!\n" + ex); }
-
-        Initialized = false;
-
-        try
-        {
-            CommandManager.RemoveHandler(MainCommand); 
-            CrossUpUI.Dispose();
-        }   catch (Exception ex) { PluginLog.LogError("Exception on Dispose: Couldn't Dispose Plugin Interface!\n" + ex); }
+        IsSetUp = false;
     }
 
     /// <summary>"/xup" Command</summary>
     private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
+    private void DisposeUI()
+    {
+        CommandManager.RemoveHandler(MainCommand);
+        CrossUpUI.Dispose();
+    }
 }

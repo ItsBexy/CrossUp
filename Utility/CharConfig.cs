@@ -1,5 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-
+// ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
 
 namespace CrossUp;
@@ -13,7 +13,7 @@ public class CharConfig
     /// <term>(int)</term> Returns the value itself<br/>
     /// <term>(bool)</term> Returns true if value > 0
     /// </summary>
-    public class Config
+    public sealed class Config
     {
         public short? ID;
         public uint Index;

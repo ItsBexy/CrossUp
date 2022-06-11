@@ -5,6 +5,8 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.Hooking;
 using Dalamud.IoC;
+// ReSharper disable All
+#pragma warning disable CS8618
 
 namespace CrossUp;
 
