@@ -6,7 +6,7 @@ public sealed partial class CrossUp
     public class Remap
     {
         /// <summary>Overrides the Character Configuration settings for WXHB / Expanded Hold mappings</summary>
-        public static void Override(int barID)
+        internal static void Override(int barID)
         {
             var pvp = CharConfig.SepPvP && Service.ClientState.IsPvP ? 1 : 0;
             var set = barID - 10;

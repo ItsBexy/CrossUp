@@ -6,7 +6,7 @@ public sealed partial class CrossUp
     public class Job
     {
         /// <summary>Gets player's current Job ID</summary>
-        public static int Current
+        internal static int Current
         {
             get
             {
@@ -16,14 +16,14 @@ public sealed partial class CrossUp
         }
 
         /// <summary>Gets player's Job abbreviation</summary>
-        public static string Abbr => Service.ClientState.LocalPlayer?.ClassJob.GameData != null ? Service.ClientState.LocalPlayer?.ClassJob.GameData.Abbreviation ?? "???" : "???";
+        internal static string Abbr => Service.ClientState.LocalPlayer?.ClassJob.GameData != null ? Service.ClientState.LocalPlayer?.ClassJob.GameData.Abbreviation ?? "???" : "???";
         private static int LastKnown;
 
         /// <summary>True if the player's Job has just changed</summary>
-        public static bool HasChanged => LastKnown != Current;
+        internal static bool HasChanged => LastKnown != Current;
 
         /// <summary>Retrieves the ID of a job's PvP hotbar sets (NOT future-proofed for more jobs being added)</summary>
-        public static int PvpID(int job) => job switch
+        internal static int PvpID(int job) => job switch
         {
             0 => 41,
             19 => 42,
