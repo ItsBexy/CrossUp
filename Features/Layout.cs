@@ -10,7 +10,7 @@ public sealed unsafe partial class CrossUp
     public static partial class Layout
     {
         /// <summary>Checks/updates the Cross Hotbar selection and calls the main arrangement functions</summary>
-        public static void Update(bool forceArrange = false, bool hudFixCheck = false, bool resetAll = false)
+        internal static void Update(bool forceArrange = false, bool hudFixCheck = false, bool resetAll = false)
         {
             if (!Bars.Cross.Exists) return;
             
@@ -46,10 +46,10 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Calls the update function with arguments to reset everything</summary>
-        public static void TidyUp() => Update(true, true, true);
+        internal static void TidyUp() => Update(true, true, true);
 
         /// <summary>Re-run the update function a few times on first login/load in case there's any straggler nodes caught out of position</summary>
-        public static void ScheduleNudges(int c=5,int span = 500,bool log = true)
+        internal static void ScheduleNudges(int c=5,int span = 500,bool log = true)
         {
             for (var i = 1; i <= c; i++)
             {
@@ -66,7 +66,7 @@ public sealed unsafe partial class CrossUp
                 if (!IsSetUp) return;
                 if (log) {PluginLog.LogDebug($"Nudging Nodes {n}/{c}");}
 
-                if (Config.DisposeBaseX != null && Config.DisposeRootX != null) RestoreCrossXPos();
+                if (Config.DisposeBaseX != null && Config.DisposeRootX != null) Cross.RestoreXPos();
                 Update(true);
             }
             catch
@@ -76,13 +76,13 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Reset all the node properties we've messed with and reset any borrowed bars</summary>
-        public static void ResetBars()
+        internal static void ResetBars()
         {
             if (!Bars.Cross.Exists) return;
 
             Bars.Cross.VertLine.SetSize();
             Bars.Cross.Padlock.SetRelativePos();
-            Bars.Cross.PadlockIcon.SetVis(true);
+            Bars.Cross.Padlock[2u].SetVis(true);
             Bars.Cross.SetDisplay.SetVis(true).SetRelativePos();
             Bars.Cross.ChangeSetDisplay.Container.SetRelativePos();
             Bars.Cross.LTtext.SetScale();
@@ -101,20 +101,24 @@ public sealed unsafe partial class CrossUp
 
             Actions.Copy(Actions.GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
 
-            Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base->X, Bars.ActionBars[barID].Base->Y)
+            Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
                                        .SetSize()
-                                       .SetScale(Bars.ActionBars[barID].Base->Scale);
+                                       .SetScale(Bars.ActionBars[barID].Base.Scale);
 
             Bars.ActionBars[barID].BarNumText.SetScale();
 
             for (var i = 0; i < 12; i++)
             {
-                var button = Bars.ActionBars[barID].GetButton(i,true);
-                button.SetRelativePos().SetVis(true).SetScale();
-                button.ChildNode(1).SetVis(true);
+                var buttonNode = Bars.ActionBars[barID].Buttons[i,getDef:true];
+
+                buttonNode.SetRelativePos()
+                          .SetVis(true)
+                          .SetScale();
+
+                buttonNode[2u].SetVis(true);
             }
 
-            if (CharConfig.Hotbar.Visible[barID] && Bars.WasHidden[barID] && ((barID != Bars.LR.BorrowID && barID != Bars.RL.BorrowID) || !SeparateEx.Ready))
+            if (CharConfig.Hotbar.Visible[barID] && Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
             {
                 CharConfig.Hotbar.Visible[barID].Set(0);
             }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Numerics;
+using Dalamud.Logging;
 
 namespace CrossUp;
 
 public sealed partial class CrossUp
 {
     /// <summary>Color Customization features</summary>
-    public class Color
+    internal class Color
     {
         public struct Preset
         {
@@ -24,8 +25,8 @@ public sealed partial class CrossUp
             var blend = (uint)(displayType == 2 ? 2 : 0);
             var hide = displayType == 1;
 
-            var normSize = hide ? new Vector2 { X = 0, Y = 0 } : new Vector2 { X = 304, Y = 140 };
-            var miniSize = hide ? new Vector2 { X = 0, Y = 0 } : new Vector2 { X = 166, Y = 140 };
+            Vector2 normSize = hide ? new(0) : new(304,140);
+            Vector2 miniSize = hide ? new(0) : new(166,140);
 
             if (Bars.Cross.Exists)
             {
@@ -34,13 +35,13 @@ public sealed partial class CrossUp
                 Bars.Cross.MiniSelectL.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
             }
 
-            if (Bars.WXLL.Exists && Bars.WXRR.Exists)
+            if (Bars.WXHB.Exists)
             {
-                Bars.WXLL.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
-                Bars.WXLL.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.WXHB.LL.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
+                Bars.WXHB.LL.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
         
-                Bars.WXRR.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
-                Bars.WXRR.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.WXHB.RR.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
+                Bars.WXHB.RR.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
             }
 
             if (Bars.ActionContents.Exists)
@@ -63,6 +64,8 @@ public sealed partial class CrossUp
                 Bars.ActionContents.BG3.SetColor(dutyActionColor).SetBlend(blend);
                 Bars.ActionContents.BG4.SetColor(dutyActionColor).SetBlend(blend);
             }
+
+            PluginLog.LogVerbose($"Selection Color Set: {multiply}, {displayType switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
         }
 
         /// <summary>Set/Reset colors of pressed buttons</summary>
@@ -73,39 +76,23 @@ public sealed partial class CrossUp
 
             if (Bars.Cross.Exists)
             {
-                var groups = new[] {
-                    Bars.Cross.Left.GroupL,
-                    Bars.Cross.Left.GroupR,
-                    Bars.Cross.Right.GroupL,
-                    Bars.Cross.Right.GroupR
-                };
-
-                foreach (var group in groups)
+                for (var set = 0; set < 4; set++) 
+                for (uint bID = 2; bID <= 5; bID++)
                 {
-                    for (var i = 0; i < 4; i++)
-                    {
-                        group.ChildNode(i, 2, 10).SetColor(glowA);
-                        group.ChildNode(i, 2, 14).SetColor(glowB);
-                    }
+                    var iconNode = Bars.Cross.Buttons[set][bID][2u];
+                    iconNode[8u].SetColor(glowA);
+                    iconNode[4u].SetColor(glowB);
                 }
             }
 
-            if (Bars.WXLL.Exists && Bars.WXRR.Exists)
+            if (Bars.WXHB.Exists)
             {
-                var groups = new[] {
-                    Bars.WXLL.GroupL,
-                    Bars.WXLL.GroupR,
-                    Bars.WXRR.GroupL,
-                    Bars.WXRR.GroupR
-                };
-
-                foreach (var group in groups)
+                for (var set = 0; set < 4; set++) 
+                for (uint bID = 2; bID <= 5; bID++)
                 {
-                    for (var i = 0; i < 4; i++)
-                    {
-                        group.ChildNode(i, 2, 10).SetColor(glowA);
-                        group.ChildNode(i, 2, 14).SetColor(glowB);
-                    }
+                    var iconNode = Bars.WXHB.Buttons[set][bID][2u];
+                    iconNode[8u].SetColor(glowA);
+                    iconNode[4u].SetColor(glowB);
                 }
             }
 
@@ -113,15 +100,17 @@ public sealed partial class CrossUp
             {
                 for (var i = 0; i < 12; i++)
                 {
-                    var buttonLR = Bars.LR.BorrowBar.GetButton(i);
-                    buttonLR.ChildNode(0, 2, 10).SetColor(glowA);
-                    buttonLR.ChildNode(0, 2, 14).SetColor(glowB);
-    
-                    var buttonRL = Bars.RL.BorrowBar.GetButton(i);
-                    buttonRL.ChildNode(0, 2, 10).SetColor(glowA);
-                    buttonRL.ChildNode(0, 2, 14).SetColor(glowB);
+                    var iconNodeLR = Bars.LR.Buttons[i][3u][2u];
+                    iconNodeLR[8u].SetColor(glowA);
+                    iconNodeLR[4u].SetColor(glowB);
+
+                    var iconNodeRL = Bars.RL.Buttons[i][3u][2u];
+                    iconNodeRL[8u].SetColor(glowA);
+                    iconNodeRL[4u].SetColor(glowB);
                 }
             }
+
+            PluginLog.LogVerbose($"Button Colors Set; Glow: {glowA}, Pulse: {glowB}");
         }
 
         /// <summary>Set/Reset Text and border colors</summary>
@@ -139,11 +128,9 @@ public sealed partial class CrossUp
             Bars.Cross.SetNum.SetTextColor(color, glow);
             Bars.Cross.SetButton.SetTextColor(color, glow);
 
-            var numText = Bars.Cross.ChangeSetDisplay.Nums;
-            foreach (var num in numText)
-            {
-                num.ChildNode(1).SetTextColor(color, glow);
-                num.ChildNode(0).SetColor(border);
+            foreach (var num in Bars.Cross.ChangeSetDisplay.Nums) {
+                num[3u].SetTextColor(color, glow);
+                num[4u].SetColor(border);
             }
 
             Bars.Cross.ChangeSetDisplay.Text.SetTextColor(color, glow);

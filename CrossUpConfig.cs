@@ -9,22 +9,22 @@ namespace CrossUp;
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
-    public Vector2 ConfigWindowSize { get; set; } = new(450f, 650f);
+    public Vector2 ConfigWindowSize { get; set; } = new(450, 650);
 
     // Separate Expanded Hold Configs
     public bool SepExBar { get; set; }
     public int LRborrow { get; set; } = 8;
     public int RLborrow { get; set; } = 9;
-    public Vector2 LRpos { get; set; } = new() { X = -214, Y = -88 };
-    public Vector2 RLpos { get; set; } = new() { X = 214, Y = -88 };
+    public Vector2 LRpos { get; set; } = new(-214,-88);
+    public Vector2 RLpos { get; set; } = new(214,-88) ;
     public bool OnlyOneEx { get; set; }
 
     // Cross Hotbar Layout Configs
     public int Split { get; set; }
     public bool LockCenter { get; set; }
-    public Vector2 PadlockOffset { get; set; } = new(0f, 0f);
-    public Vector2 SetTextOffset { get; set; } = new(0f, 0f);
-    public Vector2 ChangeSetOffset { get; set; } = new(0f, 0f);
+    public Vector2 PadlockOffset { get; set; } = new(0);
+    public Vector2 SetTextOffset { get; set; } = new(0);
+    public Vector2 ChangeSetOffset { get; set; } = new(0);
     public bool HidePadlock { get; set; }
     public bool HideSetText { get; set; }
     public bool HideTriggerText { get; set; }
@@ -47,6 +47,11 @@ public class Configuration : IPluginConfiguration
     public bool RemapW { get; set; }
     public int[,] MappingsEx { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
     public int[,] MappingsW { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
+
+    // OOC fadeout
+    public bool CombatFadeInOut { get; set; }
+    public int TranspInCombat { get; set; } = 0;
+    public int TranspOutOfCombat { get; set; } = 100;
 
     [NonSerialized]
     private DalamudPluginInterface? PluginInterface;

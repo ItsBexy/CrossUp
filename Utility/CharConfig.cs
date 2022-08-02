@@ -1,6 +1,8 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+
 // ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBeInternal
 
 namespace CrossUp;
 
@@ -34,14 +36,20 @@ public class CharConfig
 
     private static readonly unsafe ConfigModule* Instance = ConfigModule.Instance();
 
-    /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
-    public static readonly Config CrossEnabled = new() { ID = 378 }; // checkbox -- Cross Hotbar Enabled
+    public static class Cross
+    {
+        /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
+        public static readonly Config Enabled = new() { ID = 378 };
+
+        /// <summary><term>Checkbox</term> The Cross Hotbar is visible in the HUD</summary>
+        public static readonly Config Visible = new() { Index = 536 };
+    }
 
     /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
     public static readonly Config SepPvP = new() { ID = 400 };
 
     /// <summary>
-    /// <term>Radio Button</term> Cross Hotbar Display Type<br/>
+    /// <term>Radio Button</term> Cross Hotbar Display Type<br/><br/>
     /// <term>0</term> D-Pad / Buttons / D-Pad / Buttons<br/>
     /// <term>1</term> D-Pad / D-Pad / Buttons / Buttons
     /// </summary>
@@ -132,6 +140,7 @@ public class CharConfig
             new() { Index = 493 },
             new() { Index = 494 }
         };
+
         /// <summary><term>Radio Button</term> The bar's grid layout setting<br/><br/>
         /// <term>0</term> 12x1<br/>
         /// <term>1</term> 6x2<br/>

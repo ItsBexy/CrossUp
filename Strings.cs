@@ -1,6 +1,6 @@
-﻿namespace CrossUp;
-
-public partial class CrossUpUI
+﻿// ReSharper disable UnusedMember.Global
+namespace CrossUp;
+internal sealed partial class CrossUpUI
 {
     public static class Strings
     {
@@ -26,7 +26,7 @@ public partial class CrossUpUI
         {
             public const string TabTitle = "Look & Feel";
 
-            public const string LayoutHeader = "CROSS HOTBAR LAYOUT";
+            public const string LayoutHeader = "Cross Hotbar Layout";
             public const string LeftRightSplit = "Left/Right Separation";
             public const string PadlockIcon = "Padlock Icon";
             public const string SetNumText = "Set # Text";
@@ -34,7 +34,7 @@ public partial class CrossUpUI
             public static string LRTriggerText => "Hide L/R Trigger Text";
             public const string UnassignedSlots = "Hide Unassigned Slots";
 
-            public const string ColorHeader = "CUSTOMIZE COLORS";
+            public const string ColorHeader = "Colors";
 
             public const string ColorSubheadBar = "SELECTED BAR";
             public const string ColorBarHighlight = "Backdrop Color";

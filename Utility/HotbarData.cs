@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using NodeTools;
+
 // ReSharper disable UnusedMember.Local
 // ReSharper disable MemberHidesStaticFromOuterClass
 
@@ -9,287 +10,233 @@ namespace CrossUp;
 public sealed unsafe partial class CrossUp
 {
     /// <summary>Reference (and some default properties) for all the hotbar nodes we're working with.</summary>
-    public class Bars
+    internal static class Bars
     {
         /// <summary>Whether all the hotbars are loaded</summary>
-        public static bool AllExist => Cross.Exists && WXLL.Exists && WXRR.Exists && ActionContents.Exists && ActionBars.All(static bar => bar.Exists);
+        internal static bool AllExist => Cross.Exists && WXHB.Exists && ActionContents.Exists && ActionBars.All(static bar => bar.Exists);
 
         /// <summary>Get fresh new pointers for all the hotbar AtkUnitBases</summary>
-        public static void Init()
+        internal static void GetBases()
         {
-            Cross.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1);
-            WXLL.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1);
-            WXRR.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1);
-            ActionContents.Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1);
-            
+            Cross.Base = new("_ActionCross");
+            WXHB.LL.Base = new("_ActionDoubleCrossL");
+            WXHB.RR.Base = new("_ActionDoubleCrossR");
+            ActionContents.Base = new("_ActionContents");
+
             for (var i = 0; i < 10; i++) ActionBars[i] = new(i);
         }
 
         /// <summary>The Main Cross Hotbar</summary>
-        public class Cross
+        internal class Cross
         {
-            public static AtkUnitBase* Base { get; set; }
-            private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base;
-            private static AddonActionCross* AddonCross => (AddonActionCross*)Base;
-            public static bool Exists => BaseExists(Base) || BaseExists((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionCross", 1)) || (IsSetUp = false);
-            public static bool Enabled => LastEnabledState= CharConfig.CrossEnabled;
+            public static BaseWrapper Base = new("_ActionCross");
+            private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base.UnitBase;
+            private static AddonActionCross* AddonCross => (AddonActionCross*)Base.UnitBase;
+            public static bool Exists => Base.Exists;
+            internal static bool Enabled => LastEnabledState = CharConfig.Cross.Enabled;
             private static bool LastEnabledState = true;
-            public static bool EnableStateChanged => LastEnabledState != Enabled;
+            internal static bool EnableStateChanged => LastEnabledState != Enabled;
 
             /// <summary>The selection state of the Cross Hotbar</summary>
-            public static class Selection
+            internal static class Selection
             {
-                public enum Select { None, Left, Right, LR, RL, LL, RR }
+                internal enum Select { None, Left, Right, LR, RL, LL, RR }
                 internal static Select Previous = Select.None;
-                internal static Select Current => AddonCross->LeftBar     ? Select.Left :
-                                                AddonCross->RightBar      ? Select.Right :
-                                                AddonCross->LRBar > 0     ? Select.LR :
-                                                AddonCross->RLBar > 0     ? Select.RL :
-                                                WXLL.AddonCross->Selected ? Select.LL :
-                                                WXRR.AddonCross->Selected ? Select.RR : 
-                                                                            Select.None ;
+                internal static Select Current => AddonCross->LeftBar          ? Select.Left :
+                                                  AddonCross->RightBar         ? Select.Right :
+                                                  AddonCross->LRBar > 0        ? Select.LR :
+                                                  AddonCross->RLBar > 0        ? Select.RL :
+                                                  WXHB.LL.AddonCross->Selected ? Select.LL :
+                                                  WXHB.RR.AddonCross->Selected ? Select.RR : 
+                                                                                 Select.None ;
             }
-            public static NodeWrapper Root        => new() { Node = Base->GetNodeById(1)};
-            public static NodeWrapper Container   => new() { Node = Base->GetNodeById(23), DefaultPos = { X = 18F, Y = 79F } };
-            public static NodeWrapper SelectBG    => new() { Node = Base->GetNodeById(40), DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelectL => new() { Node = Base->GetNodeById(39), DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper MiniSelectR => new() { Node = Base->GetNodeById(38), DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper VertLine    => new() { Node = Base->GetNodeById(37), DefaultPos = { X = 271F, Y = 21F }, DefaultSize = { X = 9, Y = 76 } };
-            public static NodeWrapper RTtext      => new() { Node = Base->GetNodeById(25), DefaultPos = { X = 367F, Y = 11F }};
-            public static NodeWrapper LTtext      => new() { Node = Base->GetNodeById(24), DefaultPos = { X = 83F, Y = 11F } };
-            public static NodeWrapper SetDisplay  => new() { Node = Base->GetNodeById(18), DefaultPos = { X = 230F, Y = 170F } };
-            public static NodeWrapper SetText     => new() { Node = Base->GetNodeById(19) };
-            public static NodeWrapper SetNum      => new() { Node = Base->GetNodeById(20) };
-            public static NodeWrapper SetButton   => new() { Node = Base->GetNodeById(21) };
-            public static NodeWrapper SetBorder   => new() { Node = Base->GetNodeById(22) };
-            public static NodeWrapper Padlock     => new() { Node = Base->GetNodeById(17), DefaultPos = { X = 284F, Y = 152F } };
-            public static NodeWrapper PadlockIcon => new() { Node = Padlock.ChildNode(1) };
-            public static class ChangeSetDisplay
+            internal static NodeWrapper Root        => Base[1u];
+            internal static NodeWrapper Container   => new(Base[23u], pos: new(18, 79));
+            internal static NodeWrapper SelectBG    => new(Base[40u], size: new(304, 140));
+            internal static NodeWrapper MiniSelectL => new(Base[39u], size: new(166, 140));
+            internal static NodeWrapper MiniSelectR => new( Base[38u], size: new(166, 140));
+            internal static NodeWrapper VertLine    => new( Base[37u], pos: new(271, 21), size: new(9, 76));
+            internal static NodeWrapper RTtext      => new( Base[25u], pos: new(367, 11));
+            internal static NodeWrapper LTtext      => new( Base[24u], pos: new(83, 11));
+            internal static NodeWrapper SetDisplay  => new( Base[18u], pos: new(230, 170));
+            internal static NodeWrapper SetText     => Base[19u];
+            internal static NodeWrapper SetNum      => Base[20u];
+            internal static NodeWrapper SetButton   => Base[21u];
+            internal static NodeWrapper SetBorder   => Base[22u];
+            internal static NodeWrapper Padlock     => new(Base[17u], pos: new(284, 152));
+            internal static class ChangeSetDisplay
             {
-                public static NodeWrapper Container => new() { Node = Base->GetNodeById(2), DefaultPos = { X = 146F, Y = 0F } };
-                public static IEnumerable<NodeWrapper> Nums => new NodeWrapper[]
+                internal static NodeWrapper Container => new(Base[2u], pos:new(146,0));
+                internal static IEnumerable<NodeWrapper> Nums => new[]
                 {
-                    new() { Node = Base->GetNodeById(14) },
-                    new() { Node = Base->GetNodeById(15) },
-                    new() { Node = Base->GetNodeById(16) },
-                    new() { Node = Base->GetNodeById(13) },
-                    new() { Node = Base->GetNodeById(10) },
-                    new() { Node = Base->GetNodeById(11) },
-                    new() { Node = Base->GetNodeById(12) },
-                    new() { Node = Base->GetNodeById(9) }
+                    Base[14u],
+                    Base[15u],
+                    Base[16u],
+                    Base[13u],
+                    Base[12u],
+                    Base[11u],
+                    Base[10u],
+                    Base[9u]
                 };
-                public static NodeWrapper Text => new() { Node = Base->GetNodeById(3) };
+                internal static NodeWrapper Text => Base[3u];
             }
-            public static class Left
+            internal static Command[] Actions => CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
+
+            public static class SetID
             {
-                public static NodeWrapper GroupL => new() { Node = Base->GetNodeById(33), DefaultPos = { X = 0F, Y = 0F } };
-                public static NodeWrapper GroupR => new() { Node = Base->GetNodeById(34), DefaultPos = { X = 138F, Y = 0F } };
+                private static int Previous;
+                internal static int Current => Previous = AddonBase->HotbarID;
+                internal static bool HasChanged(AddonActionBarBase* barBase) => Previous != (Previous = barBase->HotbarID);
+                private static bool HasChanged() => Previous != Current;
             }
-            public static class Right
-            {
-                public static NodeWrapper GroupL => new() { Node = Base->GetNodeById(35), DefaultPos = { X = 284F, Y = 0F } };
-                public static NodeWrapper GroupR => new() { Node = Base->GetNodeById(36), DefaultPos = { X = 422F, Y = 0F } };
-            }
-            public static Command[] Actions => CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID, 16);
-            public static int LastKnownSetID;
-            private static int SetID => LastKnownSetID = AddonBase->HotbarID;
-            public static bool SetChanged(AddonActionBarBase* barBase) => LastKnownSetID != (LastKnownSetID = barBase->HotbarID);
-            private static bool SetChanged() => LastKnownSetID != SetID;
+
+            internal sealed class ButtonSet { internal NodeWrapper this[int i] => new(Base[(uint)(33 + i)], pos: new(142f * i - (i % 2 == 0 ? 0 : 4), 0)); }
+            internal static readonly ButtonSet Buttons = new();
         }
 
-        /// <summary>The Left WXHB</summary>
-        public class WXLL
+        internal class WXHB
         {
-            public static AtkUnitBase* Base { get; set; }
-            public static bool Exists => BaseExists(Base) || BaseExists((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossL", 1));
-            public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
-            public static NodeWrapper SelectBG   => new() { Node = Base->GetNodeById(8), DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelect => new() { Node = Base->GetNodeById(7), DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper GroupL     => new() { Node = Base->GetNodeById(6) };
-            public static NodeWrapper GroupR     => new() { Node = Base->GetNodeById(5) };
-        }
+            internal static bool Exists => LL.Exists && RR.Exists;
 
-        /// <summary>The Right WXHB</summary>
-        public class WXRR
-        {
-            public static AtkUnitBase* Base { get; set; }
-            public static bool Exists => BaseExists(Base) || BaseExists((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionDoubleCrossR", 1));
-            public static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base;
-            public static NodeWrapper SelectBG   => new() { Node = Base->GetNodeById(8), DefaultSize = { X = 304, Y = 140 } };
-            public static NodeWrapper MiniSelect => new() { Node = Base->GetNodeById(7), DefaultSize = { X = 166, Y = 140 } };
-            public static NodeWrapper GroupL     => new() { Node = Base->GetNodeById(6) };
-            public static NodeWrapper GroupR     => new() { Node = Base->GetNodeById(5) };
+            internal class LL
+            {
+                internal static BaseWrapper Base = new("_ActionDoubleCrossL");
+                internal static bool Exists => Base.Exists;
+                internal static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base.UnitBase;
+                internal static NodeWrapper SelectBG => new(Base[8u], size: new(304, 140));
+                internal static NodeWrapper MiniSelect => new(Base[7u], size: new(166, 140));
+            }
+
+            internal class RR
+            {
+                internal static BaseWrapper Base = new("_ActionDoubleCrossR");
+                internal static bool Exists => Base.Exists;
+                internal static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base.UnitBase;
+                internal static NodeWrapper SelectBG => new(Base[8u], size:new(304,140));
+                internal static NodeWrapper MiniSelect => new(Base[7u], size:new(166,140));
+            }
+            internal static readonly ButtonSet Buttons = new();
+            internal sealed class ButtonSet { internal NodeWrapper this[int i] => (i < 2 ? LL.Base : RR.Base)[(uint)(6 - i % 2)]; }
         }
 
         /// <summary>The L->R Expanded Hold Bar</summary>
-        public class LR
+        internal class LR
         {
-            public static int BorrowID => Config.LRborrow;
-            public static ActionBar BorrowBar => ActionBars[BorrowID];
-            public static Command[] Actions
-            {
-                get
-                {
-                    var map = CrossUp.Actions.LRMap;
-                    return CrossUp.Actions.GetByBarID(map.barID, 8, map.useLeft ? 0 : 8);
-                }
-            }
-            public static bool Exists => BorrowBar.Exists;
+            internal static int ID => Config.LRborrow;
+            internal static ActionBar BorrowBar => ActionBars[ID];
+            internal static bool Exists => BorrowBar.Exists;
+            internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.LR);
+            internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
         }
 
         /// <summary>The R->L Expanded Hold Bar</summary>
-        public class RL
+        internal class RL
         {
-            public static int BorrowID => Config.RLborrow;
-            public static ActionBar BorrowBar => ActionBars[BorrowID];
-            public static Command[] Actions
-            {
-                get
-                {
-                    var map = CrossUp.Actions.RLMap;
-                    return CrossUp.Actions.GetByBarID(map.barID, 8, map.useLeft ? 0 : 8);
-                }
-            }
-            public static bool Exists => BorrowBar.Exists;
+            internal static int ID => Config.RLborrow;
+            internal static ActionBar BorrowBar => ActionBars[ID];
+            internal static bool Exists => BorrowBar.Exists;
+            internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.RL);
+            internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
         }
 
         /// <summary>The "Duty Action" pane (ie, in Bozja/Eureka)</summary>
-        public class ActionContents
+        internal class ActionContents
         {
-            public static AtkUnitBase* Base { get; set; }
-            public static bool Exists => BaseExists(Base) || BaseExists((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionContents", 1)) ;
-            public static NodeWrapper BG1 => new() { Node = Base->GetNodeById(14) };
-            public static NodeWrapper BG2 => new() { Node = Base->GetNodeById(13) };
-            public static NodeWrapper BG3 => new() { Node = Base->GetNodeById(10) };
-            public static NodeWrapper BG4 => new() { Node = Base->GetNodeById(9) };
+            internal static BaseWrapper Base = new("_ActionContents");
+            internal static bool Exists => Base.Exists;
+            internal static NodeWrapper BG1 => Base[14u];
+            internal static NodeWrapper BG2 => Base[13u];
+            internal static NodeWrapper BG3 => Base[10u];
+            internal static NodeWrapper BG4 => Base[9u];
         }
 
         /// <summary>Mouse/KB Action Bars</summary>
-        public static readonly ActionBar[] ActionBars = { new(0),new(1),new(2),new(3),new(4),new(5),new(6),new(7),new(8),new(9) };
-        public sealed class ActionBar
+        internal static readonly ActionBar[] ActionBars = { new(0),new(1),new(2),new(3),new(4),new(5),new(6),new(7),new(8),new(9) };
+        internal sealed class ActionBar
         {
-            public ActionBar(int barID)
+            internal ActionBar(int barID)
             {
-                BarID = barID;
-                Base = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar" + (barID == 0 ? "" : "0" + barID), 1);
+                ID = barID;
+                Base = new("_ActionBar" + (barID == 0 ? "" : "0" + barID));
+                Buttons = new ActionBarButtonNodes(ID);
             }
-            public readonly int BarID;
-            public AtkUnitBase* Base { get; }
-            private int GridType => CharConfig.Hotbar.GridType[BarID];
-            public bool Exists => BaseExists(Base) || BaseExists((AtkUnitBase*)Service.GameGui.GetAddonByName("_ActionBar" + (BarID == 0 ? "" : "0" + BarID), 1)) || (IsSetUp = false);
-            public NodeWrapper Root       => new() { Node = Base->GetNodeById(1), DefaultSize = DefaultBarSizes[CharConfig.Hotbar.GridType[BarID]] };
-            public NodeWrapper BarNumText => new() { Node = Base->GetNodeById(5) };
-            public NodeWrapper GetButton(int b, bool includeDefault=false) => new(Base->GetNodeById((uint)(b + 8)), includeDefault ? DefaultBarGrids[GridType, b] :  null);
-            public Command[] Actions => CrossUp.Actions.GetByBarID(BarID, 12);
+
+            internal readonly int ID;
+            internal readonly BaseWrapper Base;
+            internal bool Exists => Base.Exists;
+            internal NodeWrapper Root       => new(Base[1u], size: DefaultBarSizes[CharConfig.Hotbar.GridType[ID]]) ;
+            internal NodeWrapper BarNumText => Base[5u];
+            internal Command[] Actions => CrossUp.Actions.GetByBarID(ID, 12);
+            internal readonly ActionBarButtonNodes Buttons;
+        }
+        internal sealed class ActionBarButtonNodes
+        {
+            internal ActionBarButtonNodes(int id) { ID = id; }
+            private readonly int ID;
+            private BaseWrapper Base => ActionBars[ID].Base;
+            internal NodeWrapper this[int b, bool getDef = false] => new(Base[(uint)(b + 8)], getDef ? DefaultBarGrids[(int)CharConfig.Hotbar.GridType[ID], b] : null);
         }
 
-        /// <summary>Check the existence of a particular AtkUnitBase</summary>
-        private static bool BaseExists(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 /*&& unitBase->X > 0 && unitBase->Y > 0*/;
-
         /// <summary>Keeps track of the original actions from the Mouse/KB bars, before being borrowed/altered</summary>
-        public static readonly Command[]?[] StoredActions = new Command[10][];
+        internal static readonly Command[]?[] StoredActions = new Command[10][];
 
         /// <summary>Original sizes for the Mouse/KB bars, by [int gridType]</summary>
         private static readonly Vector2[] DefaultBarSizes =
         {
-            new() { X = 624, Y = 72 },
-            new() { X = 331, Y = 121 },
-            new() { X = 241, Y = 170 },
-            new() { X = 162, Y = 260 },
-            new() { X = 117, Y = 358 },
-            new() { X = 72, Y = 618 }
+            new(624,72),
+            new(331,121),
+            new(241,170),
+            new(162,260),
+            new(117,358),
+            new(72,618)
         };
 
         /// <summary>Original button positions for the Mouse/KB bars, by [int gridType]</summary>
         private static readonly Vector2[,] DefaultBarGrids =
         {
             {
-                new() { X = 34, Y = 0 },
-                new() { X = 79, Y = 0 },
-                new() { X = 124, Y = 0 },
-                new() { X = 169, Y = 0 },
-                new() { X = 214, Y = 0 },
-                new() { X = 259, Y = 0 },
-                new() { X = 304, Y = 0 },
-                new() { X = 349, Y = 0 },
-                new() { X = 394, Y = 0 },
-                new() { X = 439, Y = 0 },
-                new() { X = 484, Y = 0 },
-                new() { X = 529, Y = 0 }
+                new(34, 0), new(79, 0), new(124, 0), new(169, 0), new(214, 0), new(259, 0), new(304, 0), new(349, 0), new(394, 0), new(439, 0), new(484, 0), new(529, 0)
             },
             {
-                new() { X = 34, Y = 0 },
-                new() { X = 79, Y = 0 },
-                new() { X = 124, Y = 0 },
-                new() { X = 169, Y = 0 },
-                new() { X = 214, Y = 0 },
-                new() { X = 259, Y = 0 },
-                new() { X = 34, Y = 49 },
-                new() { X = 79, Y = 49 },
-                new() { X = 124, Y = 49 },
-                new() { X = 169, Y = 49 },
-                new() { X = 214, Y = 49 },
-                new() { X = 259, Y = 49 }
+                new(34, 0),  new(79, 0),  new(124, 0),  new(169, 0),  new(214, 0),  new(259, 0),
+                new(34, 49), new(79, 49), new(124, 49), new(169, 49), new(214, 49), new(259, 49)
             },
             {
-                new() { X = 34, Y = 0 },
-                new() { X = 79, Y = 0 },
-                new() { X = 124, Y = 0 },
-                new() { X = 169, Y = 0 },
-                new() { X = 34, Y = 49 },
-                new() { X = 79, Y = 49 },
-                new() { X = 124, Y = 49 },
-                new() { X = 169, Y = 49 },
-                new() { X = 34, Y = 98 },
-                new() { X = 79, Y = 98 },
-                new() { X = 124, Y = 98 },
-                new() { X = 169, Y = 98 }
+                new(34, 0),  new(79, 0),  new(124, 0),  new(169, 0),
+                new(34, 49), new(79, 49), new(124, 49), new(169, 49),
+                new(34, 98), new(79, 98), new(124, 98), new(169, 98)
             },
             {
-                new() { X = 0, Y = 0 },
-                new() { X = 45, Y = 0 },
-                new() { X = 90, Y = 0 },
-                new() { X = 0, Y = 49 },
-                new() { X = 45, Y = 49 },
-                new() { X = 90, Y = 49 },
-                new() { X = 0, Y = 98 },
-                new() { X = 45, Y = 98 },
-                new() { X = 90, Y = 98 },
-                new() { X = 0, Y = 147 },
-                new() { X = 45, Y = 147 },
-                new() { X = 90, Y = 147 }
+                new(0, 0),   new(45, 0),   new(90, 0),
+                new(0, 49),  new(45, 49),  new(90, 49),
+                new(0, 98),  new(45, 98),  new(90, 98),
+                new(0, 147), new(45, 147), new(90, 147)
             },
             {
-                new() { X = 0, Y = 0 },
-                new() { X = 45, Y = 0 },
-                new() { X = 0, Y = 49 },
-                new() { X = 45, Y = 49 },
-                new() { X = 0, Y = 98 },
-                new() { X = 45, Y = 98 },
-                new() { X = 0, Y = 147 },
-                new() { X = 45, Y = 147 },
-                new() { X = 0, Y = 196 },
-                new() { X = 45, Y = 196 },
-                new() { X = 0, Y = 245 },
-                new() { X = 45, Y = 245 }
+                new(0, 0),   new(45, 0),
+                new(0, 49),  new(45, 49),
+                new(0, 98),  new(45, 98),
+                new(0, 147), new(45, 147),
+                new(0, 196), new(45, 196),
+                new(0, 245), new(45, 245)
             },
             {
-                new() { X = 0, Y = 14 },
-                new() { X = 0, Y = 59 },
-                new() { X = 0, Y = 104 },
-                new() { X = 0, Y = 149 },
-                new() { X = 0, Y = 194 },
-                new() { X = 0, Y = 239 },
-                new() { X = 0, Y = 284 },
-                new() { X = 0, Y = 329 },
-                new() { X = 0, Y = 374 },
-                new() { X = 0, Y = 419 },
-                new() { X = 0, Y = 464 },
-                new() { X = 0, Y = 509 }
+                new(0, 14),
+                new(0, 59),
+                new(0, 104),
+                new(0, 149),
+                new(0, 194),
+                new(0, 239),
+                new(0, 284),
+                new(0, 329),
+                new(0, 374),
+                new(0, 419),
+                new(0, 464),
+                new(0, 509)
             }
         };
 
         /// <summary>Visibility status of Mouse/KB  bars before they were borrowed</summary>
-        public static readonly bool[] WasHidden = new bool[10];
+        internal static readonly bool[] WasHidden = new bool[10];
     }
 }
