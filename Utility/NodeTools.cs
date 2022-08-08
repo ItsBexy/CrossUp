@@ -28,7 +28,7 @@ public sealed unsafe class BaseWrapper
     }
     public string AddonName { get; }
     public readonly AtkUnitBase* UnitBase;
-    public static bool BaseCheck(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && (unitBase->X > 0 || unitBase->Y > 0);
+    public static bool BaseCheck(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && (unitBase->X != 0 || unitBase->Y != 0);
     public bool Exists => BaseCheck(UnitBase) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName(AddonName, 1));
     public AtkResNode** NodeList => UnitBase->UldManager.NodeList;
     public ushort NodeListSize => UnitBase->UldManager.NodeListSize;
