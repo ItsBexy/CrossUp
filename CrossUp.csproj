@@ -20,7 +20,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-    <Content Include="Data\crossUp.json">
+    <Content Include="Data\CrossUp.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
