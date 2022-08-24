@@ -13,7 +13,7 @@ public sealed unsafe partial class CrossUp
         internal static void Update(bool forceArrange = false, bool hudFixCheck = false, bool resetAll = false)
         {
             if (!Bars.Cross.Exists) return;
-            
+
             var select = Current;
             if (Bars.Cross.Enabled)
             {

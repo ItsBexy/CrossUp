@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+﻿using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 // ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
@@ -39,21 +40,21 @@ public class CharConfig
     public static class Cross
     {
         /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
-        public static readonly Config Enabled = new() { ID = 378 };
+        public static readonly Config Enabled = new() { ID = 380 };
 
         /// <summary><term>Checkbox</term> The Cross Hotbar is visible in the HUD</summary>
-        public static readonly Config Visible = new() { Index = 536 };
+        public static readonly Config Visible = new() { Index = 538 };
     }
 
     /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
-    public static readonly Config SepPvP = new() { ID = 400 };
+    public static readonly Config SepPvP = new() { ID = 402 };
 
     /// <summary>
     /// <term>Radio Button</term> Cross Hotbar Display Type<br/><br/>
     /// <term>0</term> D-Pad / Buttons / D-Pad / Buttons<br/>
     /// <term>1</term> D-Pad / D-Pad / Buttons / Buttons
     /// </summary>
-    public static readonly Config MixBar = new() { ID = 370 };
+    public static readonly Config MixBar = new() { ID = 372 };
 
     /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
     /// Returns:<br/>
@@ -81,21 +82,21 @@ public class CharConfig
     public static class ExtraBarMaps
     {
         /// <summary>L->R Expanded Hold Controls</summary>
-        public static readonly Config[] LR = { new() { ID = 399 }, new() { ID = 422 } };
+        public static readonly Config[] LR = { new() { ID = 401 }, new() { ID = 424 } };
         /// <summary>R->L Expanded Hold Controls</summary>
-        public static readonly Config[] RL = { new() { ID = 398 }, new() { ID = 421 } };
+        public static readonly Config[] RL = { new() { ID = 400 }, new() { ID = 423 } };
         /// <summary>Left WXHB</summary>
-        public static readonly Config[] LL = { new() { ID = 424 }, new() { ID = 427 } };
+        public static readonly Config[] LL = { new() { ID = 426 }, new() { ID = 429 } };
         /// <summary>Right WXHB</summary>
-        public static readonly Config[] RR = { new() { ID = 425 }, new() { ID = 428 } };
+        public static readonly Config[] RR = { new() { ID = 427 }, new() { ID = 430 } };
     }
 
     /// <summary><term>Sliders</term> Transparency settings for Cross Hotbar buttons<br/><br/>Returns 0-100 (Converted by game to alpha 0-255)</summary>
     public class Transparency
     {
-        public static readonly Config Standard = new() { ID = 435 };
-        public static readonly Config Active = new() { ID = 436 };
-        public static readonly Config Inactive = new() { ID = 437 };
+        public static readonly Config Standard = new() { ID = 437 };
+        public static readonly Config Active = new() { ID = 438 };
+        public static readonly Config Inactive = new() { ID = 439 };
     }
     /// <summary>Per-bar configuration settings, by [int BarID]</summary>
     public class Hotbar
@@ -104,9 +105,7 @@ public class CharConfig
         /// <term>0</term> Job-specific<br/>
         /// <term>1</term> Shared</summary>
         public static readonly Config[] Shared =
-        {   new() { ID = 350 },
-            new() { ID = 351 },
-            new() { ID = 352 },
+        {   new() { ID = 352 },
             new() { ID = 353 },
             new() { ID = 354 },
             new() { ID = 355 },
@@ -114,22 +113,23 @@ public class CharConfig
             new() { ID = 357 },
             new() { ID = 358 },
             new() { ID = 359 },
-
             new() { ID = 360 },
             new() { ID = 361 },
+
             new() { ID = 362 },
             new() { ID = 363 },
             new() { ID = 364 },
             new() { ID = 365 },
             new() { ID = 366 },
-            new() { ID = 367 }
+            new() { ID = 367 },
+            new() { ID = 368 },
+            new() { ID = 369 }
         };
         /// <summary><term>CheckBox</term> Whether the bar is set to visible<br/><br/>
         /// <term>0</term> Hidden<br/>
         /// <term>1</term> Visible</summary>
         public static readonly Config[] Visible =
         {   
-            new() { Index = 485 },
             new() { Index = 486 },
             new() { Index = 487 },
             new() { Index = 488 },
@@ -138,7 +138,8 @@ public class CharConfig
             new() { Index = 491 },
             new() { Index = 492 },
             new() { Index = 493 },
-            new() { Index = 494 }
+            new() { Index = 494 },
+            new() { Index = 495 }
         };
 
         /// <summary><term>Radio Button</term> The bar's grid layout setting<br/><br/>
@@ -151,8 +152,6 @@ public class CharConfig
         /// </summary>
         public static readonly Config[] GridType =
         {
-            new() { Index = 501 },
-            new() { Index = 502 },
             new() { Index = 503 },
             new() { Index = 504 },
             new() { Index = 505 },
@@ -160,7 +159,28 @@ public class CharConfig
             new() { Index = 507 },
             new() { Index = 508 },
             new() { Index = 509 },
-            new() { Index = 510 }
+            new() { Index = 510 },
+            new() { Index = 511 },
+            new() { Index = 512 }
         };
     }
+
+    public static void LogRangeUint(uint start, uint end)
+    {
+        for (var i=start;i<=end;i++)
+        {
+            PluginLog.Log(i+" "+Config.Get(i));
+        }
+
+    }
+
+    public static void LogRangeShort(short start, short end)
+    {
+        for (short i = start; i <= end; i++)
+        {
+            PluginLog.Log(i + " " + Config.Get(i));
+        }
+
+    }
+
 }
