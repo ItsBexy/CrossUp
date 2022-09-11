@@ -48,7 +48,7 @@ public sealed partial class CrossUp : IDalamudPlugin
             if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable();
 
             Layout.Update(true, true);
-            Layout.ScheduleNudges(10);
+            Layout.ScheduleNudges(10,750);
 
             Color.SetSelectBG();
             Color.SetPulse();
@@ -76,6 +76,7 @@ public sealed partial class CrossUp : IDalamudPlugin
 
     /// <summary>"/xup" Command</summary>
     private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
+
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
     private void DisposeUI()

@@ -87,12 +87,15 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.LeftRightSplit);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(2, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetSplit");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.Split = 0;
                     Config.Save();
                     CrossUp.Layout.Update(true);
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
@@ -130,13 +133,16 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.PadlockIcon);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(3, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetPadlock");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.PadlockOffset = new(0);
                     Config.HidePadlock = false;
                     Config.Save();
                     CrossUp.Layout.Update(true, true);
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
@@ -174,13 +180,16 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.SetNumText);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(4, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetSetText");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.SetTextOffset = new(0);
                     Config.HideSetText = false;
                     Config.Save();
                     CrossUp.Layout.Update(true, true);
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
@@ -217,12 +226,14 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.ChangeSetText);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(5, FontAwesomeIcon.UndoAlt))
+                ImGui.PushID("resetChangeSet");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.ChangeSetOffset = new(0);
                     Config.Save();
                     CrossUp.Layout.Update(true, true);
                 }
+                ImGui.PopID();
 
 
                 ImGui.TableNextColumn();
@@ -320,13 +331,17 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.TableNextColumn();
                 ImGui.Text(Strings.LookAndFeel.ColorBarHighlight);
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(9, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetBG");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.SelectColorMultiply = CrossUp.Color.Preset.MultiplyNeutral;
                     Config.SelectDisplayType = 0;
                     Config.Save();
                     CrossUp.Color.SetSelectBG();
                 }
+                ImGui.PopID();
+
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
                 if (ImGui.ColorEdit3("##BarMultiply", ref multiply))
@@ -385,12 +400,16 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.ColorGlow);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(7, FontAwesomeIcon.UndoAlt))
+
+
+                ImGui.PushID("resetGlowA");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.GlowA = CrossUp.Color.Preset.White;
                     Config.Save();
                     CrossUp.Color.SetPulse();
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
@@ -405,12 +424,15 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.ColorPulse);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(8, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetGlowB");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.GlowB = CrossUp.Color.Preset.White;
                     Config.Save();
                     CrossUp.Color.SetPulse();
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
@@ -437,12 +459,15 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.TextColor);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(10, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetTextColor");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.TextColor = CrossUp.Color.Preset.White;
                     Config.Save();
                     CrossUp.Color.SetText();
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
@@ -457,12 +482,15 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.TextGlow);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(11, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetTextGlow");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.TextGlow = CrossUp.Color.Preset.TextGlow;
                     Config.Save();
                     CrossUp.Color.SetText();
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
@@ -478,12 +506,15 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.Text(Strings.LookAndFeel.BorderColor);
 
                 ImGui.TableNextColumn();
-                if (ImGuiComponents.IconButton(12, FontAwesomeIcon.UndoAlt))
+
+                ImGui.PushID("resetBorder");
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Config.BorderColor = CrossUp.Color.Preset.White;
                     Config.Save();
                     CrossUp.Color.SetText();
                 }
+                ImGui.PopID();
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
@@ -649,11 +680,14 @@ internal sealed partial class CrossUpUI : IDisposable
 
                         ImGui.TableNextColumn();
 
-                        if (ImGuiComponents.IconButton(0, FontAwesomeIcon.UndoAlt))
+                        ImGui.PushID("resetLRpos");
+                        if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                         {
                             Config.LRpos = new(-214,-88);
                             CrossUp.Layout.Update(true);
                         }
+
+                        ImGui.PopID();
 
                         ImGui.TableNextColumn();
                         ImGui.SetNextItemWidth(100 * scale);
@@ -683,11 +717,15 @@ internal sealed partial class CrossUpUI : IDisposable
 
                             ColumnCentredText(Strings.Terms.RLinput + " " + Strings.SeparateEx.BarPosition);
                             ImGui.TableNextColumn();
-                            if (ImGuiComponents.IconButton(1, FontAwesomeIcon.UndoAlt))
+
+
+                            ImGui.PushID("resetRLpos");
+                            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                             {
                                 Config.RLpos = new(214,-88);
                                 CrossUp.Layout.Update(true);
                             }
+                            ImGui.PopID();
 
                             ImGui.TableNextColumn();
                             ImGui.SetNextItemWidth(100 * scale);

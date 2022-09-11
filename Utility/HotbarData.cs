@@ -64,6 +64,9 @@ public sealed unsafe partial class CrossUp
             internal static NodeWrapper SetButton   => Base[21u];
             internal static NodeWrapper SetBorder   => Base[22u];
             internal static NodeWrapper Padlock     => new(Base[17u], pos: new(284, 152));
+            internal static NodeWrapper ButtonGuide => Base[27u]; 
+            internal static NodeWrapper DpadGuide => Base[26u];
+
             internal static class ChangeSetDisplay
             {
                 internal static NodeWrapper Container => new(Base[2u], pos:new(146,0));
