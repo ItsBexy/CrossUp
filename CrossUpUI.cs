@@ -4,6 +4,7 @@ using Dalamud.Interface.Components;
 using ImGuiNET;
 using System;
 using System.Numerics;
+using Dalamud.Logging;
 using ImGui = ImGuiNET.ImGui;
 
 // ReSharper disable NotAccessedField.Local
@@ -66,12 +67,69 @@ internal sealed partial class CrossUpUI : IDisposable
                 LookAndFeel.DrawTab();
                 SeparateEx.DrawTab();
                 Mapping.DrawTab();
+             /*   DevTest.DrawTab();*/
 
                 ImGui.EndTabBar();
             }
             Config.ConfigWindowSize = ImGui.GetWindowSize();
         }
         ImGui.End();
+    }
+
+    public class DevTest
+    {
+        private static int StartID = 0;
+        private static int EndID = 600;
+        private static int StartIndex = 0;
+        private static int EndIndex = 600;
+
+        public static void DrawTab()
+        {
+            int startID = StartID;
+            int endID = EndID;
+            int startIndex = StartIndex;
+            int endIndex = EndIndex;
+
+            if (!ImGui.BeginTabItem("Dev Testing")) return;
+
+
+            if (ImGui.Button("Log Config IDs",new Vector2(150,20)))
+            {
+                for (int i = startID; i < endID; i++)
+                {
+                    PluginLog.Log("ID "+i+": "+CharConfig.Config.Get((short)i));
+                }
+            }
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##startID", ref startID)) StartID = startID;
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##endID", ref endID)) EndID = endID;
+
+
+
+            if (ImGui.Button("Log Config Indexes", new Vector2(150, 20)))
+            {
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    PluginLog.Log("index " + i + ": " + CharConfig.Config.Get((uint)i));
+                }
+            }
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##startIndex", ref startIndex)) StartIndex = startIndex;
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##endIndex", ref endIndex)) EndIndex = endIndex;
+
+
+            ImGui.EndTabItem();
+        }
     }
 
     public class LookAndFeel

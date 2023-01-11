@@ -20,9 +20,9 @@ public class CharConfig
     {
         public short? ID;
         public uint Index;
-        private int Get() => ID == null ? Get(Index) : Get((short)ID);
-        private static unsafe int Get(uint index) => Instance->GetIntValue(index);
-        private static unsafe int Get(short id) => Instance->GetIntValue(id);
+        public int Get() => ID == null ? Get(Index) : Get((short)ID);
+        public static unsafe int Get(uint index) => Instance->GetIntValue(index);
+        public static unsafe int Get(short id) => Instance->GetIntValue(id);
         public bool Set(int val) => ID == null ? Set(Index, val) : Set((short)ID, val);
         private static unsafe bool Set(uint configIndex, int value) => Instance->SetOption(configIndex, value, 1);
         private static unsafe bool Set(short configID, int value)
@@ -40,21 +40,21 @@ public class CharConfig
     public static class Cross
     {
         /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
-        public static readonly Config Enabled = new() { ID = 380 };
+        public static readonly Config Enabled = new() { ID = 384 };
 
         /// <summary><term>Checkbox</term> The Cross Hotbar is visible in the HUD</summary>
-        public static readonly Config Visible = new() { Index = 538 };
+        public static readonly Config Visible = new() { Index = 546 };
     }
 
     /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
-    public static readonly Config SepPvP = new() { ID = 402 };
+    public static readonly Config SepPvP = new() { ID = 406 };
 
     /// <summary>
     /// <term>Radio Button</term> Cross Hotbar Display Type<br/><br/>
     /// <term>0</term> D-Pad / Buttons / D-Pad / Buttons<br/>
     /// <term>1</term> D-Pad / D-Pad / Buttons / Buttons
     /// </summary>
-    public static readonly Config MixBar = new() { ID = 372 };
+    public static readonly Config MixBar = new() { ID = 376 };
 
     /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
     /// Returns:<br/>
@@ -82,21 +82,21 @@ public class CharConfig
     public static class ExtraBarMaps
     {
         /// <summary>L->R Expanded Hold Controls</summary>
-        public static readonly Config[] LR = { new() { ID = 401 }, new() { ID = 424 } };
+        public static readonly Config[] LR = { new() { ID = 405 }, new() { ID = 428 } };
         /// <summary>R->L Expanded Hold Controls</summary>
-        public static readonly Config[] RL = { new() { ID = 400 }, new() { ID = 423 } };
+        public static readonly Config[] RL = { new() { ID = 404 }, new() { ID = 427 } };
         /// <summary>Left WXHB</summary>
-        public static readonly Config[] LL = { new() { ID = 426 }, new() { ID = 429 } };
+        public static readonly Config[] LL = { new() { ID = 430 }, new() { ID = 433 } };
         /// <summary>Right WXHB</summary>
-        public static readonly Config[] RR = { new() { ID = 427 }, new() { ID = 430 } };
+        public static readonly Config[] RR = { new() { ID = 431 }, new() { ID = 434 } };
     }
 
     /// <summary><term>Sliders</term> Transparency settings for Cross Hotbar buttons<br/><br/>Returns 0-100 (Converted by game to alpha 0-255)</summary>
     public class Transparency
     {
-        public static readonly Config Standard = new() { ID = 437 };
-        public static readonly Config Active = new() { ID = 438 };
-        public static readonly Config Inactive = new() { ID = 439 };
+        public static readonly Config Standard = new() { ID = 441 };
+        public static readonly Config Active = new() { ID = 442 };
+        public static readonly Config Inactive = new() { ID = 443 };
     }
     /// <summary>Per-bar configuration settings, by [int BarID]</summary>
     public class Hotbar
@@ -105,41 +105,41 @@ public class CharConfig
         /// <term>0</term> Job-specific<br/>
         /// <term>1</term> Shared</summary>
         public static readonly Config[] Shared =
-        {   new() { ID = 352 },
-            new() { ID = 353 },
-            new() { ID = 354 },
-            new() { ID = 355 },
-            new() { ID = 356 },
+        {   new() { ID = 356 },
             new() { ID = 357 },
             new() { ID = 358 },
             new() { ID = 359 },
             new() { ID = 360 },
             new() { ID = 361 },
-
             new() { ID = 362 },
             new() { ID = 363 },
             new() { ID = 364 },
             new() { ID = 365 },
+
             new() { ID = 366 },
             new() { ID = 367 },
             new() { ID = 368 },
-            new() { ID = 369 }
+            new() { ID = 369 },
+            new() { ID = 370 },
+            new() { ID = 371 },
+            new() { ID = 372 },
+            new() { ID = 373 }
         };
         /// <summary><term>CheckBox</term> Whether the bar is set to visible<br/><br/>
         /// <term>0</term> Hidden<br/>
         /// <term>1</term> Visible</summary>
         public static readonly Config[] Visible =
         {   
-            new() { Index = 486 },
-            new() { Index = 487 },
-            new() { Index = 488 },
-            new() { Index = 489 },
-            new() { Index = 490 },
-            new() { Index = 491 },
-            new() { Index = 492 },
-            new() { Index = 493 },
             new() { Index = 494 },
-            new() { Index = 495 }
+            new() { Index = 495 },
+            new() { Index = 496 },
+            new() { Index = 497 },
+            new() { Index = 498 },
+            new() { Index = 499 },
+            new() { Index = 500 },
+            new() { Index = 501 },
+            new() { Index = 502 },
+            new() { Index = 503 }
         };
 
         /// <summary><term>Radio Button</term> The bar's grid layout setting<br/><br/>
@@ -152,16 +152,16 @@ public class CharConfig
         /// </summary>
         public static readonly Config[] GridType =
         {
-            new() { Index = 503 },
-            new() { Index = 504 },
-            new() { Index = 505 },
-            new() { Index = 506 },
-            new() { Index = 507 },
-            new() { Index = 508 },
-            new() { Index = 509 },
             new() { Index = 510 },
             new() { Index = 511 },
-            new() { Index = 512 }
+            new() { Index = 512 },
+            new() { Index = 513 },
+            new() { Index = 514 },
+            new() { Index = 515 },
+            new() { Index = 516 },
+            new() { Index = 517 },
+            new() { Index = 518 },
+            new() { Index = 519 }
         };
     }
 
