@@ -252,7 +252,7 @@ public sealed unsafe class NodeWrapper
 
     public NodeWrapper SetPos(Vector2? pos)
     {
-        pos ??= DefaultSize;
+        pos ??= DefaultPos;
         return SetPos((Vector2)pos);
     }
 
