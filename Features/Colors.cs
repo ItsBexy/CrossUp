@@ -19,14 +19,14 @@ public sealed partial class CrossUp
         /// <summary>Apply selected highlight colour to all XHB and WXHB highlight ninegrids</summary>
         public static void SetSelectBG(bool reset = false)
         {
-            var multiply = reset ? Preset.MultiplyNeutral : Config.SelectColorMultiply;
-            var displayType = reset ? 0 : Config.SelectDisplayType;
+            var multiply = reset ? Preset.MultiplyNeutral : Profile.SelectColorMultiply;
+            var displayType = reset ? 0 : Profile.SelectDisplayType;
 
             var blend = (uint)(displayType == 2 ? 2 : 0);
             var hide = displayType == 1;
 
-            Vector2 normSize = hide ? new(0) : new(304,140);
-            Vector2 miniSize = hide ? new(0) : new(166,140);
+            Vector2 normSize = hide ? new(0) : new(304, 140);
+            Vector2 miniSize = hide ? new(0) : new(166, 140);
 
             if (Bars.Cross.Exists)
             {
@@ -39,7 +39,7 @@ public sealed partial class CrossUp
             {
                 Bars.WXHB.LL.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
                 Bars.WXHB.LL.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
-        
+
                 Bars.WXHB.RR.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
                 Bars.WXHB.RR.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
             }
@@ -49,7 +49,9 @@ public sealed partial class CrossUp
                 var dutyActionColor = Preset.White;
                 if (!reset)
                 {
-                    var saturation = System.Drawing.Color.FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255)).GetSaturation();
+                    var saturation = System.Drawing.Color
+                        .FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255))
+                        .GetSaturation();
 
                     dutyActionColor = new Vector3
                     {
@@ -65,18 +67,19 @@ public sealed partial class CrossUp
                 Bars.ActionContents.BG4.SetColor(dutyActionColor).SetBlend(blend);
             }
 
-            PluginLog.LogVerbose($"Selection Color Set: {multiply}, {displayType switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+            PluginLog.LogVerbose(
+                $"Selection Color Set: {multiply}, {displayType switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
         }
 
         /// <summary>Set/Reset colors of pressed buttons</summary>
         public static void SetPulse(bool reset = false)
         {
-            var glowA = reset ? Preset.White : Config.GlowA;
-            var glowB = reset ? Preset.White : Config.GlowB;
+            var glowA = reset ? Preset.White : Profile.GlowA;
+            var glowB = reset ? Preset.White : Profile.GlowB;
 
             if (Bars.Cross.Exists)
             {
-                for (var set = 0; set < 4; set++) 
+                for (var set = 0; set < 4; set++)
                 for (uint bID = 2; bID <= 5; bID++)
                 {
                     var iconNode = Bars.Cross.Buttons[set][bID][2u];
@@ -87,7 +90,7 @@ public sealed partial class CrossUp
 
             if (Bars.WXHB.Exists)
             {
-                for (var set = 0; set < 4; set++) 
+                for (var set = 0; set < 4; set++)
                 for (uint bID = 2; bID <= 5; bID++)
                 {
                     var iconNode = Bars.WXHB.Buttons[set][bID][2u];
@@ -96,7 +99,7 @@ public sealed partial class CrossUp
                 }
             }
 
-            if (Layout.SeparateEx.Ready && Bars.LR.BorrowBar.Exists && Bars.RL.BorrowBar.Exists)
+            if (Layout.SeparateEx.Ready && Bars.LR.Exists && Bars.RL.Exists)
             {
                 for (var i = 0; i < 12; i++)
                 {
@@ -114,21 +117,22 @@ public sealed partial class CrossUp
         }
 
         /// <summary>Set/Reset Text and border colors</summary>
-        public static void SetText(bool reset=false)
+        public static void SetText(bool reset = false)
         {
             if (!Bars.Cross.Exists) return;
 
-            var color = reset ? Preset.White : Config.TextColor;
-            var glow = reset ? Preset.TextGlow : Config.TextGlow;
-            var border = reset ? Preset.White : Config.BorderColor;
+            var color = reset ? Preset.White : Profile.TextColor;
+            var glow = reset ? Preset.TextGlow : Profile.TextGlow;
+            var border = reset ? Preset.White : Profile.BorderColor;
 
-            Bars.Cross.LTtext.SetTextColor(color,glow);
+            Bars.Cross.LTtext.SetTextColor(color, glow);
             Bars.Cross.RTtext.SetTextColor(color, glow);
             Bars.Cross.SetText.SetTextColor(color, glow);
             Bars.Cross.SetNum.SetTextColor(color, glow);
             Bars.Cross.SetButton.SetTextColor(color, glow);
 
-            foreach (var num in Bars.Cross.ChangeSetDisplay.Nums) {
+            foreach (var num in Bars.Cross.ChangeSetDisplay.Nums)
+            {
                 num[3u].SetTextColor(color, glow);
                 num[4u].SetColor(border);
             }
@@ -138,12 +142,11 @@ public sealed partial class CrossUp
             Bars.Cross.SetBorder.SetColor(border);
         }
 
-        /// <summary>Reset all colours to defaults (called on dispose)</summary>
-        public static void Reset()
+        public static void SetAll(bool reset = false)
         {
-            SetSelectBG(true);
-            SetPulse(true);
-            SetText(true);
+            SetPulse(reset);
+            SetText(reset);
+            SetSelectBG(reset);
         }
     }
 }

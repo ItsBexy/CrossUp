@@ -7,6 +7,7 @@ using NodeTools;
 using static CrossUp.CrossUp.Bars.Cross.Selection;
 
 namespace CrossUp;
+
 public sealed unsafe partial class CrossUp
 {
     public static partial class Layout
@@ -15,11 +16,15 @@ public sealed unsafe partial class CrossUp
         public class SeparateEx
         {
             /// <summary>Confirms that the Separate Expanded Hold feature is active and that two valid bars are selected</summary>
-            internal static bool Ready => IsSetUp && Config.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
+            internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
+
+            internal static bool Enabled;
 
             /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
             internal static void Enable()
             {
+                if (Enabled) return;
+
                 PrepBar(Bars.LR.ID);
                 PrepBar(Bars.RL.ID);
 
@@ -28,6 +33,7 @@ public sealed unsafe partial class CrossUp
 
                 Update(true);
                 Task.Delay(20).ContinueWith(static delegate { if (IsSetUp) Update(true); });
+                Enabled = true;
             }
 
             /// <summary>Turn on each borrowed bar</summary>
@@ -42,15 +48,13 @@ public sealed unsafe partial class CrossUp
                     CharConfig.Hotbar.Visible[barID].Set(1);
                 }
 
-                for (var i = 0; i < 12; i++)
-                {
-                    Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
-                }
+                for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
             }
 
             /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
             internal static void Disable()
             {
+                Enabled = false;
                 Update(true);
                 ResetBars();
 
@@ -65,13 +69,14 @@ public sealed unsafe partial class CrossUp
                 {
                     var button = bar.Buttons[i];
                     button[2u].SetVis(false);
-                    button[3u].SetVis(!Config.HideUnassigned || actions[i].CommandType != HotbarSlotType.Empty);
+                    button[3u].SetVis(!Profile.HideUnassigned || actions[i].CommandType != HotbarSlotType.Empty);
                     button.SetAlpha(alpha);
                 }
             }
 
             /// <summary>Visually arrange the borrowed bars to replicate the Expanded Hold bars</summary>
-            internal static void Arrange(Select select, Select previous, float scale, int split, bool mixBar, (int, int, int, int) coords, bool forceArrange)
+            internal static void Arrange(Select select, Select previous, float scale, int split, bool mixBar,
+                (int, int, int, int) coords, bool forceArrange)
             {
                 SetActions(select);
                 HiddenCheck();
@@ -93,7 +98,7 @@ public sealed unsafe partial class CrossUp
                 Bars.LR.BorrowBar.BarNumText.SetScale(0F);
                 Bars.RL.BorrowBar.BarNumText.SetScale(0F);
 
-                for (var i = 0; i < 8; i++) MetaSlots.RL[i].Visible = !Config.OnlyOneEx;
+                for (var i = 0; i < 8; i++) MetaSlots.RL[i].Visible = !Profile.OnlyOneEx;
 
                 if (forceArrange || select != previous)
                 {
@@ -119,6 +124,7 @@ public sealed unsafe partial class CrossUp
                                 Bars.LR.Buttons[i + 8].SetVis(false).SetScale(0.85F); // hide unneeded borrowed buttons
                                 Bars.RL.Buttons[i + 8].SetVis(false).SetScale(0.85F);
                             }
+
                             break;
                         }
                         case Select.Left:
@@ -136,9 +142,10 @@ public sealed unsafe partial class CrossUp
                                 MetaSlots.Cross[2][i].SetVis(fromLR && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
                                 MetaSlots.Cross[3][i].SetVis(fromLR).SetScale(0.85F).Insert(Bars.RL.Buttons[i + 8], -rlX + split, -rlY, 0.85F);
 
-                                (!mixBar ? MetaSlots.Cross[2][i] : 
-                                           MetaSlots.Cross[1][i]).Insert(Bars.LR.Buttons[i + 8], (!mixBar ? split : -split) - lrX, -lrY, 0.85F);
+                                (!mixBar ? MetaSlots.Cross[2][i] : MetaSlots.Cross[1][i]).Insert(Bars.LR.Buttons[i + 8],
+                                    (!mixBar ? split : -split) - lrX, -lrY, 0.85F);
                             }
+
                             break;
                         }
                         case Select.Right:
@@ -156,9 +163,10 @@ public sealed unsafe partial class CrossUp
                                 MetaSlots.Cross[2][i].SetVis(fromRL && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
                                 MetaSlots.Cross[3][i].SetVis(false).SetScale(1.1F);
 
-                                (!mixBar ? MetaSlots.Cross[1][i] :
-                                           MetaSlots.Cross[2][i]).Insert(Bars.RL.Buttons[i + 8], (!mixBar ? -split : split) - rlX, -rlY, 0.85F);
+                                (!mixBar ? MetaSlots.Cross[1][i] : MetaSlots.Cross[2][i]).Insert(Bars.RL.Buttons[i + 8],
+                                    (!mixBar ? -split : split) - rlX, -rlY, 0.85F);
                             }
+
                             break;
                         }
                         case Select.LR:
@@ -175,15 +183,15 @@ public sealed unsafe partial class CrossUp
                                 MetaSlots.Cross[2][i].SetVis(true).Insert(Bars.LR.Buttons[i + (!mixBar ? 8 : 4)], -lrX + split, -lrY, 0.85F);
                                 MetaSlots.Cross[3][i].SetVis(true).Insert(Bars.RL.Buttons[i + 8], -rlX + split, -rlY, 0.85F);
                             }
+
                             break;
                         }
                         case Select.RL:
                             for (var i = 0; i < 8; i++)
                             {
                                 MetaSlots.RL[i].SetScale(1.1F);
-                                MetaSlots.LR[i].SetScale(Config.OnlyOneEx ? 1.1F : 0.85F);
-                                (!Config.OnlyOneEx ? MetaSlots.LR : MetaSlots.RL)[i]
-                                    .Insert(Bars.LR.Buttons[i], 0, 0, 0.85F); // L->R bar
+                                MetaSlots.LR[i].SetScale(Profile.OnlyOneEx ? 1.1F : 0.85F);
+                                (!Profile.OnlyOneEx ? MetaSlots.LR : MetaSlots.RL)[i].Insert(Bars.LR.Buttons[i], 0, 0, 0.85F); // L->R bar
                                 if (i >= 4) continue;
 
                                 // XHB
@@ -192,6 +200,7 @@ public sealed unsafe partial class CrossUp
                                 MetaSlots.Cross[2][i].SetVis(true).Insert(Bars.RL.Buttons[i + (!mixBar ? 0 : 8)], -rlX + split, -rlY, 0.85F);
                                 MetaSlots.Cross[3][i].SetVis(true).Insert(Bars.RL.Buttons[i + 4], -rlX + split, -rlY, 0.85F);
                             }
+
                             break;
                     }
                 }
@@ -280,11 +289,13 @@ public sealed unsafe partial class CrossUp
                         Position = pos;
                         Origin = orig;
                     }
+
                     internal bool Visible { get; set; } = true;
                     private Vector2 Position { get; }
                     private Vector2 Origin { get; }
                     private Vector2 Mod { get; set; }
                     internal float Scale { get; set; } = 1.0F;
+
                     public sealed class ScaleTween
                     {
                         internal DateTime Start { get; init; }
@@ -292,6 +303,7 @@ public sealed unsafe partial class CrossUp
                         internal float FromScale { get; init; }
                         internal float ToScale { get; init; }
                     }
+
                     private ScaleTween? Tween { get; set; }
                     private NodeWrapper? Button { get; set; }
 
@@ -318,7 +330,7 @@ public sealed unsafe partial class CrossUp
                     /// <summary>Places a button node into a MetaSlot, and sets it up to be animated if necessary.</summary>
                     internal MetaSlot Insert(NodeWrapper button, float xMod = 0, float yMod = 0, float scale = 1F)
                     {
-                        Mod = new Vector2(xMod,yMod);
+                        Mod = new Vector2(xMod, yMod);
                         Button = button;
 
                         if (Math.Abs(scale - Scale) > 0.01f)
@@ -382,58 +394,59 @@ public sealed unsafe partial class CrossUp
 
                 internal static readonly MetaSlot[] LR =
                 {
-                    new(pos: new(0,24), orig: new(102,39)),
-                    new(pos: new(42,0), orig: new(60,63)),
-                    new(pos: new(84,24), orig: new(18,39)),
-                    new(pos: new(42,48), orig: new(60,15)),
+                    new(pos: new(0, 24), orig: new(102, 39)),
+                    new(pos: new(42, 0), orig: new(60, 63)),
+                    new(pos: new(84, 24), orig: new(18, 39)),
+                    new(pos: new(42, 48), orig: new(60, 15)),
 
-                    new(pos: new(138,24), orig: new(54,39)),
-                    new(pos: new(180,0 ), orig: new(12,63)),
-                    new(pos: new(222,24), orig: new(-30,39)),
-                    new(pos: new(180,48), orig: new(12,15))
+                    new(pos: new(138, 24), orig: new(54, 39)),
+                    new(pos: new(180, 0), orig: new(12, 63)),
+                    new(pos: new(222, 24), orig: new(-30, 39)),
+                    new(pos: new(180, 48), orig: new(12, 15))
                 };
 
                 internal static readonly MetaSlot[] RL =
                 {
-                    new(pos: new(0,24), orig: new(102,39)),
-                    new(pos: new(42,0), orig: new(60,63)),
-                    new(pos: new(84,24), orig: new(18,39)),
-                    new(pos: new(42,48), orig: new(60,15)),
+                    new(pos: new(0, 24), orig: new(102, 39)),
+                    new(pos: new(42, 0), orig: new(60, 63)),
+                    new(pos: new(84, 24), orig: new(18, 39)),
+                    new(pos: new(42, 48), orig: new(60, 15)),
 
-                    new(pos: new(138,24), orig: new(54,39)),
-                    new(pos: new(180,0 ), orig: new(12,63)),
-                    new(pos: new(222,24), orig: new(-30,39)),
-                    new(pos: new(180,48), orig: new(12,15))
+                    new(pos: new(138, 24), orig: new(54, 39)),
+                    new(pos: new(180, 0), orig: new(12, 63)),
+                    new(pos: new(222, 24), orig: new(-30, 39)),
+                    new(pos: new(180, 48), orig: new(12, 15))
                 };
 
-                internal static readonly MetaSlot[][] Cross = {
+                internal static readonly MetaSlot[][] Cross =
+                {
                     new MetaSlot[]
                     {
                         new(pos: new(-142, 24), orig: new(94, 39)),
-                        new(pos: new(-100, 0),  orig: new(52, 63)),
-                        new(pos: new(-58, 24),  orig: new(10, 39)),
+                        new(pos: new(-100, 0), orig: new(52, 63)),
+                        new(pos: new(-58, 24), orig: new(10, 39)),
                         new(pos: new(-100, 48), orig: new(52, 15))
                     },
                     new MetaSlot[]
                     {
-                        new(pos: new(-4, 24 ), orig: new(62,  39 )),
-                        new(pos: new(38, 0  ), orig: new(20,  63 )),
-                        new(pos: new(80, 24 ), orig: new(-22, 39 )),
-                        new(pos: new(38, 48 ), orig: new(20,  15 ))
+                        new(pos: new(-4, 24), orig: new(62, 39)),
+                        new(pos: new(38, 0), orig: new(20, 63)),
+                        new(pos: new(80, 24), orig: new(-22, 39)),
+                        new(pos: new(38, 48), orig: new(20, 15))
                     },
                     new MetaSlot[]
                     {
-                        new(pos: new(142, 24 ), orig: new(94, 39)),
-                        new(pos: new(184, 0  ), orig: new(52, 63)),
-                        new(pos: new(226, 24 ), orig: new(10, 39)),
-                        new(pos: new(184, 48 ), orig: new(52, 15))
+                        new(pos: new(142, 24), orig: new(94, 39)),
+                        new(pos: new(184, 0), orig: new(52, 63)),
+                        new(pos: new(226, 24), orig: new(10, 39)),
+                        new(pos: new(184, 48), orig: new(52, 15))
                     },
                     new MetaSlot[]
                     {
-                        new(pos: new(280, 24 ), orig: new(62,  39 )),
-                        new(pos: new(322, 0  ), orig: new(20,  63 )),
-                        new(pos: new(364, 24 ), orig: new(-22, 39 )),
-                        new(pos: new(322, 48 ), orig: new(20,  15 ))
+                        new(pos: new(280, 24), orig: new(62, 39)),
+                        new(pos: new(322, 0), orig: new(20, 63)),
+                        new(pos: new(364, 24), orig: new(-22, 39)),
+                        new(pos: new(322, 48), orig: new(20, 15))
                     }
                 };
             }

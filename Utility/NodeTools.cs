@@ -3,12 +3,14 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Numerics;
 using CrossUp;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable MemberCanBeInternal
 // ReSharper disable InvertIf
+#pragma warning disable CS8629
 
 namespace NodeTools;
 
@@ -23,27 +25,59 @@ public sealed unsafe class BaseWrapper
     /// <param name="addonName">The internal name of a UI Addon</param>
     public BaseWrapper(string addonName)
     {
-        UnitBase = (AtkUnitBase*)Service.GameGui.GetAddonByName(addonName, 1);
+        UnitBase = (AtkUnitBase*)Service.GameGui.GetAddonByName(addonName);
         AddonName = addonName;
     }
+
     public string AddonName { get; }
     public readonly AtkUnitBase* UnitBase;
-    public static bool BaseCheck(AtkUnitBase* unitBase) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && (unitBase->X != 0 || unitBase->Y != 0);
-    public bool Exists => BaseCheck(UnitBase) || BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName(AddonName, 1));
+
+    public static bool BaseCheck(AtkUnitBase* unitBase, bool posCheck = true) => unitBase != null &&
+        unitBase->UldManager.NodeListSize > 0 && (!posCheck || unitBase->X != 0 || unitBase->Y != 0);
+
+    public bool Exists(bool posCheck = true) => BaseCheck(UnitBase, posCheck) ||
+                                                BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName(AddonName),
+                                                    posCheck);
+
     public AtkResNode** NodeList => UnitBase->UldManager.NodeList;
     public ushort NodeListSize => UnitBase->UldManager.NodeListSize;
     public ushort NodeListCount => UnitBase->UldManager.NodeListCount;
-    public short X { get => UnitBase->X; set => UnitBase->X = value; }
-    public short Y { get => UnitBase->Y; set => UnitBase->Y = value; }
-    public float Scale { get => UnitBase->Scale; set => UnitBase->Scale = value; }
+
+    public short X
+    {
+        get => UnitBase->X;
+        set => UnitBase->X = value;
+    }
+
+    public short Y
+    {
+        get => UnitBase->Y;
+        set => UnitBase->Y = value;
+    }
+
+    public float Scale
+    {
+        get => UnitBase->Scale;
+        set => UnitBase->Scale = value;
+    }
+
+    public bool Visible
+    {
+        get => UnitBase->IsVisible;
+        set => UnitBase->IsVisible = value;
+    }
+
     public NodeWrapper this[uint id] => new(UnitBase->GetNodeById(id));
     public NodeWrapper this[int i] => new(NodeListSize > i ? NodeList[i] : null);
+
     public BaseWrapper SetPos(short x, short y)
     {
         UnitBase->SetPosition(x, y);
         return this;
     }
+
     public BaseWrapper SetPos(Vector2 position) => SetPos((short)position.X, (short)position.Y);
+
     public BaseWrapper SetPos(short? x = null, short? y = null)
     {
         x ??= X;
@@ -69,9 +103,17 @@ public sealed unsafe class NodeWrapper
     public NodeWrapper(AtkResNode* node, Vector2? pos = null, Vector2? size = null)
     {
         Node = node;
-        if (pos != null) { DefaultPos = (Vector2)pos; }
-        if (size != null) { DefaultSize = (Vector2)size; }
+        if (pos != null)
+        {
+            DefaultPos = (Vector2)pos;
+        }
+
+        if (size != null)
+        {
+            DefaultSize = (Vector2)size;
+        }
     }
+
     public Vector2? DefaultPos;
     public Vector2 DefaultSize;
     public readonly AtkResNode* Node;
@@ -86,12 +128,17 @@ public sealed unsafe class NodeWrapper
             try
             {
                 AtkComponentNode* comp;
-                return Node != null ? (comp = Node->GetAsAtkComponentNode()) != null ?
-                        comp->Component->UldManager.SearchNodeById(id) :
-                        Warning($"No Child node found for NodeWrapper with ID {id}\n{new System.Diagnostics.StackTrace()}") :
-                    Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+                return Node != null
+                    ? (comp = Node->GetAsAtkComponentNode()) != null
+                        ? comp->Component->UldManager.SearchNodeById(id)
+                        : Warning(
+                            $"No Child node found for NodeWrapper with ID {id}\n{new System.Diagnostics.StackTrace()}")
+                    : Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
             }
-            catch (Exception) { return Warning($"Error retrieving child node with ID {id}\n{new System.Diagnostics.StackTrace()}"); }
+            catch (Exception)
+            {
+                return Warning($"Error retrieving child node with ID {id}\n{new System.Diagnostics.StackTrace()}");
+            }
         }
     }
 
@@ -103,12 +150,18 @@ public sealed unsafe class NodeWrapper
             {
                 AtkComponentNode* comp;
                 AtkUldManager uld;
-                return Node != null ? (comp = Node->GetAsAtkComponentNode()) != null && (uld = comp->Component->UldManager).NodeListSize >= i ?
-                        uld.NodeList[i] :
-                        Warning($"No Child node found for NodeWrapper at index {i}\n{new System.Diagnostics.StackTrace()}") :
-                    Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+                return Node != null
+                    ? (comp = Node->GetAsAtkComponentNode()) != null &&
+                      (uld = comp->Component->UldManager).NodeListSize >= i
+                        ? uld.NodeList[i]
+                        : Warning(
+                            $"No Child node found for NodeWrapper at index {i}\n{new System.Diagnostics.StackTrace()}")
+                    : Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
             }
-            catch (Exception) { return Warning($"Error retrieving child node at index {i}\n{new System.Diagnostics.StackTrace()}"); }
+            catch (Exception)
+            {
+                return Warning($"Error retrieving child node at index {i}\n{new System.Diagnostics.StackTrace()}");
+            }
         }
     }
 
@@ -134,7 +187,9 @@ public sealed unsafe class NodeWrapper
         public Vector3? Color { get; init; }
         public Vector3? Multiply { get; init; }
     }
+
     public int ChildCount() => Node == null ? 0 : Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
+
     public NodeWrapper SetVis(bool show)
     {
         if (Node != null)
@@ -143,6 +198,7 @@ public sealed unsafe class NodeWrapper
             else Node->Flags &= ~0x10;
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
 
@@ -153,6 +209,7 @@ public sealed unsafe class NodeWrapper
             var count = (int)Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
             for (var i = 0; i < count; i++) this[i].SetVis(show);
         }
+
         return this;
     }
 
@@ -164,8 +221,10 @@ public sealed unsafe class NodeWrapper
             Node->ScaleY = scale;
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
+
     public NodeWrapper SetSize(Vector2? size)
     {
         size ??= DefaultSize;
@@ -180,6 +239,7 @@ public sealed unsafe class NodeWrapper
         h ??= (ushort)DefaultSize.Y;
         return SetSize((ushort)w, (ushort)h);
     }
+
     public NodeWrapper SetSize(ushort w, ushort h)
     {
         if (Node != null)
@@ -187,8 +247,10 @@ public sealed unsafe class NodeWrapper
             Node->SetWidth(w);
             Node->SetHeight(h);
         }
+
         return this;
     }
+
     public NodeWrapper SetSize() => SetSize(DefaultSize);
 
     public NodeWrapper SetColor(Vector3 color)
@@ -200,6 +262,7 @@ public sealed unsafe class NodeWrapper
             Node->Color.B = (byte)(color.Z * 255f);
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
 
@@ -212,6 +275,7 @@ public sealed unsafe class NodeWrapper
             Node->MultiplyBlue = (byte)(color.Z * 255f);
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
 
@@ -222,6 +286,7 @@ public sealed unsafe class NodeWrapper
             Node->Color.A = a;
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
 
@@ -233,6 +298,7 @@ public sealed unsafe class NodeWrapper
     }
 
     public NodeWrapper SetOrigin(Vector2 origin) => Node == null ? this : SetOrigin(origin.X, origin.Y);
+
     public NodeWrapper SetOrigin(float x, float y)
     {
         if (Node != null)
@@ -241,6 +307,7 @@ public sealed unsafe class NodeWrapper
             Node->OriginY = y;
             Node->Flags_2 |= 0xD;
         }
+
         return this;
     }
 
@@ -264,11 +331,12 @@ public sealed unsafe class NodeWrapper
 
     public NodeWrapper SetRelativePos(float x = 0f, float y = 0f)
     {
-        if (DefaultPos != null && Node != null) Node->SetPositionFloat(((Vector2)DefaultPos).X + x, ((Vector2)DefaultPos).Y + y);
+        if (DefaultPos != null && Node != null)
+            Node->SetPositionFloat(((Vector2)DefaultPos).X + x, ((Vector2)DefaultPos).Y + y);
         return this;
     }
 
-    public NodeWrapper SetTextColor(Vector3 color,Vector3 glow)
+    public NodeWrapper SetTextColor(Vector3 color, Vector3 glow)
     {
         if (Node != null)
         {
@@ -305,4 +373,3 @@ public sealed unsafe class NodeWrapper
         return this;
     }
 }
-

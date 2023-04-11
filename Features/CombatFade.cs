@@ -11,6 +11,7 @@ public sealed partial class CrossUp
         private static int From { get; set; }
         private static int? To { get; set; }
         internal static bool Active { get; private set; }
+
         internal static void Run()
         {
             var progress = (float)decimal.Divide((DateTime.Now - Start).Milliseconds, Duration.Milliseconds);
@@ -26,11 +27,12 @@ public sealed partial class CrossUp
                 To = null;
             }
         }
+
         internal static void Begin(bool inCombat)
         {
-            var to = inCombat ? Config.TranspInCombat : Config.TranspOutOfCombat;
+            var to = inCombat ? Profile.TranspInCombat : Profile.TranspOutOfCombat;
             var dur = inCombat ? 150 : 350;
-  
+
             if ((Active && To == to) || CharConfig.Transparency.Standard == to) return;
 
             Start = DateTime.Now;

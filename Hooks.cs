@@ -6,19 +6,27 @@ using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Hooking;
 using NodeTools;
+using System.Runtime.InteropServices;
 
 namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
     private delegate byte ActionBarReceiveEventDel(AddonActionBarBase* barBase, uint eventID, void* a3, void* a4, NumberArrayData** numberArrayData);
+
     private Hook<ActionBarReceiveEventDel>? ActionBarReceiveEventHook;
 
     private delegate byte ActionBarBaseUpdateDel(AddonActionBarBase* barBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData);
+
     private Hook<ActionBarBaseUpdateDel>? ActionBarBaseUpdateHook;
 
     private delegate uint SetHudLayoutDel(IntPtr filePtr, uint hudLayout, byte unk0, byte unk1);
+
     private Hook<SetHudLayoutDel>? SetHudLayoutHook;
+
+    private delegate IntPtr GetFilePointerDelegate(byte index);
+
+    private static GetFilePointerDelegate? GetFilePointer;
 
     private readonly AgentHudLayout* hudLayout = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
 
@@ -28,14 +36,25 @@ public sealed unsafe partial class CrossUp
         Service.Framework.Update += FrameworkUpdate;
         Service.Condition.ConditionChange += OnConditionChange;
 
-        ActionBarReceiveEventHook ??= Hook<ActionBarReceiveEventDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? FF 66 83 FB ?? ?? ?? ?? BF 3F"), ActionBarReceiveEventDetour);
-        ActionBarReceiveEventHook?.Enable();
+        ActionBarReceiveEventHook ??= Hook<ActionBarReceiveEventDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? FF 66 83 FB ?? ?? ?? ?? BF 3F"), ActionBarReceiveEventDetour); ActionBarReceiveEventHook?.Enable();
 
-        ActionBarBaseUpdateHook ??= Hook<ActionBarBaseUpdateDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09"), ActionBarBaseUpdateDetour);
-        ActionBarBaseUpdateHook?.Enable();
+        ActionBarBaseUpdateHook ??= Hook<ActionBarBaseUpdateDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09"), ActionBarBaseUpdateDetour); ActionBarBaseUpdateHook?.Enable();
 
         SetHudLayoutHook ??= Hook<SetHudLayoutDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 33 C0 EB 15"), SetHudLayoutDetour);
         SetHudLayoutHook?.Enable();
+
+        var getFilePointerPtr = Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 85 C0 74 14 83 7B 44 00");
+        if (getFilePointerPtr != IntPtr.Zero) { GetFilePointer = Marshal.GetDelegateForFunctionPointer<GetFilePointerDelegate>(getFilePointerPtr); }
+    }
+
+    private const int SlotOffset = 0x6378;
+    internal static int HudSlot;
+
+    private static int GetHudSlot()
+    {
+        var filePtr = GetFilePointer?.Invoke(0) ?? IntPtr.Zero;
+        var dataPtr = filePtr + 0x50;
+        return (int)*(uint*)(Marshal.ReadIntPtr(dataPtr) + SlotOffset) + 1;
     }
 
     /// <summary>Removes all of CrossUp's hooks</summary>
@@ -49,6 +68,7 @@ public sealed unsafe partial class CrossUp
     }
 
     private bool LogFrameCatch = true;
+
     /// <summary>Runs every frame. Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.<br/><br/>
     /// Also calls animation function (<see cref="Layout.SeparateEx.MetaSlots.TweenAll"/>) when relevant.</summary>
     private void FrameworkUpdate(Framework framework)
@@ -59,9 +79,13 @@ public sealed unsafe partial class CrossUp
             {
                 if (Bars.Cross.Exists)
                 {
-                    if (Layout.SeparateEx.MetaSlots.TweensExist) Layout.SeparateEx.MetaSlots.TweenAll();                  // animate button sizes if needed
-                    if (Config.CombatFadeInOut && FadeTween.Active) { FadeTween.Run(); }                                  // run fader animation if needed
-                    DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() && (DoneHudCheck || AdjustHudEditorNode());  // if HUD layout editor is open, perform this fix once
+                    if (Layout.SeparateEx.MetaSlots.TweensExist) Layout.SeparateEx.MetaSlots.TweenAll(); // animate button sizes if needed
+                    if (Profile.CombatFadeInOut && FadeTween.Active) { FadeTween.Run(); } // run fader animation if needed
+                    DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() && (DoneHudCheck || AdjustHudEditorNode()); // if HUD layout editor is open, perform this fix once
+
+                    if (!Layout.SeparateEx.Ready || !Layout.SeparateEx.Enabled || !Bars.MainMenu.Exists) return; // hide EXHB if Main Menu is active
+                    Bars.LR.Base.Visible = !Bars.MainMenu.Base.Visible;
+                    Bars.RL.Base.Visible = !Bars.MainMenu.Base.Visible;
                 }
                 else
                 {
@@ -72,6 +96,8 @@ public sealed unsafe partial class CrossUp
             else if (Bars.AllExist && Job.Current != 0)
             {
                 PluginLog.LogDebug("Cross Hotbar nodes found; setting up plugin features");
+                HudSlot = GetHudSlot();
+                PluginLog.LogDebug("Hud Layout " + HudSlot + " is currently active");
                 Setup();
             }
         }
@@ -95,7 +121,8 @@ public sealed unsafe partial class CrossUp
     ///<term>50</term> Drag/Drop onto a slot<br/>
     ///<term>54</term> Drag/Discard from a slot
     /// </summary>
-    private byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4, NumberArrayData** numberArrayData)
+    private byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4,
+        NumberArrayData** numberArrayData)
     {
         try
         {
@@ -105,7 +132,7 @@ public sealed unsafe partial class CrossUp
                 {
                     var barID = barBase->HotbarID;
                     PluginLog.LogDebug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBase Update");
-                    Layout.Cross.UnassignedSlotVis(!Config.HideUnassigned);
+                    Layout.Cross.UnassignedSlotVis(Profile.HideUnassigned);
                     DragDrop = true;
                     break;
                 }
@@ -120,7 +147,8 @@ public sealed unsafe partial class CrossUp
     }
 
     /// <summary>Called whenever a change occurs on any hotbar. Calls the plugin's main arrangement functions.</summary>
-    private byte ActionBarBaseUpdateDetour(AddonActionBarBase* barBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
+    private byte ActionBarBaseUpdateDetour(AddonActionBarBase* barBase, NumberArrayData** numberArrayData,
+        StringArrayData** stringArrayData)
     {
         var ret = ActionBarBaseUpdateHook!.Original(barBase, numberArrayData, stringArrayData);
         if (!IsSetUp) return ret;
@@ -146,8 +174,8 @@ public sealed unsafe partial class CrossUp
 
         if (!Layout.SeparateEx.Ready || (int)Bars.Cross.Selection.Current > 2) return;
 
-        var lr = (id: Bars.LR.BorrowBar.ID, map: Actions.GetExMap(ExSide.LR), actions: Bars.LR.BorrowBar.Actions);
-        var rl = (id: Bars.RL.BorrowBar.ID, map: Actions.GetExMap(ExSide.RL), actions: Bars.RL.BorrowBar.Actions);
+        var lr = (id: Bars.LR.ID, map: Actions.GetExMap(ExSide.LR), actions: Bars.LR.BorrowBar.Actions);
+        var rl = (id: Bars.RL.ID, map: Actions.GetExMap(ExSide.RL), actions: Bars.RL.BorrowBar.Actions);
 
         var shared = CharConfig.Hotbar.Shared;
         var stored = Bars.StoredActions;
@@ -167,7 +195,7 @@ public sealed unsafe partial class CrossUp
     {
         PluginLog.LogDebug("Job Change: " + Job.Abbr);
         if (!Layout.SeparateEx.Ready) return;
-        
+
         Actions.Store(Bars.LR.ID);
         Actions.Store(Bars.RL.ID);
     }
@@ -180,10 +208,12 @@ public sealed unsafe partial class CrossUp
     }
 
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
-    private uint SetHudLayoutDetour(IntPtr filePtr, uint layout, byte unk0, byte unk1)
+    private uint SetHudLayoutDetour(IntPtr filePtr, uint hudSlot, byte unk0, byte unk1)
     {
+        PluginLog.LogDebug($"Loaded Hud Layout {hudSlot}");
+        HudSlot = (int)(hudSlot + 1);
         if (IsSetUp) Layout.ScheduleNudges(2, 10, false);
-        return SetHudLayoutHook!.Original(filePtr, layout, unk0, unk1);
+        return SetHudLayoutHook!.Original(filePtr, hudSlot, unk0, unk1);
     }
 
     /// <summary>Whether <see cref="AdjustHudEditorNode"/> has already run and completed</summary>
@@ -202,7 +232,7 @@ public sealed unsafe partial class CrossUp
 
         for (var i = 1; i < hudScreen.NodeListCount; i++)
         {
-            if (!hudNodes[i]->IsVisible || 
+            if (!hudNodes[i]->IsVisible ||
                 Math.Abs(hudNodes[i]->Y - root->Y) > 1 ||
                 Math.Abs(hudNodes[i]->Width - root->Width * scale) > 1 ||
                 Math.Abs(hudNodes[i]->Height - root->Height * scale) > 1 ||
@@ -211,12 +241,13 @@ public sealed unsafe partial class CrossUp
             hudNodes[i]->Flags_2 |= 0xD;
             return true;
         }
+
         return false;
     }
 
     /// <summary>Runs the fader feature when the player's condition changes</summary>
     internal static void OnConditionChange(ConditionFlag flag = 0, bool value = true)
     {
-        if (Config.CombatFadeInOut) FadeTween.Begin(Service.Condition[ConditionFlag.InCombat]);
+        if (Profile.CombatFadeInOut) FadeTween.Begin(Service.Condition[ConditionFlag.InCombat]);
     }
 }

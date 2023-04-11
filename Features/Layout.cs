@@ -6,6 +6,8 @@ namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
+    private static Profile Profile => Config.Profiles[Config.UniqueHud ? HudSlot : 0];
+
     /// <summary>Methods regarding overall layout manipulation</summary>
     public static partial class Layout
     {
@@ -18,19 +20,19 @@ public sealed unsafe partial class CrossUp
             if (Bars.Cross.Enabled)
             {
                 var scale = Bars.Cross.Root.Node->ScaleX;
-                var split = resetAll ? 0 : Config.Split;
+                var split = resetAll ? 0 : Profile.Split;
                 var mixBar = (bool)CharConfig.MixBar;
                 var arrangeEx = !resetAll && SeparateEx.Ready && Bars.RL.Exists && Bars.LR.Exists;
-                var lockCenter = Config.LockCenter;
+                var lockCenter = Profile.LockCenter;
 
-                var lrX = arrangeEx ? Config.LRpos.X : 0;
-                var lrY = arrangeEx ? Config.LRpos.Y : 0;
-                var rlX = arrangeEx ? Config.OnlyOneEx ? Config.LRpos.X : Config.RLpos.X : 0;
-                var rlY = arrangeEx ? Config.OnlyOneEx ? Config.LRpos.Y : Config.RLpos.Y : 0;
+                var lrX = arrangeEx ? Profile.LRpos.X : 0;
+                var lrY = arrangeEx ? Profile.LRpos.Y : 0;
+                var rlX = arrangeEx ? Profile.OnlyOneEx ? Profile.LRpos.X : Profile.RLpos.X : 0;
+                var rlY = arrangeEx ? Profile.OnlyOneEx ? Profile.LRpos.Y : Profile.RLpos.Y : 0;
 
                 var coords = ((int)lrX, (int)lrY, (int)rlX, (int)rlY);
 
-                if (lockCenter)       Cross.Recenter(scale);
+                if (lockCenter) Cross.Recenter(scale);
                 else if (hudFixCheck) Cross.HudOffsetFix(split, scale);
 
                 Cross.Arrange(select, Previous, scale, split, mixBar, arrangeEx, coords, forceArrange, resetAll);
@@ -49,7 +51,7 @@ public sealed unsafe partial class CrossUp
         internal static void TidyUp() => Update(true, true, true);
 
         /// <summary>Re-run the update function a few times on first login/load in case there's any straggler nodes caught out of position</summary>
-        internal static void ScheduleNudges(int c=5,int span = 500,bool log = true)
+        internal static void ScheduleNudges(int c = 5, int span = 500, bool log = true)
         {
             for (var i = 1; i <= c; i++)
             {
@@ -59,7 +61,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Re-run the update function</summary>
-        private static void Nudge(int c, int n, bool log=true)
+        private static void Nudge(int c, int n, bool log = true)
         {
             try
             {
@@ -102,27 +104,27 @@ public sealed unsafe partial class CrossUp
             Actions.Copy(Actions.GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
-                                       .SetSize()
-                                       .SetScale(Bars.ActionBars[barID].Base.Scale);
+                .SetSize()
+                .SetScale(Bars.ActionBars[barID].Base.Scale);
 
             Bars.ActionBars[barID].BarNumText.SetScale();
 
             for (var i = 0; i < 12; i++)
             {
-                var buttonNode = Bars.ActionBars[barID].Buttons[i,getDef:true];
+                var buttonNode = Bars.ActionBars[barID].Buttons[i, getDef: true];
 
                 buttonNode.SetRelativePos()
-                          .SetVis(true)
-                          .SetScale();
+                    .SetVis(true)
+                    .SetScale();
 
                 buttonNode[2u].SetVis(true);
             }
 
-            if (CharConfig.Hotbar.Visible[barID] && Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
+            if (CharConfig.Hotbar.Visible[barID] && Bars.WasHidden[barID] &&
+                ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
             {
                 CharConfig.Hotbar.Visible[barID].Set(0);
             }
         }
     }
 }
-
