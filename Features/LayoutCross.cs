@@ -167,8 +167,7 @@ public sealed unsafe partial class CrossUp
 
                     Bars.Cross.Base.X = (short)Config.DisposeBaseX!;
                     Bars.Cross.Root.Node->X = (float)Config.DisposeRootX!;
-                }
-                catch (Exception ex) { PluginLog.LogWarning("Exception: Couldn't restore Cross Hotbar X Position!\n" + ex); }
+                } catch (Exception ex) { PluginLog.LogWarning("Exception: Couldn't restore Cross Hotbar X Position!\n" + ex); }
             }
         }
     }
