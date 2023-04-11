@@ -68,7 +68,7 @@ public sealed partial class CrossUp : IDalamudPlugin
         try { Layout.Cross.StoreXPos(); } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't store Cross Hotbar X Position!\n{ex}"); }
         try { Layout.TidyUp();          } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Cross Hotbar layout!\n{ex}"); }
         try { Layout.ResetBars();       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
-        try { Color.Reset();            } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
+        try { Color.SetAll(true);       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
         try { DisposeUI();              } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose Plugin Interface!\n{ex}"); }
 
         IsSetUp = false;
@@ -76,7 +76,6 @@ public sealed partial class CrossUp : IDalamudPlugin
 
     /// <summary>"/xup" Command</summary>
     private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
-
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
     private void DisposeUI()

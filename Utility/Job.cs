@@ -1,8 +1,10 @@
 ﻿namespace CrossUp;
+
 public sealed partial class CrossUp
-{      
+{
     /// <summary>Checks if the player is in a PvP match or in the Wolves' Den</summary>
     private static bool IsPvP => Service.ClientState.IsPvP || Service.ClientState.TerritoryType == 250;
+
     public class Job
     {
         /// <summary>Gets player's current Job ID</summary>
@@ -16,7 +18,10 @@ public sealed partial class CrossUp
         }
 
         /// <summary>Gets player's Job abbreviation</summary>
-        internal static string Abbr => Service.ClientState.LocalPlayer?.ClassJob.GameData != null ? Service.ClientState.LocalPlayer?.ClassJob.GameData.Abbreviation ?? "???" : "???";
+        internal static string Abbr => Service.ClientState.LocalPlayer?.ClassJob.GameData != null
+            ? Service.ClientState.LocalPlayer?.ClassJob.GameData.Abbreviation ?? "???"
+            : "???";
+
         private static int LastKnown;
 
         /// <summary>True if the player's Job has just changed</summary>

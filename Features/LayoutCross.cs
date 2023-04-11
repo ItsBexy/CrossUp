@@ -13,26 +13,28 @@ public sealed unsafe partial class CrossUp
         internal static class Cross
         {
             /// <summary>Arranges all elements of the main Cross Hotbar based on current selection status and other factors</summary>
-            public static void Arrange(Select select, Select previous, float scale, int split, bool mixBar, bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)
+            public static void Arrange(Select select, Select previous, float scale, int split, bool mixBar,
+                bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)
             {
                 Bars.Cross.Root.SetPos(Bars.Cross.Base.X - split * scale, Bars.Cross.Base.Y)
-                               .SetSize((ushort)(float)(588 + split * 2), 210);
+                    .SetSize((ushort)(float)(588 + split * 2), 210);
 
-                ushort? lineSize = split > 0 || Config.SepExBar && !resetAll ? 0 : null;
+                ushort? lineSize = split > 0 || Profile.SepExBar && !resetAll ? 0 : null;
                 Bars.Cross.VertLine.SetSize(lineSize, lineSize);
-                Bars.Cross.Padlock.SetRelativePos(Config.PadlockOffset.X + split, Config.PadlockOffset.Y);
-                Bars.Cross.Padlock[2u].SetVis(!Config.HidePadlock);
-                Bars.Cross.SetDisplay.SetVis(!Config.HideSetText)
-                                     .SetRelativePos(Config.SetTextOffset.X + split, Config.SetTextOffset.Y);
-                Bars.Cross.ChangeSetDisplay.Container.SetRelativePos(Config.ChangeSetOffset.X + split, Config.ChangeSetOffset.Y);
-                Bars.Cross.LTtext.SetScale(Config.HideTriggerText ? 0F : 1F);
-                Bars.Cross.RTtext.SetScale(Config.HideTriggerText ? 0F : 1F);
+                Bars.Cross.Padlock.SetRelativePos(Profile.PadlockOffset.X + split, Profile.PadlockOffset.Y);
+                Bars.Cross.Padlock[2u].SetVis(!Profile.HidePadlock);
+                Bars.Cross.SetDisplay.SetVis(!Profile.HideSetText)
+                                     .SetRelativePos(Profile.SetTextOffset.X + split, Profile.SetTextOffset.Y);
+                Bars.Cross.ChangeSetDisplay.Container.SetRelativePos(Profile.ChangeSetOffset.X + split, Profile.ChangeSetOffset.Y);
+                Bars.Cross.LTtext.SetScale(Profile.HideTriggerText ? 0F : 1F);
+                Bars.Cross.RTtext.SetScale(Profile.HideTriggerText ? 0F : 1F);
 
-                UnassignedSlotVis(resetAll || !Config.HideUnassigned);
+                UnassignedSlotVis(resetAll || !Profile.HideUnassigned);
 
                 if (!forceArrange && select == previous) return;
 
                 var (lrX, lrY, rlX, rlY) = coords;
+                var miniSize = Profile.SelectDisplayType == 1 || (mixBar && split > 0) ? 0 : 166;
                 switch (select)
                 {
                     case Select.None:
@@ -59,8 +61,8 @@ public sealed unsafe partial class CrossUp
                         Bars.Cross.Buttons[2].ChildVis(!fromLR || mixBar).SetRelativePos(split * 2);
                         Bars.Cross.Buttons[3].ChildVis(!fromLR).SetRelativePos(split * 2);
 
-                        Bars.Cross.MiniSelectL.SetSize((ushort)(Config.HideSelect || (mixBar && split > 0) ? 0 : 166), 140);
-                        Bars.Cross.MiniSelectR.SetSize((ushort)(Config.HideSelect || (mixBar && split > 0) ? 0 : 166), 140);
+                        Bars.Cross.MiniSelectL.SetSize((ushort)miniSize, 140);
+                        Bars.Cross.MiniSelectR.SetSize((ushort)miniSize, 140);
                         break;
 
                     case Select.Right:
@@ -74,8 +76,8 @@ public sealed unsafe partial class CrossUp
                         Bars.Cross.Buttons[2].ChildVis(!fromRL || !mixBar).SetRelativePos();
                         Bars.Cross.Buttons[3].ChildVis(true).SetRelativePos();
 
-                        Bars.Cross.MiniSelectL.SetSize((ushort)(Config.HideSelect || (mixBar && split > 0) ? 0 : 166), 140);
-                        Bars.Cross.MiniSelectR.SetSize((ushort)(Config.HideSelect || (mixBar && split > 0) ? 0 : 166), 140);
+                        Bars.Cross.MiniSelectL.SetSize((ushort)miniSize, 140);
+                        Bars.Cross.MiniSelectR.SetSize((ushort)miniSize, 140);
                         break;
 
                     case Select.LR:
@@ -133,7 +135,7 @@ public sealed unsafe partial class CrossUp
             {
                 var misalign = Bars.Cross.Base.X - Bars.Cross.Root.Node->X - Math.Round(split * scale);
                 if (misalign >= 0) return;
-              
+
                 PluginLog.LogDebug($"HUD FIX: Misaligned by {misalign}");
                 Bars.Cross.Base.X -= (short)misalign;
             }
@@ -141,8 +143,13 @@ public sealed unsafe partial class CrossUp
             /// <summary>Records the X coordinates of the Cross Hotbar's AtkUnitBase and root node on disable/dispose</summary>
             internal static void StoreXPos()
             {
-                if (!Bars.Cross.Exists) { return; }
+                if (!Bars.Cross.Exists)
+                {
+                    return;
+                }
+
                 PluginLog.LogDebug($"Storing Cross Hotbar X Position; UnitBase: {Bars.Cross.Base.X}, Root Node: {Bars.Cross.Root.Node->X}");
+
                 Config.DisposeBaseX = Bars.Cross.Base.X;
                 Config.DisposeRootX = Bars.Cross.Root.Node->X;
                 Config.Save();
@@ -153,12 +160,15 @@ public sealed unsafe partial class CrossUp
             {
                 try
                 {
-                    if (!Bars.Cross.Exists || Config.LockCenter) return;
-                    if (Bars.Cross.Base.X != (short)Config.DisposeBaseX! || Math.Abs(Bars.Cross.Root.Node->X - (float)Config.DisposeRootX!) > 0.5F) PluginLog.LogDebug("Correcting Cross Hotbar X Position");
+                    if (!Bars.Cross.Exists || Profile.LockCenter) return;
+                    if (Bars.Cross.Base.X != (short)Config.DisposeBaseX! ||
+                        Math.Abs(Bars.Cross.Root.Node->X - (float)Config.DisposeRootX!) > 0.5F)
+                        PluginLog.LogDebug("Correcting Cross Hotbar X Position");
 
                     Bars.Cross.Base.X = (short)Config.DisposeBaseX!;
                     Bars.Cross.Root.Node->X = (float)Config.DisposeRootX!;
-                } catch (Exception ex) { PluginLog.LogWarning("Exception: Couldn't restore Cross Hotbar X Position!\n" + ex); }
+                }
+                catch (Exception ex) { PluginLog.LogWarning("Exception: Couldn't restore Cross Hotbar X Position!\n" + ex); }
             }
         }
     }

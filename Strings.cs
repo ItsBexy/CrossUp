@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnusedMember.Global
+
 namespace CrossUp;
 internal sealed partial class CrossUpUI
 {
@@ -6,6 +7,9 @@ internal sealed partial class CrossUpUI
     {
         public const string HelpMsg = "Open CrossUp Settings";
         public const string WindowTitle = "CrossUp Settings";
+
+        public const string UpdateWarning =
+            "Hey! CrossUp has been updated to allow separate configurations for each of your HUD Layout slots. Some of your settings might have been affected by the change. Type /xup to open CrossUp configuration.";
 
         public static class Terms
         {
@@ -29,7 +33,7 @@ internal sealed partial class CrossUpUI
             public const string LayoutHeader = "Cross Hotbar Layout";
             public const string LeftRightSplit = "Left/Right Separation";
             public const string PadlockIcon = "Padlock Icon";
-            public const string SetNumText = "Set # Text";
+            public const string SetNumText = "SET # Text";
             public static string ChangeSetText => "CHANGE SET Display";
             public static string LRTriggerText => "Hide L/R Trigger Text";
             public const string UnassignedSlots = "Hide Unassigned Slots";
@@ -58,6 +62,7 @@ internal sealed partial class CrossUpUI
 
             public const string Hide = "Hide";
             public const string LockCenter = "Lock Center";
+            public const string FadeOutsideCombat = "Fade Outside Combat";
         }
 
         public static class SeparateEx
@@ -79,6 +84,18 @@ internal sealed partial class CrossUpUI
             public const string OpenHudMan = "Open HUD Manager";
         }
 
+        public static class Hud
+        {
+            public const string TabTitle = "HUD Options";
+            public const string AllSame = "Apply the same settings to all HUD Layouts";
+            public const string Unique = "Apply different settings for each HUD Layout";
+            public const string Current = "Current Hud Layout:";
+
+            public const string HighlightMsg1 = "Settings that are";
+            public const string HighlightMsg2 = "highlighted";
+            public const string HighlightMsg3 = "will change with your HUD.";
+        }
+
         public static class BarMapping
         {
             public const string TabTitle = "Bar Assignments";
@@ -87,4 +104,5 @@ internal sealed partial class CrossUpUI
             public static string MapTo(string str) => $"Map {str} to...";
         }
     }
+
 }

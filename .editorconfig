@@ -3,6 +3,9 @@
 # CS0649: Field 'CrossUp.ActionManager' is never assigned to, and will always have its default value
 dotnet_diagnostic.CS0649.severity = none
 
+# CA1416: Validate platform compatibility
+dotnet_diagnostic.CA1416.severity = silent
+
 [*.{cs,vb}]
 #### Naming styles ####
 
