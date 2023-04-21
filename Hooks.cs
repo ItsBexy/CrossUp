@@ -13,19 +13,15 @@ namespace CrossUp;
 public sealed unsafe partial class CrossUp
 {
     private delegate byte ActionBarReceiveEventDel(AddonActionBarBase* barBase, uint eventID, void* a3, void* a4, NumberArrayData** numberArrayData);
-
     private Hook<ActionBarReceiveEventDel>? ActionBarReceiveEventHook;
 
     private delegate byte ActionBarBaseUpdateDel(AddonActionBarBase* barBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData);
-
     private Hook<ActionBarBaseUpdateDel>? ActionBarBaseUpdateHook;
 
     private delegate uint SetHudLayoutDel(IntPtr filePtr, uint hudLayout, byte unk0, byte unk1);
-
     private Hook<SetHudLayoutDel>? SetHudLayoutHook;
 
     private delegate IntPtr GetFilePointerDelegate(byte index);
-
     private static GetFilePointerDelegate? GetFilePointer;
 
     private readonly AgentHudLayout* hudLayout = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
@@ -69,6 +65,8 @@ public sealed unsafe partial class CrossUp
 
     private bool LogFrameCatch = true;
 
+
+
     /// <summary>Runs every frame. Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.<br/><br/>
     /// Also calls animation function (<see cref="Layout.SeparateEx.MetaSlots.TweenAll"/>) when relevant.</summary>
     private void FrameworkUpdate(Framework framework)
@@ -83,9 +81,7 @@ public sealed unsafe partial class CrossUp
                     if (Profile.CombatFadeInOut && FadeTween.Active) { FadeTween.Run(); } // run fader animation if needed
                     DoneHudCheck = hudLayout->AgentInterface.IsAgentActive() && (DoneHudCheck || AdjustHudEditorNode()); // if HUD layout editor is open, perform this fix once
 
-                    if (!Layout.SeparateEx.Ready || !Layout.SeparateEx.Enabled || !Bars.MainMenu.Exists) return; // hide EXHB if Main Menu is active
-                    Bars.LR.Base.Visible = !Bars.MainMenu.Base.Visible;
-                    Bars.RL.Base.Visible = !Bars.MainMenu.Base.Visible;
+                    if (Layout.SeparateEx.Ready && Bars.MainMenu.Exists) Layout.SeparateEx.HideForMenu();
                 }
                 else
                 {
@@ -210,7 +206,7 @@ public sealed unsafe partial class CrossUp
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
     private uint SetHudLayoutDetour(IntPtr filePtr, uint hudSlot, byte unk0, byte unk1)
     {
-        PluginLog.LogDebug($"Loaded Hud Layout {hudSlot}");
+        PluginLog.LogDebug($"Loaded Hud Layout {hudSlot+1}");
         HudSlot = (int)(hudSlot + 1);
         if (IsSetUp) Layout.ScheduleNudges(2, 10, false);
         return SetHudLayoutHook!.Original(filePtr, hudSlot, unk0, unk1);

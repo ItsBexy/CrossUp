@@ -1,5 +1,7 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
+using Dalamud.Game.Config;
+using Dalamud.Logging;
 
 // ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
@@ -27,12 +29,14 @@ public class CharConfig
         public unsafe string Name => ConfModule->GetOption(Index)->GetName();
         public unsafe int Get() => ConfModule->GetIntValue(Index);
         public unsafe bool Set(int val) => ConfModule->SetOption(Index, val, 1);
+        public bool Set(bool val) => Set(val ? 1 : 0);
+
         public static implicit operator int(Config cfg) => cfg.Get();
         public static implicit operator bool(Config cfg) => cfg.Get() > 0;
         public byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
 
         /// <returns>Index | ID | Name | Value</returns>
-        public override string ToString() =>
+        public new string ToString() =>
             Index + " | " + ID + " | " + Name + " | " + (uint)Get() + " | " + UintToHex((uint)Get());
     }
 

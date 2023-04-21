@@ -18,13 +18,9 @@ public sealed unsafe partial class CrossUp
             /// <summary>Confirms that the Separate Expanded Hold feature is active and that two valid bars are selected</summary>
             internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
 
-            internal static bool Enabled;
-
             /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
             internal static void Enable()
             {
-                if (Enabled) return;
-
                 PrepBar(Bars.LR.ID);
                 PrepBar(Bars.RL.ID);
 
@@ -33,19 +29,19 @@ public sealed unsafe partial class CrossUp
 
                 Update(true);
                 Task.Delay(20).ContinueWith(static delegate { if (IsSetUp) Update(true); });
-                Enabled = true;
             }
 
             /// <summary>Turn on each borrowed bar</summary>
             private static void PrepBar(int barID)
             {
                 if (!Bars.ActionBars[barID].Exists) return;
+
                 Actions.Store(barID);
 
-                if (!CharConfig.Hotbar.Visible[barID])
+                if (CharConfig.Hotbar.Visible[barID] == false)
                 {
-                    Bars.WasHidden[barID] = true;
-                    CharConfig.Hotbar.Visible[barID].Set(1);
+                      Bars.WasHidden[barID] = true;
+                      CharConfig.Hotbar.Visible[barID].Set(true); 
                 }
 
                 for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
@@ -54,7 +50,6 @@ public sealed unsafe partial class CrossUp
             /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
             internal static void Disable()
             {
-                Enabled = false;
                 Update(true);
                 ResetBars();
 
@@ -78,6 +73,7 @@ public sealed unsafe partial class CrossUp
             internal static void Arrange(Select select, Select previous, float scale, int split, bool mixBar,
                 (int, int, int, int) coords, bool forceArrange)
             {
+                
                 SetActions(select);
                 HiddenCheck();
 
@@ -206,7 +202,6 @@ public sealed unsafe partial class CrossUp
                 }
 
                 var alpha = (select == Select.None ? CharConfig.Transparency.Standard : CharConfig.Transparency.Inactive).IntToAlpha;
-
                 StyleSlots(Bars.LR.BorrowBar, alpha);
                 StyleSlots(Bars.RL.BorrowBar, alpha);
             }
@@ -218,7 +213,7 @@ public sealed unsafe partial class CrossUp
                 var rlID = Bars.RL.ID;
                 if (lrID < 1 || rlID < 1) return;
 
-                var crossVis = CharConfig.Cross.Visible;
+                bool crossVis = CharConfig.Cross.Visible;
                 var lrVis = CharConfig.Hotbar.Visible[lrID];
                 var rlVis = CharConfig.Hotbar.Visible[rlID];
 
@@ -226,6 +221,14 @@ public sealed unsafe partial class CrossUp
 
                 lrVis.Set(crossVis);
                 rlVis.Set(crossVis);
+            }
+
+            /// <summary>Sets the visibility of the EXHB when the main menu is opened via gamepad</summary>
+            internal static void HideForMenu()
+            {
+                var alpha = (byte)(Bars.MainMenu.Base.Visible ? 0 : 255);
+                Bars.LR.Root.SetAlpha(alpha);
+                Bars.RL.Root.SetAlpha(alpha);
             }
 
             /// <summary>Copies the appropriate actions to the borrowed bars</summary>

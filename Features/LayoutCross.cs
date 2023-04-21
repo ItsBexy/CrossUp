@@ -1,6 +1,7 @@
 ﻿using System;
 using Dalamud.Interface;
 using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using static CrossUp.CrossUp.Bars.Cross.Selection;
 
 namespace CrossUp;
@@ -34,7 +35,7 @@ public sealed unsafe partial class CrossUp
                 if (!forceArrange && select == previous) return;
 
                 var (lrX, lrY, rlX, rlY) = coords;
-                var miniSize = Profile.SelectDisplayType == 1 || (mixBar && split > 0) ? 0 : 166;
+                var miniSize = Profile.SelectStyle == 2 || (mixBar && split > 0) ? 0 : 166;
                 switch (select)
                 {
                     case Select.None:

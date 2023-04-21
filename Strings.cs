@@ -1,5 +1,7 @@
 ﻿// ReSharper disable UnusedMember.Global
 
+using Dalamud.Interface;
+
 namespace CrossUp;
 internal sealed partial class CrossUpUI
 {
@@ -42,10 +44,13 @@ internal sealed partial class CrossUpUI
 
             public const string ColorSubheadBar = "SELECTED BAR";
             public const string ColorBarHighlight = "Backdrop Color";
-            public const string ColorBarBlend = "Backdrop Type";
+            public const string ColorBarBlend = "Color Blending";
             public const string BlendNormal = "Normal";
             public const string BlendDodge = "Dodge";
-            public const string BlendHide = "Hide";
+            public const string StyleHide = "Hidden";
+            public const string ColorBarStyle = "Backdrop Style";
+            public const string StyleSolid = "Solid";
+            public const string StyleFrame = "Frame";
 
             public const string ColorSubheadButtons = "BUTTONS";
             public const string ColorGlow = "Button Glow";

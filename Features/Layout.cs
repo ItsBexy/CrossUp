@@ -99,13 +99,14 @@ public sealed unsafe partial class CrossUp
         /// <summary>Put a borrowed hotbar back the way we found it based on HUD layout settings and saved actions</summary>
         private static void ResetBar(int barID, int job)
         {
+
             if (!Bars.ActionBars[barID].Exists) return;
 
             Actions.Copy(Actions.GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
-                .SetSize()
-                .SetScale(Bars.ActionBars[barID].Base.Scale);
+                                       .SetSize()
+                                       .SetScale(Bars.ActionBars[barID].Base.Scale);
 
             Bars.ActionBars[barID].BarNumText.SetScale();
 
@@ -114,16 +115,15 @@ public sealed unsafe partial class CrossUp
                 var buttonNode = Bars.ActionBars[barID].Buttons[i, getDef: true];
 
                 buttonNode.SetRelativePos()
-                    .SetVis(true)
-                    .SetScale();
+                          .SetVis(true)
+                          .SetScale();
 
                 buttonNode[2u].SetVis(true);
             }
 
-            if (CharConfig.Hotbar.Visible[barID] && Bars.WasHidden[barID] &&
-                ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
+            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
             {
-                CharConfig.Hotbar.Visible[barID].Set(0);
+                CharConfig.Hotbar.Visible[barID].Set(false);
             }
         }
     }

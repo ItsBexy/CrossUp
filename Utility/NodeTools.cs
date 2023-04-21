@@ -117,6 +117,8 @@ public sealed unsafe class NodeWrapper
     public Vector2? DefaultPos;
     public Vector2 DefaultSize;
     public readonly AtkResNode* Node;
+    public AtkNineGridNode* NineGrid => Node->GetAsAtkNineGridNode();
+    public AtkUldPart* NGParts => NineGrid->PartsList->Parts;
 
     public static implicit operator AtkResNode*(NodeWrapper wrap) => wrap.Node;
     public static implicit operator NodeWrapper(AtkResNode* node) => new(node);
@@ -294,6 +296,21 @@ public sealed unsafe class NodeWrapper
     {
         AtkNineGridNode* nineGrid;
         if (Node != null && (nineGrid = Node->GetAsAtkNineGridNode()) != null) nineGrid->BlendMode = b;
+        return this;
+    }
+
+    public NodeWrapper SetBGCoords(Vector4 uvwh, Vector4 offset)
+    {
+        NGParts->U = (ushort)uvwh.X;
+        NGParts->V = (ushort)uvwh.Y;
+        NGParts->Width = (ushort)uvwh.Z;
+        NGParts->Height = (ushort)uvwh.W;
+
+        NineGrid->TopOffset = (short)offset.X;
+        NineGrid->BottomOffset = (short)offset.Y;
+        NineGrid->LeftOffset = (short)offset.Z;
+        NineGrid->RightOffset = (short)offset.W;
+
         return this;
     }
 

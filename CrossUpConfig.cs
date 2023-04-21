@@ -20,8 +20,8 @@ public class Configuration : IPluginConfiguration
     public Profile[] Profiles { get; set; } = { new(), new(), new(), new(), new() };
 
     // Separate Expanded Hold Configs
-    public int LRborrow { get; set; } = 8;
-    public int RLborrow { get; set; } = 9;
+    public int LRborrow { get; set; } = -1;
+    public int RLborrow { get; set; } = -1;
 
     //DEPRECATED
     public bool? SepExBar { get; set; }
@@ -81,7 +81,8 @@ public class Profile
         HideTriggerText = original.HideTriggerText;
         HideUnassigned = original.HideUnassigned;
         SelectColorMultiply = original.SelectColorMultiply;
-        SelectDisplayType = original.SelectDisplayType;
+        SelectBlend = original.SelectBlend;
+        SelectStyle = original.SelectStyle;
         GlowA = original.GlowA;
         GlowB = original.GlowB;
         TextColor = original.TextColor;
@@ -106,7 +107,8 @@ public class Profile
     public bool HideTriggerText { get; set; }
     public bool HideUnassigned { get; set; }
     public Vector3 SelectColorMultiply { get; set; } = CrossUp.Color.Preset.MultiplyNeutral;
-    public int SelectDisplayType { get; set; }
+    public int SelectBlend { get; set; }
+    public int SelectStyle { get; set; }
     public Vector3 GlowA { get; set; } = CrossUp.Color.Preset.White;
     public Vector3 GlowB { get; set; } = CrossUp.Color.Preset.White;
     public Vector3 TextColor { get; set; } = CrossUp.Color.Preset.White;

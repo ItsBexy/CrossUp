@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices.ComTypes;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using NodeTools;
 using static CrossUp.CharConfig;
 
@@ -16,8 +18,7 @@ public sealed unsafe partial class CrossUp
     internal static class Bars
     {
         /// <summary>Whether all the hotbars are loaded</summary>
-        internal static bool AllExist => Cross.Exists && WXHB.Exists && ActionContents.Exists && MainMenu.Exists &&
-                                         ActionBars.All(static bar => bar.Exists);
+        internal static bool AllExist => Cross.Exists && WXHB.Exists && ActionContents.Exists && MainMenu.Exists && ActionBars.All(static bar => bar.Exists);
 
         /// <summary>Get fresh new pointers for all the hotbar AtkUnitBases</summary>
         internal static void GetBases()
@@ -57,7 +58,6 @@ public sealed unsafe partial class CrossUp
                 }
 
                 internal static Select Previous = Select.None;
-
                 internal static Select Current => AddonCross->LeftBar ? Select.Left :
                     AddonCross->RightBar ? Select.Right :
                     AddonCross->LRBar > 0 ? Select.LR :
@@ -103,24 +103,19 @@ public sealed unsafe partial class CrossUp
                 internal static NodeWrapper Text => Base[3u];
             }
 
-            internal static Command[] Actions =>
-                CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
+            internal static Command[] Actions => CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
 
             public static class SetID
             {
                 private static int Previous;
                 internal static int Current => Previous = AddonBase->HotbarID;
-
-                internal static bool HasChanged(AddonActionBarBase* barBase) =>
-                    Previous != (Previous = barBase->HotbarID);
-
+                internal static bool HasChanged(AddonActionBarBase* barBase) => Previous != (Previous = barBase->HotbarID);
                 private static bool HasChanged() => Previous != Current;
             }
 
             internal sealed class ButtonSet
             {
-                internal NodeWrapper this[int i] =>
-                    new(Base[(uint)(33 + i)], pos: new(142f * i - (i % 2 == 0 ? 0 : 4), 0));
+                internal NodeWrapper this[int i] => new(Base[(uint)(33 + i)], pos: new(142f * i - (i % 2 == 0 ? 0 : 4), 0));
             }
 
             internal static readonly ButtonSet Buttons = new();
@@ -149,7 +144,6 @@ public sealed unsafe partial class CrossUp
             }
 
             internal static readonly ButtonSet Buttons = new();
-
             internal sealed class ButtonSet
             {
                 internal NodeWrapper this[int i] => (i < 2 ? LL.Base : RR.Base)[(uint)(6 - i % 2)];
@@ -165,6 +159,7 @@ public sealed unsafe partial class CrossUp
             internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.LR);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
             internal static BaseWrapper Base => BorrowBar.Base;
+            internal static NodeWrapper Root => new(Base[1u]);
         }
 
         /// <summary>The R->L Expanded Hold Bar</summary>
@@ -176,6 +171,7 @@ public sealed unsafe partial class CrossUp
             internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.RL);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
             internal static BaseWrapper Base => BorrowBar.Base;
+            internal static NodeWrapper Root => new(Base[1u]);
         }
 
         /// <summary>The "Duty Action" pane (ie, in Bozja/Eureka)</summary>
@@ -190,8 +186,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Mouse/KB Action Bars</summary>
-        internal static readonly ActionBar[] ActionBars =
-            { new(0), new(1), new(2), new(3), new(4), new(5), new(6), new(7), new(8), new(9) };
+        internal static readonly ActionBar[] ActionBars = { new(0), new(1), new(2), new(3), new(4), new(5), new(6), new(7), new(8), new(9) };
 
         internal sealed class ActionBar
         {
@@ -237,7 +232,7 @@ public sealed unsafe partial class CrossUp
         private static readonly Vector2[,] DefaultBarGrids =
         {
             {
-                new(34, 0),  new(79, 0),  new(124, 0), new(169, 0), new(214, 0), new(259, 0), new(304, 0), new(349, 0),
+                new(34,  0),  new(79, 0), new(124, 0), new(169, 0), new(214, 0), new(259, 0), new(304, 0), new(349, 0),
                 new(394, 0), new(439, 0), new(484, 0), new(529, 0)
             },
             {

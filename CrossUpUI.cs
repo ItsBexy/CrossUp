@@ -1,13 +1,13 @@
 ﻿using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Numerics;
-using static CrossUp.CharConfig;
 using static CrossUp.Service;
 using ImGui = ImGuiNET.ImGui;
+using PluginLog = Dalamud.Logging.PluginLog;
+
 // ReSharper disable UnusedMember.Local
 // ReSharper disable NotAccessedField.Local
 // ReSharper disable InvertIf
@@ -64,7 +64,8 @@ internal sealed partial class CrossUpUI : IDisposable
                 HideTriggerText = Config.HideTriggerText ?? false,
                 HideUnassigned = Config.HideUnassigned ?? false,
                 SelectColorMultiply = Config.SelectColorMultiply ?? CrossUp.Color.Preset.MultiplyNeutral,
-                SelectDisplayType = Config.SelectDisplayType ?? 0,
+                SelectBlend = Config.SelectDisplayType ?? 0,
+                SelectStyle = Config.SelectDisplayType == 1 ? 0 : 1,
                 GlowA = Config.GlowA ?? CrossUp.Color.Preset.White,
                 GlowB = Config.GlowB ?? CrossUp.Color.Preset.White,
                 TextColor = Config.TextColor ?? CrossUp.Color.Preset.White,
@@ -134,6 +135,7 @@ internal sealed partial class CrossUpUI : IDisposable
         }
     };
 
+    public static float Scale => ImGuiHelpers.GlobalScale;
 
     private static Vector4 HighlightColor => Config.UniqueHud ? ColorSchemes[CrossUp.HudSlot - 1, 0] : new(1f, 1f, 1f, 1f);
 
@@ -166,9 +168,7 @@ internal sealed partial class CrossUpUI : IDisposable
     {
         if (!SettingsVisible || !CrossUp.IsSetUp) return;
 
-        var scale = ImGuiHelpers.GlobalScale;
-
-        ImGui.SetNextWindowSizeConstraints(new Vector2(500 * scale, 380 * scale), new Vector2(650 * scale, 480 * scale));
+        ImGui.SetNextWindowSizeConstraints(new Vector2(500 * Scale, 380 * Scale), new Vector2(650 * Scale, 480 * Scale));
         ImGui.SetNextWindowSize(Config.ConfigWindowSize, ImGuiCond.Always);
         if (ImGui.Begin(Strings.WindowTitle, ref settingsVisible))
         {
@@ -179,101 +179,16 @@ internal sealed partial class CrossUpUI : IDisposable
                 Mapping.DrawTab();
                 HudOptions.DrawTab();
 
-#if DEBUG
+//#if DEBUG
                 ConfigDebug.DrawTab();
-#endif
+//#endif
 
                 ImGui.EndTabBar();
             }
             Config.ConfigWindowSize = ImGui.GetWindowSize();
-        }
-        ImGui.End();
-    }
-
-    public class ConfigDebug
-    {
-        private static int StartIndex = 394;
-        private static int EndIndex = 394;
-
-        public static void DrawTab()
-        {
-            var startIndex = StartIndex;
-            var endIndex = EndIndex;
-
-            if (!ImGui.BeginTabItem("Debug: Config")) return;
-
-            ImGui.SetNextItemWidth(100);
-            if (ImGui.InputInt("##startIndex", ref startIndex)) StartIndex = Math.Min(701, Math.Max(0, startIndex));
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(100);
-            if (ImGui.InputInt("##endIndex", ref endIndex)) EndIndex = Math.Max(0, Math.Min(701, endIndex));
-
-            ImGui.SameLine();
-            if (ImGui.Button("Log Config Indexes", new Vector2(150, 20)))
-            {
-                PluginLog.Log("Index\tID\tName\tValue");
-                for (var i = (uint)startIndex; i <= endIndex; i++)
-                {
-                    if (i is < 0 or > 700) break;
-                    PluginLog.Log(new Config(i).ToString());
-                }
-            }
-
-
-            ImGui.BeginTable("configTable", 5, ImGuiTableFlags.Borders, new Vector2(620 * ImGuiHelpers.GlobalScale, 1));
-
-
-            ImGui.TableSetupColumn("ind", ImGuiTableColumnFlags.WidthFixed, 50 * ImGuiHelpers.GlobalScale);
-            ImGui.TableSetupColumn("id", ImGuiTableColumnFlags.WidthFixed, 50 * ImGuiHelpers.GlobalScale);
-            ImGui.TableSetupColumn("name", ImGuiTableColumnFlags.WidthFixed, 300 * ImGuiHelpers.GlobalScale);
-            ImGui.TableSetupColumn("int", ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
-            ImGui.TableSetupColumn("uint", ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
-            ImGui.TableSetupColumn("hex", ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
-
-            ImGui.TableNextColumn();
-            ImGui.TableHeader("Index");
-            ImGui.TableNextColumn();
-            ImGui.TableHeader("ID");
-            ImGui.TableNextColumn();
-            ImGui.TableHeader("Name");
-            ImGui.TableNextColumn();
-            ImGui.TableHeader("uint");
-            ImGui.TableNextColumn();
-            ImGui.TableHeader("hex");
-
-
-            for (var i = (uint)startIndex; i <= endIndex; i++)
-            {
-                if (i is < 0 or > 700) break;
-
-                var conf = new Config(i);
-                
-                ImGui.TableNextRow();
-
-                ImGui.TableNextColumn();
-                ImGui.Text(i + "");
-                ImGui.TableNextColumn();
-
-                ImGui.Text(conf.ID + "");
-                ImGui.TableNextColumn();
-                ImGui.Text(conf.Name + "");
-                ImGui.SetNextItemWidth(100);
-                ImGui.TableNextColumn();
-                ImGui.Text((uint)conf.Get() + "");
-                ImGui.TableNextColumn();
-                ImGui.Text( UintToHex( (uint)conf.Get()) + "");
-            }
-
-            ImGui.EndTable();
-
-            ImGui.EndTabItem();
+            ImGui.End();
         }
     }
-
-
-
-
 
     public class LookAndFeel
     {
@@ -283,12 +198,12 @@ internal sealed partial class CrossUpUI : IDisposable
             {
                 var split = Profile.Split;
                 var lockCenter = Profile.LockCenter;
+
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
 
                 ImGui.TextColored(HighlightColor, Strings.LookAndFeel.LeftRightSplit);
-
                 ImGui.TableNextColumn();
 
                 ImGui.PushID("resetSplit");
@@ -301,7 +216,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("##Distance", ref split))
                 {
                     split = Math.Max(split, 0);
@@ -312,7 +227,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 ImGui.SameLine();
-                ImGui.Indent(111);
+                ImGui.Indent(111 * Scale);
 
                 ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
                 if (ImGui.Checkbox(Strings.LookAndFeel.LockCenter + "##Center", ref lockCenter))
@@ -323,9 +238,9 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 ImGui.PopStyleColor(1);
-                ImGui.Indent(-111);
+                ImGui.Indent(-111 * Scale);
                 ImGui.TableNextColumn();
-
+                
                 ImGuiComponents.HelpMarker(Strings.LookAndFeel.HelpText);
 
             }
@@ -334,6 +249,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 var padlockX = (int)Profile.PadlockOffset.X;
                 var padlockY = (int)Profile.PadlockOffset.Y;
                 var hidePadlock = Profile.HidePadlock;
+
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 ImGui.TextColored(HighlightColor, Strings.LookAndFeel.PadlockIcon);
@@ -351,7 +267,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("X##PadX", ref padlockX))
                 {
                     Profile.PadlockOffset = Profile.PadlockOffset with { X = padlockX };
@@ -360,7 +276,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 ImGui.SameLine();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("Y##PadY", ref padlockY))
                 {
                     Profile.PadlockOffset = Profile.PadlockOffset with { Y = padlockY };
@@ -400,7 +316,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("X##SetX", ref setTextX))
                 {
                     Profile.SetTextOffset = Profile.SetTextOffset with { X = setTextX };
@@ -409,7 +325,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 ImGui.SameLine();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("Y##SetY", ref setTextY))
                 {
                     Profile.SetTextOffset = Profile.SetTextOffset with { Y = setTextY };
@@ -447,7 +363,7 @@ internal sealed partial class CrossUpUI : IDisposable
 
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("X##ChangeSetX", ref changeSetX))
                 {
                     Profile.ChangeSetOffset = Profile.ChangeSetOffset with { X = changeSetX };
@@ -456,7 +372,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 ImGui.SameLine();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(90 * Scale);
                 if (ImGui.InputInt("Y##ChangeSetY", ref changeSetY))
                 {
                     Profile.ChangeSetOffset = Profile.ChangeSetOffset with { Y = changeSetY };
@@ -495,6 +411,7 @@ internal sealed partial class CrossUpUI : IDisposable
                     Config.Save();
                 }
             }
+
             public static void CombatFade()
             {
                 var fade = Profile.CombatFadeInOut;
@@ -509,7 +426,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 if (ImGui.Checkbox("##Fade", ref fade))
                 {
                     Profile.CombatFadeInOut = fade;
-                    if (!fade) Transparency.Standard.Set(0);
+                    if (!fade) CharConfig.Transparency.Standard.Set(0);
                     else CrossUp.OnConditionChange();
                     Config.Save();
                 }
@@ -521,8 +438,8 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.TextColored(HighlightColor,"Combat");
                 ImGui.SameLine();
 
-                ImGui.SetCursorPosX(258f * ImGuiHelpers.GlobalScale);
-                ImGui.SetNextItemWidth(140 * ImGuiHelpers.GlobalScale);
+                ImGui.SetCursorPosX(258f * Scale);
+                ImGui.SetNextItemWidth(140 * Scale);
                 if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100))
                 {
                     if (tIn > 100) tIn = 100;
@@ -536,8 +453,8 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.SameLine();
 
 
-                ImGui.SetCursorPosX(258f * ImGuiHelpers.GlobalScale);
-                ImGui.SetNextItemWidth(140 * ImGuiHelpers.GlobalScale);
+                ImGui.SetCursorPosX(258f * Scale);
+                ImGui.SetNextItemWidth(140 * Scale);
                 if (ImGui.SliderInt("##NonCombatTransparency", ref tOut, 0, 100))
                 {
                     if (tOut > 100) tOut = 100;
@@ -552,7 +469,8 @@ internal sealed partial class CrossUpUI : IDisposable
             public static void BarHighlightColor()
             {
                 var multiply = Profile.SelectColorMultiply;
-                var displayType = Profile.SelectDisplayType;
+                var displayType = Profile.SelectBlend;
+                var tex = Profile.SelectStyle;
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -567,20 +485,54 @@ internal sealed partial class CrossUpUI : IDisposable
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt))
                 {
                     Profile.SelectColorMultiply = CrossUp.Color.Preset.MultiplyNeutral;
-                    Profile.SelectDisplayType = 0;
+                    Profile.SelectBlend = 0;
                     Config.Save();
                     CrossUp.Color.SetSelectBG();
                 }
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##BarMultiply", ref multiply))
                 {
                     Profile.SelectColorMultiply = multiply;
                     Config.Save();
                     CrossUp.Color.SetSelectBG();
                 }
+
+
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorBarStyle);
+
+                ImGui.TableNextColumn();
+                ImGui.TableNextColumn();
+                if (ImGui.RadioButton(Strings.LookAndFeel.StyleSolid, tex == 0))
+                {
+                    Profile.SelectStyle = 0;
+                    Config.Save();
+                    CrossUp.Color.SetSelectBG();
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.RadioButton(Strings.LookAndFeel.StyleFrame, tex == 1))
+                {
+                    Profile.SelectStyle = 1;
+                    Config.Save();
+                    CrossUp.Color.SetSelectBG();
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.RadioButton(Strings.LookAndFeel.StyleHide, tex == 2))
+                {
+                    Profile.SelectStyle = 2;
+                    Config.Save();
+                    CrossUp.Color.SetSelectBG();
+                }
+
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -590,7 +542,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.TableNextColumn();
                 if (ImGui.RadioButton(Strings.LookAndFeel.BlendNormal, displayType == 0))
                 {
-                    Profile.SelectDisplayType = 0;
+                    Profile.SelectBlend = 0;
                     Config.Save();
                     CrossUp.Color.SetSelectBG();
                 }
@@ -599,21 +551,21 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 if (ImGui.RadioButton(Strings.LookAndFeel.BlendDodge, displayType == 2))
                 {
-                    Profile.SelectDisplayType = 2;
+                    Profile.SelectBlend = 2;
                     Config.Save();
                     CrossUp.Color.SetSelectBG();
                 }
-                ImGui.SameLine();
 
-                if (ImGui.RadioButton(Strings.LookAndFeel.BlendHide, displayType == 1))
-                {
-                    Profile.SelectDisplayType = 1;
-                    Config.Save();
-                    CrossUp.Color.SetSelectBG();
-                }
+
+
+
+
+
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 ImGui.Spacing();
+
+
 
 
             }
@@ -643,7 +595,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##ButtonGlow", ref glowA))
                 {
                     Profile.GlowA = glowA;
@@ -666,7 +618,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##ButtonPulse", ref glowB))
                 {
                     Profile.GlowB = glowB;
@@ -701,7 +653,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##TextColor", ref textColor))
                 {
                     Profile.TextColor = textColor;
@@ -724,7 +676,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##TextGlow", ref textGlow))
                 {
                     Profile.TextGlow = textGlow;
@@ -748,7 +700,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.PopID();
 
                 ImGui.TableNextColumn();
-                ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(240 * Scale);
                 if (ImGui.ColorEdit3("##Border", ref border))
                 {
                     Profile.BorderColor = border;
@@ -757,15 +709,10 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
             }
         }
-
-
         public static void DrawTab()
         {
             if (!ImGui.BeginTabItem(Strings.LookAndFeel.TabTitle)) return;
             var columnSize = new[] { 140, 22, 215, 60 };
-
-
-
 
             ImGui.Spacing();
 
@@ -779,21 +726,18 @@ internal sealed partial class CrossUpUI : IDisposable
 
                     if (ImGui.BeginTable("Reposition", 5, ImGuiTableFlags.SizingFixedFit))
                     {
-                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, columnSize[2] * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed, columnSize[3] * ImGuiHelpers.GlobalScale);
-
+                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * Scale);
+                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * Scale);
+                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, columnSize[2] * Scale);
+                        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed, columnSize[3] * Scale);
 
                         Rows.LRsplit();
                         Rows.Padlock();
                         Rows.SetNumText();
                         Rows.ChangeSetDisplay();
                         Rows.TriggerText();
-
                         Rows.UnassignedSlots();
                         Rows.CombatFade();
-
 
                         ImGui.EndTable();
                     }
@@ -807,9 +751,9 @@ internal sealed partial class CrossUpUI : IDisposable
 
                     if (ImGui.BeginTable("Colors", 3, ImGuiTableFlags.SizingFixedFit))
                     {
-                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, (columnSize[2] + columnSize[3]) * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * Scale);
+                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * Scale);
+                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, (columnSize[2] + columnSize[3]) * Scale);
 
                         Rows.BarHighlightColor();
                         Rows.ButtonColor();
@@ -831,7 +775,6 @@ internal sealed partial class CrossUpUI : IDisposable
         public static void DrawTab()
         {
             if (!ImGui.BeginTabItem(Strings.SeparateEx.TabTitle)) return;
-            var scale = ImGuiHelpers.GlobalScale;
             var sepExBar = Profile.SepExBar;
             var lrX = (int)Profile.LRpos.X;
             var lrY = (int)Profile.LRpos.Y;
@@ -874,8 +817,8 @@ internal sealed partial class CrossUpUI : IDisposable
 
             if (ImGui.BeginTable("BarBorrowDesc", 2))
             {
-                ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed, 330 * scale);
-                ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed, 115 * scale);
+                ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed, 330 * Scale);
+                ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed, 115 * Scale);
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -888,7 +831,7 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 if (Profile.SepExBar)
                 {
-                    ImGui.SetCursorPosY(128f * scale + 87f);
+                    ImGui.SetCursorPosY(128f * Scale + 87f);
 
                     ImGui.Indent(20);
                     ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
@@ -913,7 +856,7 @@ internal sealed partial class CrossUpUI : IDisposable
 
                     if (ImGui.BeginTable("Coords", 3, ImGuiTableFlags.SizingFixedFit))
                     {
-                        ImGui.TableSetupColumn("coordText", ImGuiTableColumnFlags.WidthFixed, 120 * scale);
+                        ImGui.TableSetupColumn("coordText", ImGuiTableColumnFlags.WidthFixed, 120 * Scale);
                         ImGui.TableNextRow();
 
                         ImGui.TableNextColumn();
@@ -935,7 +878,7 @@ internal sealed partial class CrossUpUI : IDisposable
                         ImGui.PopID();
 
                         ImGui.TableNextColumn();
-                        ImGui.SetNextItemWidth(100 * scale);
+                        ImGui.SetNextItemWidth(100 * Scale);
                         if (ImGui.InputInt("X##LX", ref lrX))
                         {
                             Profile.LRpos = Profile.LRpos with { X = lrX };
@@ -947,7 +890,7 @@ internal sealed partial class CrossUpUI : IDisposable
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
                         ImGui.TableNextColumn();
-                        ImGui.SetNextItemWidth(100 * scale);
+                        ImGui.SetNextItemWidth(100 * Scale);
                         if (ImGui.InputInt("Y##LY", ref lrY))
                         {
                             Profile.LRpos = Profile.LRpos with { Y = lrY };
@@ -976,7 +919,7 @@ internal sealed partial class CrossUpUI : IDisposable
                             ImGui.PopID();
 
                             ImGui.TableNextColumn();
-                            ImGui.SetNextItemWidth(100 * scale);
+                            ImGui.SetNextItemWidth(100 * Scale);
                             if (ImGui.InputInt("X##RX", ref rlX))
                             {
                                 Profile.RLpos = Profile.RLpos with { X = rlX };
@@ -988,7 +931,7 @@ internal sealed partial class CrossUpUI : IDisposable
                             ImGui.TableNextColumn();
                             ImGui.TableNextColumn();
                             ImGui.TableNextColumn();
-                            ImGui.SetNextItemWidth(100 * scale);
+                            ImGui.SetNextItemWidth(100 * Scale);
                             if (ImGui.InputInt("Y##RY", ref rlY))
                             {
                                 Profile.RLpos = Profile.RLpos with { Y = rlY };
@@ -1014,36 +957,42 @@ internal sealed partial class CrossUpUI : IDisposable
 
                             if (borrowBars[i] || borrowCount < 2)
                             {
-                                if (ImGui.Checkbox("##using" + (i + 1), ref borrowBars[i]))
-                                {
-                                    if (borrowBars[i])
-                                    {
-                                        if (Config.LRborrow <= 0) Config.LRborrow = i;
-                                        else if (Config.RLborrow <= 0) Config.RLborrow = i;
 
-                                        CrossUp.Layout.ResetBars();
-                                        Config.Save();
+                                    if (ImGui.Checkbox("##using" + (i + 1), ref borrowBars[i]))
+                                    {
+                                        if (borrowBars[i])
+                                        {
+                                            if (Config.LRborrow <= 0) Config.LRborrow = i;
+                                            else if (Config.RLborrow <= 0) Config.RLborrow = i;
+
+
+                                            CrossUp.Layout.ResetBars();
+
                                         if (CrossUp.Layout.SeparateEx.Ready) CrossUp.Layout.SeparateEx.Enable();
-                                    }
-                                    else
-                                    {
-                                        if (Config.LRborrow == i) Config.LRborrow = -1;
-                                        else if (Config.RLborrow == i) Config.RLborrow = -1;
+                                            Config.Save();
+                                        }
+                                        else
+                                        {
+                                            if (Config.LRborrow == i) Config.LRborrow = -1;
+                                            else if (Config.RLborrow == i) Config.RLborrow = -1;
 
-                                        CrossUp.Layout.ResetBars();
-                                        CrossUp.Layout.Update();
-                                        Config.Save();
+                                            CrossUp.Layout.ResetBars();
+                                            CrossUp.Layout.Update();
+                                            Config.Save();
+                                        }
                                     }
-                                }
                             }
                             else
                             {
                                 var disabled = false;
                                 ImGui.Checkbox("##disabled", ref disabled);
                             }
+                            
 
                             ImGui.TableNextColumn();
-                            ImGui.Text(Strings.Terms.Hotbar + " " + (i + 1));
+                            var labelColor = CharConfig.Hotbar.Visible[i] ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
+                            ImGui.TextColored(labelColor, Strings.Terms.Hotbar + " " + (i + 1));
+                            
                         }
                         ImGui.TableNextRow();
                         ImGui.Indent(-14);
@@ -1078,7 +1027,6 @@ internal sealed partial class CrossUpUI : IDisposable
             var title = type ? Strings.Terms.ExpandedHold : Strings.Terms.WXHB;
             if (!ImGui.BeginTabItem(title)) return;
 
-            var scale = ImGuiHelpers.GlobalScale;
             var featureOn = type ? Config.RemapEx : Config.RemapW;
             var mappings = type ? Config.MappingsEx : Config.MappingsW;
             var optionString = "";
@@ -1122,10 +1070,10 @@ internal sealed partial class CrossUpUI : IDisposable
                         {
                             ImGui.TableNextColumn();
 
-                            var indent = (ImGui.GetColumnWidth() - 170f * scale) / 2;
+                            var indent = (ImGui.GetColumnWidth() - 170f * Scale) / 2;
                             if (indent > 0) ImGui.Indent(indent);
 
-                            ImGui.SetNextItemWidth(170f * scale);
+                            ImGui.SetNextItemWidth(170f * Scale);
                             if (ImGui.Combo($"##{(type ? c == 0 ? "LR" : "RL" : c == 0 ? "LL" : "RR")}{i + 1}",
                                     ref mappings[c, i], optionString, 16))
                             {
@@ -1145,8 +1093,7 @@ internal sealed partial class CrossUpUI : IDisposable
             ImGui.EndTabItem();
         }
     }
-
-
+    
     public class HudOptions
     {
         private static readonly string[] NumSymbols = { "ALL", "", "", "", "" };
@@ -1219,6 +1166,86 @@ internal sealed partial class CrossUpUI : IDisposable
 
 
 
+        }
+    }
+
+    public class ConfigDebug
+    {
+        private static int StartIndex = 0;
+        private static int EndIndex = 702;
+
+        public static void DrawTab()
+        {
+            var startIndex = StartIndex;
+            var endIndex = EndIndex;
+
+            if (!ImGui.BeginTabItem("Debug: Config")) return;
+
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##startIndex", ref startIndex)) StartIndex = Math.Min(701, Math.Max(0, startIndex));
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("##endIndex", ref endIndex)) EndIndex = Math.Max(0, Math.Min(701, endIndex));
+
+            ImGui.SameLine();
+            if (ImGui.Button("Log Config Indexes", new Vector2(150, 20)))
+            {
+                PluginLog.Log("Index\tID\tName\tValue");
+                for (var i = (uint)startIndex; i <= endIndex; i++)
+                {
+                    if (i is < 0 or > 700) break;
+                    PluginLog.Log(new CharConfig.Config(i).ToString());
+                }
+            }
+
+
+            ImGui.BeginTable("configTable", 5, ImGuiTableFlags.Borders, new Vector2(620 * Scale, 1));
+
+            ImGui.TableSetupColumn("ind", ImGuiTableColumnFlags.WidthFixed, 50 * Scale);
+            ImGui.TableSetupColumn("id", ImGuiTableColumnFlags.WidthFixed, 50 * Scale);
+            ImGui.TableSetupColumn("name", ImGuiTableColumnFlags.WidthFixed, 300 * Scale);
+            ImGui.TableSetupColumn("int", ImGuiTableColumnFlags.WidthFixed, 100 * Scale);
+            ImGui.TableSetupColumn("uint", ImGuiTableColumnFlags.WidthFixed, 100 * Scale);
+            ImGui.TableSetupColumn("hex", ImGuiTableColumnFlags.WidthFixed, 100 * Scale);
+
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("Index");
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("ID");
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("Name");
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("uint");
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("hex");
+
+
+            for (var i = (uint)startIndex; i <= endIndex; i++)
+            {
+                if (i is < 0 or > 700) break;
+
+                var conf = new CharConfig.Config(i);
+
+                ImGui.TableNextRow();
+
+                ImGui.TableNextColumn();
+                ImGui.Text(i + "");
+                ImGui.TableNextColumn();
+
+                ImGui.Text(conf.ID + "");
+                ImGui.TableNextColumn();
+                ImGui.Text(conf.Name + "");
+                ImGui.SetNextItemWidth(100);
+                ImGui.TableNextColumn();
+                ImGui.Text((uint)conf.Get() + "");
+                ImGui.TableNextColumn();
+                ImGui.Text(CharConfig.UintToHex((uint)conf.Get()) + "");
+            }
+
+            ImGui.EndTable();
+
+            ImGui.EndTabItem();
         }
     }
 

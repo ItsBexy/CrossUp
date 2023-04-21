@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Logging;
+using NodeTools;
 
 namespace CrossUp;
 
@@ -20,29 +21,70 @@ public sealed partial class CrossUp
         public static void SetSelectBG(bool reset = false)
         {
             var multiply = reset ? Preset.MultiplyNeutral : Profile.SelectColorMultiply;
-            var displayType = reset ? 0 : Profile.SelectDisplayType;
+            var blend = (uint)(reset ? 0 : Profile.SelectBlend);
+            var style = reset ? 0 : Profile.SelectStyle;
+            var hide = style == 2;
+            var uvwh = BGStyles[style, 0];
+            var offset = BGStyles[style, 1];
+            var scale = style == 1 ? 1.02f : 1f;
 
-            var blend = (uint)(displayType == 2 ? 2 : 0);
-            var hide = displayType == 1;
-
-            Vector2 normSize = hide ? new(0) : new(304, 140);
+            Vector2 normSize = hide ? new(0) : new(300, 140);
             Vector2 miniSize = hide ? new(0) : new(166, 140);
 
             if (Bars.Cross.Exists)
             {
-                Bars.Cross.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
-                Bars.Cross.MiniSelectR.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
-                Bars.Cross.MiniSelectL.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.Cross.SelectBG
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(normSize)
+                    .SetOrigin(160,67)
+                    .SetScale(scale)
+                    .SetBGCoords(uvwh, offset);
+
+                Bars.Cross.MiniSelectR
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(miniSize)
+                    .SetBGCoords(uvwh, offset);
+
+                Bars.Cross.MiniSelectL
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(miniSize)
+                    .SetBGCoords(uvwh, offset);
             }
 
             if (Bars.WXHB.Exists)
             {
-                Bars.WXHB.LL.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
-                Bars.WXHB.LL.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.WXHB.LL.SelectBG
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(normSize)
+                    .SetOrigin(160, 67)
+                    .SetScale(scale)
+                    .SetBGCoords(uvwh, offset);
 
-                Bars.WXHB.RR.SelectBG.SetMultiply(multiply).SetBlend(blend).SetSize(normSize);
-                Bars.WXHB.RR.MiniSelect.SetMultiply(multiply).SetBlend(blend).SetSize(miniSize);
+                Bars.WXHB.LL.MiniSelect
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(miniSize)
+                    .SetBGCoords(uvwh, offset);
+
+                Bars.WXHB.RR.SelectBG
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(normSize)
+                    .SetOrigin(160, 67)
+                    .SetScale(scale)
+                    .SetBGCoords(uvwh, offset);
+
+                Bars.WXHB.RR.MiniSelect
+                    .SetMultiply(multiply)
+                    .SetBlend(blend)
+                    .SetSize(miniSize)
+                    .SetBGCoords(uvwh, offset);
             }
+            
 
             if (Bars.ActionContents.Exists)
             {
@@ -67,9 +109,17 @@ public sealed partial class CrossUp
                 Bars.ActionContents.BG4.SetColor(dutyActionColor).SetBlend(blend);
             }
 
+
             PluginLog.LogVerbose(
-                $"Selection Color Set: {multiply}, {displayType switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+                $"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
         }
+
+        private static readonly Vector4[,] BGStyles =
+        {
+            {new(0,0,104,104), new(48)},
+            {new(284, 28, 40, 40), new(9)},
+            {new(0,0,104,104), new(48)}
+        };
 
         /// <summary>Set/Reset colors of pressed buttons</summary>
         public static void SetPulse(bool reset = false)
