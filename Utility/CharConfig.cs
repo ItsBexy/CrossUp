@@ -1,7 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
-using Dalamud.Game.Config;
-using Dalamud.Logging;
 
 // ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
@@ -16,7 +14,7 @@ public class CharConfig
 
     /// <summary>
     /// Represents a Character Configuration value<br/><br/>
-    /// <term cref="Set">Set()</term> Updates the value in-game<br/>
+    /// <term cref="Set(int)">Set()</term> Updates the value in-game<br/>
     /// <term>(int)</term> Returns the value itself<br/>
     /// <term>(bool)</term> Returns true if value > 0
     /// </summary>
@@ -37,7 +35,7 @@ public class CharConfig
 
         /// <returns>Index | ID | Name | Value</returns>
         public new string ToString() =>
-            Index + " | " + ID + " | " + Name + " | " + (uint)Get() + " | " + UintToHex((uint)Get());
+            $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
     }
 
 

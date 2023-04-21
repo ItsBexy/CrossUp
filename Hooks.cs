@@ -43,16 +43,6 @@ public sealed unsafe partial class CrossUp
         if (getFilePointerPtr != IntPtr.Zero) { GetFilePointer = Marshal.GetDelegateForFunctionPointer<GetFilePointerDelegate>(getFilePointerPtr); }
     }
 
-    private const int SlotOffset = 0x6378;
-    internal static int HudSlot;
-
-    private static int GetHudSlot()
-    {
-        var filePtr = GetFilePointer?.Invoke(0) ?? IntPtr.Zero;
-        var dataPtr = filePtr + 0x50;
-        return (int)*(uint*)(Marshal.ReadIntPtr(dataPtr) + SlotOffset) + 1;
-    }
-
     /// <summary>Removes all of CrossUp's hooks</summary>
     private void DisableHooks()
     {
@@ -93,7 +83,7 @@ public sealed unsafe partial class CrossUp
             {
                 PluginLog.LogDebug("Cross Hotbar nodes found; setting up plugin features");
                 HudSlot = GetHudSlot();
-                PluginLog.LogDebug("Hud Layout " + HudSlot + " is currently active");
+                PluginLog.LogDebug($"Hud Layout {HudSlot} is currently active");
                 Setup();
             }
         }
@@ -117,8 +107,7 @@ public sealed unsafe partial class CrossUp
     ///<term>50</term> Drag/Drop onto a slot<br/>
     ///<term>54</term> Drag/Discard from a slot
     /// </summary>
-    private byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4,
-        NumberArrayData** numberArrayData)
+    private byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4, NumberArrayData** numberArrayData)
     {
         try
         {
@@ -154,7 +143,7 @@ public sealed unsafe partial class CrossUp
             if (DragDrop) HandleDragDrop();
             if (Job.HasChanged) HandleJobChange();
 
-            if (barBase->HotbarID == 1) Layout.Update(Bars.Cross.EnableStateChanged, true);
+            if (barBase->HotbarID == 1) Layout.Update(Bars.Cross.EnableStateChanged);
             else if (barBase->HotbarSlotCount == 16 && Bars.Cross.SetID.HasChanged(barBase)) HandleSetChange(barBase);
         }
         catch (Exception ex) { PluginLog.LogError($"Exception: ActionBarBaseUpdateDetour Failed!\n{ex}"); }
@@ -189,7 +178,7 @@ public sealed unsafe partial class CrossUp
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     private static void HandleJobChange()
     {
-        PluginLog.LogDebug("Job Change: " + Job.Abbr);
+        PluginLog.LogDebug($"Job Change: {Job.Abbr}");
         if (!Layout.SeparateEx.Ready) return;
 
         Actions.Store(Bars.LR.ID);
@@ -203,6 +192,15 @@ public sealed unsafe partial class CrossUp
         if (Config.RemapEx || Config.RemapW) Remap.Override(barBase->HotbarID);
     }
 
+    private const int SlotOffset = 0x6378;
+    internal static int HudSlot;
+    private static int GetHudSlot()
+    {
+        var filePtr = GetFilePointer?.Invoke(0) ?? IntPtr.Zero;
+        var dataPtr = filePtr + 0x50;
+        return (int)*(uint*)(Marshal.ReadIntPtr(dataPtr) + SlotOffset) + 1;
+    }
+    
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
     private uint SetHudLayoutDetour(IntPtr filePtr, uint hudSlot, byte unk0, byte unk1)
     {

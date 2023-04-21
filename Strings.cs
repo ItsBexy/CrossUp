@@ -1,8 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-
-using Dalamud.Interface;
-
-namespace CrossUp;
+﻿namespace CrossUp;
 internal sealed partial class CrossUpUI
 {
     public static class Strings
@@ -11,7 +7,7 @@ internal sealed partial class CrossUpUI
         public const string WindowTitle = "CrossUp Settings";
 
         public const string UpdateWarning =
-            "Hey! CrossUp has been updated to allow separate configurations for each of your HUD Layout slots. Some of your settings might have been affected by the change. Type /xup to open CrossUp configuration.";
+            "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.";
 
         public static class Terms
         {
@@ -26,6 +22,7 @@ internal sealed partial class CrossUpUI
             public static string LLinput => "L Double Tap";
             public static string RRinput => "R Double Tap";
             public static string Set => "SET";
+            public static string HudSlot => "HUD Slot";
         }
 
         public static class LookAndFeel
@@ -33,7 +30,12 @@ internal sealed partial class CrossUpUI
             public const string TabTitle = "Look & Feel";
 
             public const string LayoutHeader = "Cross Hotbar Layout";
-            public const string LeftRightSplit = "Left/Right Separation";
+            public const string Split = "BAR SEPARATION";
+            public const string SplitOn = "Separate Left/Right";
+            public const string SplitDistance = "Separation Distance";
+            public const string SplitCenter = "Center Point ";
+            public const string SplitNote = "This will override your HUD setting for the bar's horizontal position.";
+            public const string BarElements = "BAR ELEMENTS";
             public const string PadlockIcon = "Padlock Icon";
             public const string SetNumText = "SET # Text";
             public static string ChangeSetText => "CHANGE SET Display";
@@ -60,13 +62,8 @@ internal sealed partial class CrossUpUI
             public const string TextColor = "Text Color";
             public const string TextGlow = "Text Glow Color";
             public const string BorderColor = "Border Color";
-            public const string HelpText = "Overrides HUD layout preferences to keep the Cross Hotbar centred horizontally on your screen no matter what." +
-                                           "\n\n" +
-                                           "You may wish to turn this setting on if you use other plugins that manipulate the HUD, " +
-                                           "or if you notice the bar moving left/right unexpectedly.";
 
             public const string Hide = "Hide";
-            public const string LockCenter = "Lock Center";
             public const string FadeOutsideCombat = "Fade Outside Combat";
         }
 
@@ -81,24 +78,27 @@ internal sealed partial class CrossUpUI
             public const string ShowOnlyOne = "Show Only One Bar";
             public const string ShowBoth = "Show Both";
             public const string PickTwo = "SELECT 2 BARS:";
-            
-            public static string HudManWarning => "Hi there, HUD Manager user! To make sure that CrossUp and HUD Manager work nicely together, " +
-                                                  "it's a good idea to turn off any layout preferences you might have in place for " +
-                                                  $"{Terms.Hotbar} {Config.LRborrow + 1} and {Terms.Hotbar} {Config.RLborrow + 1}. " +
-                                                  "That way, you won't end up with both plugins fighting over where to put them.";
-            public const string OpenHudMan = "Open HUD Manager";
+
+
         }
 
         public static class Hud
         {
             public const string TabTitle = "HUD Options";
-            public const string AllSame = "Apply the same settings to all HUD Layouts";
-            public const string Unique = "Apply different settings for each HUD Layout";
-            public const string Current = "Current Hud Layout:";
+            public const string AllSame = "Apply the same settings to all HUD Slots";
+            public const string Unique = "Apply different settings to each HUD Slot";
+            public const string Current = "Current HUD Slot:";
 
             public const string HighlightMsg1 = "Settings that are";
             public const string HighlightMsg2 = "highlighted";
             public const string HighlightMsg3 = "will change with your HUD.";
+
+            public const string CopyProfile = "COPY SETTINGS";
+            public const string From = "FROM";
+            public const string To = "TO";
+            public const string Copy = "COPY";
+
+            public static readonly string AllSlots = "All HUD Slots " + NumSymbols[0];
         }
 
         public static class BarMapping
@@ -108,6 +108,7 @@ internal sealed partial class CrossUpUI
             public const string IfUsing = "If Using...";
             public static string MapTo(string str) => $"Map {str} to...";
         }
-    }
 
+        public static readonly string[] NumSymbols = { "", "", "", "", "" };
+    }
 }

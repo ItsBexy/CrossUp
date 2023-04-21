@@ -47,7 +47,7 @@ public sealed partial class CrossUp : IDalamudPlugin
 
             if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable();
 
-            Layout.Update(true, true);
+            Layout.Update(true);
             Layout.ScheduleNudges(10,750);
 
             Color.SetSelectBG();
@@ -56,7 +56,7 @@ public sealed partial class CrossUp : IDalamudPlugin
         }
         catch (Exception ex)
         {
-            PluginLog.LogError("Exception: Setup Failed!\n"+ex);
+            PluginLog.LogError($"Exception: Setup Failed!\n{ex}");
             IsSetUp = false;
         }
     }
@@ -65,7 +65,6 @@ public sealed partial class CrossUp : IDalamudPlugin
     public void Dispose()
     {
         try { DisableHooks();           } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Remove hooks!\n{ex}"); }
-        try { Layout.Cross.StoreXPos(); } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't store Cross Hotbar X Position!\n{ex}"); }
         try { Layout.TidyUp();          } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Cross Hotbar layout!\n{ex}"); }
         try { Layout.ResetBars();       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
         try { Color.SetAll(true);       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }

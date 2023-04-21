@@ -16,5 +16,4 @@ internal class Service
     [PluginService] internal static Condition Condition { get; private set; }
     [PluginService] internal static GameGui GameGui { get; private set; }
     [PluginService] internal static SigScanner SigScanner { get; private set; }
-    [PluginService] public static ChatGui Chat { get; private set; }
 }

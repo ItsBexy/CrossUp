@@ -23,6 +23,16 @@ public class Configuration : IPluginConfiguration
     public int LRborrow { get; set; } = -1;
     public int RLborrow { get; set; } = -1;
 
+    // Remapping Configs
+    public bool RemapEx { get; set; }
+    public bool RemapW { get; set; }
+    public int[,] MappingsEx { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
+    public int[,] MappingsW { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
+
+    [NonSerialized] private DalamudPluginInterface? PluginInterface;
+    public void Initialize(DalamudPluginInterface pluginInterface) => PluginInterface = pluginInterface;
+    public void Save() => PluginInterface!.SavePluginConfig(this);
+
     //DEPRECATED
     public bool? SepExBar { get; set; }
     public Vector2? LRpos { get; set; }
@@ -40,8 +50,6 @@ public class Configuration : IPluginConfiguration
     public bool? HideSelect { get; set; } = null;
     public short? DisposeBaseX { get; set; }
     public float? DisposeRootX { get; set; }
-
-    // Color Configs
     public Vector3? SelectColorMultiply { get; set; }
     public int? SelectDisplayType { get; set; }
     public Vector3? GlowA { get; set; }
@@ -49,21 +57,9 @@ public class Configuration : IPluginConfiguration
     public Vector3? TextColor { get; set; }
     public Vector3? TextGlow { get; set; }
     public Vector3? BorderColor { get; set; }
-
-    // OOC fadeout
     public bool? CombatFadeInOut { get; set; }
     public int? TranspOutOfCombat { get; set; }
     public int? TranspInCombat { get; set; }
-
-    // Remapping Configs
-    public bool RemapEx { get; set; }
-    public bool RemapW { get; set; }
-    public int[,] MappingsEx { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
-    public int[,] MappingsW { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
-
-    [NonSerialized] private DalamudPluginInterface? PluginInterface;
-    public void Initialize(DalamudPluginInterface pluginInterface) => PluginInterface = pluginInterface;
-    public void Save() => PluginInterface!.SavePluginConfig(this);
 }
 
 public class Profile
@@ -71,8 +67,8 @@ public class Profile
     public Profile() { }
     public Profile(Profile original) //copy constructor
     {
-        Split = original.Split;
-        LockCenter = original.LockCenter;
+        SplitOn = original.SplitOn;
+        SplitDist = original.SplitDist;
         PadlockOffset = original.PadlockOffset;
         SetTextOffset = original.SetTextOffset;
         ChangeSetOffset = original.ChangeSetOffset;
@@ -96,9 +92,9 @@ public class Profile
         TranspOutOfCombat = original.TranspOutOfCombat;
         TranspInCombat = original.TranspInCombat;
     }
-
-    public int Split { get; set; }
-    public bool LockCenter { get; set; }
+    public bool SplitOn { get; set; }
+    public int SplitDist { get; set; } = 100;
+    public int CenterPoint { get; set; }
     public Vector2 PadlockOffset { get; set; } = new(0);
     public Vector2 SetTextOffset { get; set; } = new(0);
     public Vector2 ChangeSetOffset { get; set; } = new(0);

@@ -12,7 +12,7 @@ public sealed unsafe partial class CrossUp
     public static partial class Layout
     {
         /// <summary>Checks/updates the Cross Hotbar selection and calls the main arrangement functions</summary>
-        internal static void Update(bool forceArrange = false, bool hudFixCheck = false, bool resetAll = false)
+        internal static void Update(bool forceArrange = false, bool resetAll = false)
         {
             if (!Bars.Cross.Exists) return;
 
@@ -20,10 +20,10 @@ public sealed unsafe partial class CrossUp
             if (Bars.Cross.Enabled)
             {
                 var scale = Bars.Cross.Root.Node->ScaleX;
-                var split = resetAll ? 0 : Profile.Split;
+                var splitDist = Profile.SplitOn && !resetAll ? Profile.SplitDist : 0;
+
                 var mixBar = (bool)CharConfig.MixBar;
                 var arrangeEx = !resetAll && SeparateEx.Ready && Bars.RL.Exists && Bars.LR.Exists;
-                var lockCenter = Profile.LockCenter;
 
                 var lrX = arrangeEx ? Profile.LRpos.X : 0;
                 var lrY = arrangeEx ? Profile.LRpos.Y : 0;
@@ -32,12 +32,9 @@ public sealed unsafe partial class CrossUp
 
                 var coords = ((int)lrX, (int)lrY, (int)rlX, (int)rlY);
 
-                if (lockCenter) Cross.Recenter(scale);
-                else if (hudFixCheck) Cross.HudOffsetFix(split, scale);
+                Cross.Arrange(select, Previous, scale, splitDist, mixBar, arrangeEx, coords, forceArrange, resetAll);
 
-                Cross.Arrange(select, Previous, scale, split, mixBar, arrangeEx, coords, forceArrange, resetAll);
-
-                if (arrangeEx) SeparateEx.Arrange(select, Previous, scale, split, mixBar, coords, forceArrange);
+                if (arrangeEx) SeparateEx.Arrange(select, Previous, scale, splitDist, mixBar, coords, forceArrange);
             }
             else
             {
@@ -48,7 +45,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Calls the update function with arguments to reset everything</summary>
-        internal static void TidyUp() => Update(true, true, true);
+        internal static void TidyUp() => Update(true, true);
 
         /// <summary>Re-run the update function a few times on first login/load in case there's any straggler nodes caught out of position</summary>
         internal static void ScheduleNudges(int c = 5, int span = 500, bool log = true)
@@ -67,8 +64,7 @@ public sealed unsafe partial class CrossUp
             {
                 if (!IsSetUp) return;
                 if (log) {PluginLog.LogDebug($"Nudging Nodes {n}/{c}");}
-
-                if (Config.DisposeBaseX != null && Config.DisposeRootX != null) Cross.RestoreXPos();
+                
                 Update(true);
             }
             catch
@@ -121,10 +117,7 @@ public sealed unsafe partial class CrossUp
                 buttonNode[2u].SetVis(true);
             }
 
-            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready))
-            {
-                CharConfig.Hotbar.Visible[barID].Set(false);
-            }
+            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready)) CharConfig.Hotbar.Visible[barID].Set(false);
         }
     }
 }

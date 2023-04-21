@@ -90,7 +90,7 @@ public sealed unsafe partial class CrossUp
                                       .SetVis(true)
                                       .SetSize(295, 120)
                                       .SetPos(anchorX + (rlX + split) * scale, anchorY + rlY * scale);
-
+                
                 Bars.LR.BorrowBar.BarNumText.SetScale(0F);
                 Bars.RL.BorrowBar.BarNumText.SetScale(0F);
 

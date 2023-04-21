@@ -1,12 +1,11 @@
 ﻿using System;
 using Dalamud.Interface;
 using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using static CrossUp.CrossUp.Bars.Cross.Selection;
 
 namespace CrossUp;
 
-public sealed unsafe partial class CrossUp
+public sealed partial class CrossUp
 {
     public static partial class Layout
     {
@@ -17,10 +16,12 @@ public sealed unsafe partial class CrossUp
             public static void Arrange(Select select, Select previous, float scale, int split, bool mixBar,
                 bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)
             {
-                Bars.Cross.Root.SetPos(Bars.Cross.Base.X - split * scale, Bars.Cross.Base.Y)
-                    .SetSize((ushort)(float)(588 + split * 2), 210);
+                if (Profile.SplitOn) Recenter(scale);
 
-                ushort? lineSize = split > 0 || Profile.SepExBar && !resetAll ? 0 : null;
+                Bars.Cross.Root.SetPos(Bars.Cross.Base.X - split * scale, Bars.Cross.Base.Y)
+                               .SetSize((ushort)(float)(588 + split * 2), 210);
+
+                ushort? lineSize = split != 0 || Profile.SepExBar && !resetAll ? 0 : null;
                 Bars.Cross.VertLine.SetSize(lineSize, lineSize);
                 Bars.Cross.Padlock.SetRelativePos(Profile.PadlockOffset.X + split, Profile.PadlockOffset.Y);
                 Bars.Cross.Padlock[2u].SetVis(!Profile.HidePadlock);
@@ -111,64 +112,22 @@ public sealed unsafe partial class CrossUp
                 var scale = show ? 1F : 0F;
 
                 for (var set = 0; set < 4; set++)
+                for (uint bID = 2; bID <= 5; bID++)
                 {
-                    for (uint bID = 2; bID <= 5; bID++)
-                    {
-                        Bars.Cross.Buttons[set][bID][3u].SetScale(scale);
-                        Bars.WXHB.Buttons[set][bID][3u].SetScale(scale);
-                    }
+                    Bars.Cross.Buttons[set][bID][3u].SetScale(scale);
+                    Bars.WXHB.Buttons[set][bID][3u].SetScale(scale);
                 }
             }
 
-            /// <summary>Overrides HUD settings to force the Cross Hotbar to be horizontally centered</summary>
-            public static void Recenter(float scale)
+            /// <summary>Overrides HUD settings to horizontally recenter Cross Hotbar at user-selected position</summary>
+            private static void Recenter(float scale)
             {
-                var baseX = (short)((ImGuiHelpers.MainViewport.Size.X - 588 * scale) / 2);
-                if (Math.Abs(Bars.Cross.Base.X - baseX) < 0.9) return;
+                var baseX = (short)((ImGuiHelpers.MainViewport.Size.X - 588 * scale) / 2 + Profile.CenterPoint);
+                var misalign = Bars.Cross.Base.X - baseX;
+                if (Math.Abs(misalign) < 1) return;
 
-                PluginLog.LogDebug("Re-centering Cross Hotbar");
                 Bars.Cross.Base.X = baseX;
-                StoreXPos();
-            }
-
-            /// <summary>Fix for misalignment after entering/exiting HUD Layout Interface</summary>
-            public static void HudOffsetFix(int split, float scale)
-            {
-                var misalign = Bars.Cross.Base.X - Bars.Cross.Root.Node->X - Math.Round(split * scale);
-                if (misalign >= 0) return;
-
-                PluginLog.LogDebug($"HUD FIX: Misaligned by {misalign}");
-                Bars.Cross.Base.X -= (short)misalign;
-            }
-
-            /// <summary>Records the X coordinates of the Cross Hotbar's AtkUnitBase and root node on disable/dispose</summary>
-            internal static void StoreXPos()
-            {
-                if (!Bars.Cross.Exists)
-                {
-                    return;
-                }
-
-                PluginLog.LogDebug($"Storing Cross Hotbar X Position; UnitBase: {Bars.Cross.Base.X}, Root Node: {Bars.Cross.Root.Node->X}");
-
-                Config.DisposeBaseX = Bars.Cross.Base.X;
-                Config.DisposeRootX = Bars.Cross.Root.Node->X;
-                Config.Save();
-            }
-
-            /// <summary>Restores the last known X coordinates of the Cross Hotbar's AtkUnitBase and root node</summary>
-            public static void RestoreXPos()
-            {
-                try
-                {
-                    if (!Bars.Cross.Exists || Profile.LockCenter) return;
-                    if (Bars.Cross.Base.X != (short)Config.DisposeBaseX! ||
-                        Math.Abs(Bars.Cross.Root.Node->X - (float)Config.DisposeRootX!) > 0.5F)
-                        PluginLog.LogDebug("Correcting Cross Hotbar X Position");
-
-                    Bars.Cross.Base.X = (short)Config.DisposeBaseX!;
-                    Bars.Cross.Root.Node->X = (float)Config.DisposeRootX!;
-                } catch (Exception ex) { PluginLog.LogWarning("Exception: Couldn't restore Cross Hotbar X Position!\n" + ex); }
+                PluginLog.LogDebug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
             }
         }
     }

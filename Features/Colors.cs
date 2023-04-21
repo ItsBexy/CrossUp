@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Logging;
-using NodeTools;
 
 namespace CrossUp;
 

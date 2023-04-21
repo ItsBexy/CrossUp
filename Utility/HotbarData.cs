@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices.ComTypes;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using NodeTools;
 using static CrossUp.CharConfig;
 
@@ -158,7 +156,7 @@ public sealed unsafe partial class CrossUp
             internal static bool Exists => BorrowBar.Exists;
             internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.LR);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
-            internal static BaseWrapper Base => BorrowBar.Base;
+            private static BaseWrapper Base => BorrowBar.Base;
             internal static NodeWrapper Root => new(Base[1u]);
         }
 
@@ -170,7 +168,7 @@ public sealed unsafe partial class CrossUp
             internal static bool Exists => BorrowBar.Exists;
             internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.RL);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
-            internal static BaseWrapper Base => BorrowBar.Base;
+            private static BaseWrapper Base => BorrowBar.Base;
             internal static NodeWrapper Root => new(Base[1u]);
         }
 
@@ -193,7 +191,7 @@ public sealed unsafe partial class CrossUp
             internal ActionBar(int barID)
             {
                 ID = barID;
-                Base = new("_ActionBar" + (barID == 0 ? "" : "0" + barID));
+                Base = new($"_ActionBar{(barID == 0 ? "" : $"0{barID}")}");
                 Buttons = new ActionBarButtonNodes(ID);
             }
 
