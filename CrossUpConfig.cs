@@ -13,7 +13,8 @@ namespace CrossUp;
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
-    public Vector2 ConfigWindowSize { get; set; } = new(450, 650);
+    public Vector2 ConfigWindowSize { get; set; } = new(500, 450);
+    public Vector2 DebugWindowSize { get; set; } = new(600, 800);
 
     // unique configs per HUD Slot
     public bool UniqueHud { get; set; }
@@ -103,8 +104,8 @@ public class Profile
     public bool HideTriggerText { get; set; }
     public bool HideUnassigned { get; set; }
     public Vector3 SelectColorMultiply { get; set; } = CrossUp.Color.Preset.MultiplyNeutral;
-    public int SelectBlend { get; set; }
-    public int SelectStyle { get; set; }
+    public int SelectBlend { get; set; } //0: Normal, 2: Dodge
+    public int SelectStyle { get; set; } //0: Solid, 1: Frame, 2: Hide
     public Vector3 GlowA { get; set; } = CrossUp.Color.Preset.White;
     public Vector3 GlowB { get; set; } = CrossUp.Color.Preset.White;
     public Vector3 TextColor { get; set; } = CrossUp.Color.Preset.White;

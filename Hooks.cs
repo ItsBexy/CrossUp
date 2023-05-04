@@ -55,8 +55,6 @@ public sealed unsafe partial class CrossUp
 
     private bool LogFrameCatch = true;
 
-
-
     /// <summary>Runs every frame. Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.<br/><br/>
     /// Also calls animation function (<see cref="Layout.SeparateEx.MetaSlots.TweenAll"/>) when relevant.</summary>
     private void FrameworkUpdate(Framework framework)
@@ -92,7 +90,7 @@ public sealed unsafe partial class CrossUp
             if (LogFrameCatch)
             {
                 LogFrameCatch = false;
-                PluginLog.LogError($"Exception: Framework Update Failed!\n{ex}");
+                PluginLog.LogError($"Exception: Framework Update Function Failed!\n{ex}");
                 Task.Delay(5000).ContinueWith(delegate { LogFrameCatch = true; }); // So we aren't spamming if something goes terribly wrong
             }
         }
@@ -204,7 +202,6 @@ public sealed unsafe partial class CrossUp
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
     private uint SetHudLayoutDetour(IntPtr filePtr, uint hudSlot, byte unk0, byte unk1)
     {
-        PluginLog.LogDebug($"Loaded Hud Layout {hudSlot+1}");
         HudSlot = (int)(hudSlot + 1);
         if (IsSetUp) Layout.ScheduleNudges(2, 10, false);
         return SetHudLayoutHook!.Original(filePtr, hudSlot, unk0, unk1);

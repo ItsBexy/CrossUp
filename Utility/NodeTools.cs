@@ -103,15 +103,8 @@ public sealed unsafe class NodeWrapper
     public NodeWrapper(AtkResNode* node, Vector2? pos = null, Vector2? size = null)
     {
         Node = node;
-        if (pos != null)
-        {
-            DefaultPos = (Vector2)pos;
-        }
-
-        if (size != null)
-        {
-            DefaultSize = (Vector2)size;
-        }
+        if (pos != null) DefaultPos = (Vector2)pos;
+        if (size != null) DefaultSize = (Vector2)size;
     }
 
     public Vector2? DefaultPos;
@@ -130,12 +123,12 @@ public sealed unsafe class NodeWrapper
             try
             {
                 AtkComponentNode* comp;
-                return Node != null
-                    ? (comp = Node->GetAsAtkComponentNode()) != null
-                        ? comp->Component->UldManager.SearchNodeById(id)
-                        : Warning(
-                            $"No Child node found for NodeWrapper with ID {id}\n{new System.Diagnostics.StackTrace()}")
-                    : Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+                if (Node == null) 
+                    return Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+                if ((comp = Node->GetAsAtkComponentNode()) == null)
+                    return Warning($"No Child node found for NodeWrapper with ID {id}\n{new System.Diagnostics.StackTrace()}");
+
+                return comp->Component->UldManager.SearchNodeById(id);
             }
             catch (Exception)
             {
@@ -152,13 +145,14 @@ public sealed unsafe class NodeWrapper
             {
                 AtkComponentNode* comp;
                 AtkUldManager uld;
-                return Node != null
-                    ? (comp = Node->GetAsAtkComponentNode()) != null &&
-                      (uld = comp->Component->UldManager).NodeListSize >= i
-                        ? uld.NodeList[i]
-                        : Warning(
-                            $"No Child node found for NodeWrapper at index {i}\n{new System.Diagnostics.StackTrace()}")
-                    : Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+
+                if (Node == null) 
+                    return Warning($"Node is null and has no children \n{new System.Diagnostics.StackTrace()}");
+
+                if ((comp = Node->GetAsAtkComponentNode()) == null || (uld = comp->Component->UldManager).NodeListSize < i)
+                    return Warning($"No Child node found for NodeWrapper at index {i}\n{new System.Diagnostics.StackTrace()}");
+               
+                return uld.NodeList[i];
             }
             catch (Exception)
             {
@@ -190,7 +184,7 @@ public sealed unsafe class NodeWrapper
         public Vector3? Multiply { get; init; }
     }
 
-    public int ChildCount() => Node == null ? 0 : Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
+    public int ChildCount => Node == null ? 0 : Node->GetAsAtkComponentNode()->Component->UldManager.NodeListSize;
 
     public NodeWrapper SetVis(bool show)
     {

@@ -19,13 +19,16 @@ public sealed unsafe partial class CrossUp
             internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
 
             /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
-            internal static void Enable()
+            internal static void Enable(bool chatty=false)
             {
                 PrepBar(Bars.LR.ID);
                 PrepBar(Bars.RL.ID);
 
-                PluginLog.LogDebug($"Borrowing Hotbar {Bars.LR.ID + 1} to serve as L→R Expanded Hold Bar");
-                PluginLog.LogDebug($"Borrowing Hotbar {Bars.RL.ID + 1} to serve as R→L Expanded Hold Bar");
+                if (chatty)
+                {
+                    PluginLog.LogDebug($"Borrowing Hotbar {Bars.LR.ID + 1} to serve as L→R Expanded Hold Bar");
+                    PluginLog.LogDebug($"Borrowing Hotbar {Bars.RL.ID + 1} to serve as R→L Expanded Hold Bar");
+                }
 
                 Update(true);
                 Task.Delay(20).ContinueWith(static delegate { if (IsSetUp) Update(true); });

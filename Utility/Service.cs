@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
+using Dalamud.Plugin;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 #pragma warning disable CS8618

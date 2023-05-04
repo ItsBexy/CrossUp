@@ -11,9 +11,9 @@ public sealed partial class CrossUp
     {
         public struct Preset
         {
-            public static readonly Vector3 White = new(1F, 1F, 1F);
+            public static readonly Vector3 White = new(1F);
             public static readonly Vector3 TextGlow = new(157f / 255f, 131f / 255f, 91f / 255f);
-            public static readonly Vector3 MultiplyNeutral = new(100f / 255f, 100f / 255f, 100f / 255f);
+            public static readonly Vector3 MultiplyNeutral = new(100f / 255f);
         }
 
         /// <summary>Apply selected highlight colour to all XHB and WXHB highlight ninegrids</summary>
@@ -109,8 +109,7 @@ public sealed partial class CrossUp
             }
 
 
-            PluginLog.LogVerbose(
-                $"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+            PluginLog.LogVerbose($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
         }
 
         private static readonly Vector4[,] BGStyles =

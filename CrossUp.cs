@@ -21,6 +21,7 @@ public sealed partial class CrossUp : IDalamudPlugin
     {
         CommandManager = commandManager;
         CommandManager.AddHandler(MainCommand, new CommandInfo(OnMainCommand) { HelpMessage = CrossUpUI.Strings.HelpMsg });
+        IpcManager.Register(pluginInterface);
 
         PluginInterface = pluginInterface;
         Config = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -30,7 +31,7 @@ public sealed partial class CrossUp : IDalamudPlugin
         PluginInterface.Create<Service>();
 
         CrossUpUI = new CrossUpUI(Config, this);
-        
+
         EnableHooks();
     }
 
@@ -41,11 +42,11 @@ public sealed partial class CrossUp : IDalamudPlugin
     {
         try
         {
-            IsSetUp = true;
 
             Bars.GetBases();
+            IsSetUp = true;
 
-            if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable();
+            if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable(true);
 
             Layout.Update(true);
             Layout.ScheduleNudges(10,750);
@@ -69,12 +70,11 @@ public sealed partial class CrossUp : IDalamudPlugin
         try { Layout.ResetBars();       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
         try { Color.SetAll(true);       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
         try { DisposeUI();              } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose Plugin Interface!\n{ex}"); }
-
+        try { IpcManager.Unregister();  } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Unregister IPC funcs!\n{ex}"); }
+        
         IsSetUp = false;
     }
 
-    /// <summary>"/xup" Command</summary>
-    private void OnMainCommand(string command, string args) => CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
     private void DrawUI() => CrossUpUI?.Draw();
     private void DrawConfigUI() => CrossUpUI.SettingsVisible = true;
     private void DisposeUI()

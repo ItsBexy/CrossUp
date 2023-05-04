@@ -6,8 +6,7 @@ internal sealed partial class CrossUpUI
         public const string HelpMsg = "Open CrossUp Settings";
         public const string WindowTitle = "CrossUp Settings";
 
-        public const string UpdateWarning =
-            "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.";
+        public const string UpdateWarning = "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.";
 
         public static class Terms
         {
@@ -38,8 +37,8 @@ internal sealed partial class CrossUpUI
             public const string BarElements = "BAR ELEMENTS";
             public const string PadlockIcon = "Padlock Icon";
             public const string SetNumText = "SET # Text";
-            public static string ChangeSetText => "CHANGE SET Display";
-            public static string LRTriggerText => "Hide L/R Trigger Text";
+            public const string ChangeSetText = "CHANGE SET Display";
+            public const string LRTriggerText = "Hide L/R Trigger Text";
             public const string UnassignedSlots = "Hide Unassigned Slots";
 
             public const string ColorHeader = "Colors";
