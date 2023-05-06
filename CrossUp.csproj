@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.4.3.0</Version>
+    <Version>0.4.3.1</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -19,6 +19,16 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="UI\Localization\de.json" />
+    <None Remove="UI\Localization\dePlaceholders.json" />
+    <None Remove="UI\Localization\en.json" />
+    <None Remove="UI\Localization\fr.json" />
+    <None Remove="UI\Localization\frPlaceholders.json" />
+    <None Remove="UI\Localization\ja.json" />
+    <None Remove="UI\Localization\jaPlaceholders.json" />
+  </ItemGroup>
+
 	<ItemGroup>
     <Content Include="Data\CrossUp.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -32,13 +42,24 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>0.4.3.0</FileVersion>
-	  <AssemblyVersion>0.4.3.0</AssemblyVersion>
+	  <FileVersion>0.4.3.1</FileVersion>
+	  <AssemblyVersion>0.4.3.1</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="UI\Localization\dePlaceholders.json" />
+    <EmbeddedResource Include="UI\Localization\de.json" />
+    <EmbeddedResource Include="UI\Localization\en.json" />
+    <EmbeddedResource Include="UI\Localization\frPlaceholders.json" />
+    <EmbeddedResource Include="UI\Localization\fr.json" />
+    <EmbeddedResource Include="UI\Localization\jaPlaceholders.json" />
+    <EmbeddedResource Include="UI\Localization\ja.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CheapLoc" Version="1.1.8" />
     <PackageReference Include="DalamudPackager" Version="2.1.10" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>

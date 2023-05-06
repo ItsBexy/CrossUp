@@ -1,0 +1,66 @@
+{
+  "HotbarN": {
+    "message": "Barre n°{0}",
+    "description": "Should match the term used in  (Character Configuration > Hotbar Settings > Display)"
+  },
+  "CrossHotbarMenuTerm": {
+    "message": "Crx racc. {0} - {1}",
+    "description": "{0} is the set number, {1} is 'Left' or 'Right'. Should match the exact term used in the dropdown menus in [Character Configuration > Hotbar Settings > Custom]."
+  },
+  "WXHB": {
+    "message": "Double Croix de Raccourcis",
+    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+  },
+  "Left": {
+    "message": "gauche",
+    "description": ""
+  },
+  "Right": {
+    "message": "droite",
+    "description": ""
+  },
+  "Set": {
+    "message": "Croix",
+    "description": "As in: Cross Hotbar set"
+  },
+  "HudSlot": {
+    "message": "ATH Slot",
+    "description": ""
+  },
+  "SetNumText": {
+    "message": "«CROIX #» Text",
+    "description": "Refers to the text on the Cross Hotbar that indicates the selected set number."
+  },
+  "ChangeSetDisplay": {
+    "message": "«CHANGER DE CROIX» Display",
+    "description": "Refers to the display for switching sets that appears when the R1/RB button is held"
+  },
+  "HudAllSame": {
+    "message": "Apply the same settings to all ATH Slots",
+    "description": ""
+  },
+  "HudUnique": {
+    "message": "Apply different settings to each ATH Slot",
+    "description": ""
+  },
+  "CurrentHudSlot": {
+    "message": "Current ATH Slot:",
+    "description": ""
+  },
+  "AllHudSlots": {
+    "message": "All ATH Slots",
+    "description": ""
+  },
+  "HudOptions": {
+    "message": "ATH Options",
+    "description": ""
+  },
+  "CenterNote": {
+    "message": "This will override your ATH setting for the bar's horizontal position.",
+    "description": "Help icon in the Plugin UI [CrossUp Settings > Look & Feel > Cross Hotbar Layout]"
+  },
+  "HighlightMsg": {
+    "message": "Settings that are|highlighted|will change with your ATH.",
+    "description": "The text inside the | delimiters will be highlighted with a different color in the plugin window."
+  }
+}

@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 
@@ -7,7 +6,7 @@ namespace CrossUp;
 
 public sealed partial class CrossUp
 {
-    public static class IpcManager
+    internal static class IpcManager
     {
         public class Provider
         {

@@ -12,6 +12,7 @@ namespace CrossUp;
 
 internal class Service
 {
+    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; }
     [PluginService] internal static ClientState ClientState { get; private set; }
     [PluginService] internal static Framework Framework { get; private set; }
     [PluginService] internal static Condition Condition { get; private set; }

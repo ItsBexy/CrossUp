@@ -60,7 +60,7 @@ internal sealed partial class CrossUpUI : IDisposable
         ImGui.SetNextWindowSize(new Vector2(320 * Scale, 240 * Scale), ImGuiCond.Always);
         if (ImGui.Begin("CrossUp Notice v0.4.2.0", ref ShowUpdateWarning, ImGuiWindowFlags.NoResize))
         {
-            ImGui.Text(Strings.UpdateWarning);
+            ImGui.Text(Strings.UpdateWarning0420);
 
             BumpCursorY(40f * Scale);
             ImGui.Text("Open CrossUp Config: ");
@@ -170,10 +170,8 @@ internal sealed partial class CrossUpUI : IDisposable
             new(0.357f,0.1490f,0.549f,0.9f)
         }
     };
-
     private static Vector4 HighlightColor => Config.UniqueHud ? ColorSchemes[HudSlot, 0] : ImGuiColors.DalamudWhite;
     private static Vector4 DimColor => Config.UniqueHud ? ColorSchemes[HudSlot, 1] : ImGuiColors.DalamudGrey3;
-
     private static void ColumnCentredText(string text)
     {
         var colWidth = ImGui.GetColumnWidth();
@@ -184,33 +182,40 @@ internal sealed partial class CrossUpUI : IDisposable
         ImGui.Text(text);
         ImGui.Indent(-indentSize);
     }
-    private static void IndentedText(string text, float indent)
-    {
-        ImGui.Indent(indent);
-        ImGui.Text(text);
-        ImGui.Indent(-indent);
-    }
 
+    private static void ColumnRightAlignText(string text)
+    {
+        var colWidth = ImGui.GetColumnWidth();
+        var textWidth = ImGui.CalcTextSize(text).X;
+        var indentSize = (colWidth - textWidth);
+
+        ImGui.Indent(indentSize);
+        ImGui.Text(text);
+        ImGui.Indent(-indentSize);
+    }
     private static void BumpCursorX(float val) => ImGui.SetCursorPosX(ImGui.GetCursorPosX() + val);
     private static void BumpCursorY(float val) => ImGui.SetCursorPosY(ImGui.GetCursorPosY() + val);
-    private static void BumpCursor(float x, float y)
+    private static void WriteIcon(FontAwesomeIcon icon,bool sameLine=false)
     {
-        BumpCursorX(x);
-        BumpCursorY(y);
+        if (sameLine) ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        ImGui.Text($"{icon.ToIconString()}");
+        ImGui.PopFont();
     }
+
     private void DrawSettingsWindow()
     {
         if (!SettingsVisible || !IsSetUp) return;
 
-        ImGui.SetNextWindowSizeConstraints(new Vector2(500 * Scale, 450 * Scale), new Vector2(550 * Scale, 500 * Scale));
+        ImGui.SetNextWindowSizeConstraints(new Vector2(500 * Scale, 450 * Scale), new Vector2(9999f));
         ImGui.SetNextWindowSize(Config.ConfigWindowSize, ImGuiCond.Always);
-        if (ImGui.Begin(Strings.WindowTitle, ref settingsVisible))
+        if (ImGui.Begin(Strings.WindowTitle, ref settingsVisible,ImGuiWindowFlags.NoScrollbar))
         {
             if (ImGui.BeginTabBar("Nav"))
             {
                 LookAndFeel.DrawTab();
                 SeparateEx.DrawTab();
-                Mapping.DrawTab();
+                SetSwitching.DrawTab();
                 HudOptions.DrawTab();
 
                 ImGui.EndTabBar();
@@ -237,12 +242,12 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(DimColor, Strings.LookAndFeel.Split);
+                ImGui.TextColored(DimColor, Strings.LookAndFeel.BarSeparation.ToUpper());
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.SplitOn);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.SeparateLR);
 
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox("##SplitOn", ref splitOn)) Commands.SplitOn(splitOn);
@@ -266,7 +271,7 @@ internal sealed partial class CrossUpUI : IDisposable
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
 
-                    ImGui.TextColored(HighlightColor, Strings.LookAndFeel.SplitCenter);
+                    ImGui.TextColored(HighlightColor, Strings.LookAndFeel.CenterPoint);
 
                     ImGui.TableNextColumn();
 
@@ -278,18 +283,18 @@ internal sealed partial class CrossUpUI : IDisposable
                     ImGui.SetNextItemWidth(90 * Scale);
                     if (ImGui.InputInt("##CenterPoint", ref centerPoint)) Commands.Center(centerPoint);
 
-                    ImGuiComponents.HelpMarker(Strings.LookAndFeel.SplitNote);
+                    ImGuiComponents.HelpMarker(Strings.LookAndFeel.CenterNote);
                 }
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(DimColor, Strings.LookAndFeel.BarElements);
+                ImGui.TextColored(DimColor, Strings.LookAndFeel.BarElements.ToUpper());
 
             }
             public static void Padlock()
             {
-                var x = (int)Profile.PadlockOffset.X;
                 var y = (int)Profile.PadlockOffset.Y;
+                var x = (int)Profile.PadlockOffset.X;
                 var hide = Profile.HidePadlock;
 
                 ImGui.TableNextRow();
@@ -304,11 +309,15 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("X##PadX", ref x)) Apply();
+                if (ImGui.InputInt("##PadX", ref x)) Apply();
+
+                WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("Y##PadY", ref y)) Apply();
+                if (ImGui.InputInt("##PadY", ref y)) Apply();
+                
+                WriteIcon(FontAwesomeIcon.ArrowsAltV,true);
 
                 ImGui.TableNextColumn();
                 ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
@@ -334,11 +343,16 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("X##SetX", ref x)) Apply();
+                if (ImGui.InputInt("##SetX", ref x)) Apply();
+
+
+                WriteIcon(FontAwesomeIcon.ArrowsAltH,true);
 
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("Y##SetY", ref y)) Apply();
+                if (ImGui.InputInt("##SetY", ref y)) Apply();
+
+                WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
 
                 ImGui.TableNextColumn();
                 ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
@@ -347,13 +361,15 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 void Apply() => Commands.SetNumText(!hide, x, y);
             }
+
+
             public static void ChangeSetDisplay()
             {
                 var x = (int)Profile.ChangeSetOffset.X;
                 var y = (int)Profile.ChangeSetOffset.Y;
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ChangeSetText);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ChangeSetDisplay);
 
                 ImGui.TableNextColumn();
                 ImGui.PushID("resetChangeSet");
@@ -362,11 +378,15 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("X##ChangeSetX", ref x)) Apply();
+                if (ImGui.InputInt("##ChangeSetX", ref x)) Apply();
+
+                WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * Scale);
-                if (ImGui.InputInt("Y##ChangeSetY", ref y)) Apply();
+                if (ImGui.InputInt("##ChangeSetY", ref y)) Apply();
+
+                WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
 
                 void Apply() => Commands.ChangeSet(x, y);
             }
@@ -376,7 +396,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.LRTriggerText);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.HideTriggerText);
 
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox("##HideTriggerText", ref hide)) Commands.TriggerText(!hide);
@@ -386,7 +406,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 var hide = Profile.HideUnassigned;
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.UnassignedSlots);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.HideUnassignedSlots);
 
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox("##HideUnassigned", ref hide)) Commands.EmptySlots(!hide);
@@ -408,20 +428,23 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextColumn();
 
-                ImGui.TextColored(HighlightColor, "Combat");
+                ImGui.BeginGroup();
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.InCombat);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.OutOfCombat);
+                ImGui.EndGroup();
+
                 ImGui.SameLine();
 
-                ImGui.SetCursorPosX(258f * Scale);
-                ImGui.SetNextItemWidth(140 * Scale);
+                ImGui.BeginGroup();
+                ImGui.SetNextItemWidth(100 * Scale);
                 if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100)) Commands.CombatFade(fade, tIn, tOut);
-
-                ImGui.TextColored(HighlightColor, "Idle");
-                ImGui.SameLine();
-
-                ImGui.SetCursorPosX(258f * Scale);
-                ImGui.SetNextItemWidth(140 * Scale);
+                ImGui.SetNextItemWidth(100 * Scale);
                 if (ImGui.SliderInt("##NonCombatTransparency", ref tOut, 0, 100)) Commands.CombatFade(fade, tIn, tOut);
-            }
+
+                ImGui.EndGroup();
+                
+                
+           }
             public static void BarHighlightColor()
             {
                 var color = Profile.SelectColorMultiply;
@@ -430,11 +453,11 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(DimColor, Strings.LookAndFeel.ColorSubheadBar);
+                ImGui.TextColored(DimColor, Strings.LookAndFeel.SelectedBar.ToUpper());
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorBarHighlight);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.BackdropColor);
                 ImGui.TableNextColumn();
 
                 ImGui.PushID("resetBG");
@@ -447,27 +470,24 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorBarStyle);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.BackdropStyle);
 
                 ImGui.TableNextColumn();
                 if (ImGui.RadioButton(Strings.LookAndFeel.StyleSolid, style == 0)) Commands.SelectBG(0, blend, color);
                 ImGui.SameLine();
                 if (ImGui.RadioButton(Strings.LookAndFeel.StyleFrame, style == 1)) Commands.SelectBG(1, blend, color);
                 ImGui.SameLine();
-                if (ImGui.RadioButton(Strings.LookAndFeel.StyleHide, style == 2)) Commands.SelectBG(2, blend, color);
+                if (ImGui.RadioButton(Strings.LookAndFeel.StyleHidden, style == 2)) Commands.SelectBG(2, blend, color);
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorBarBlend);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorBlending);
 
                 ImGui.TableNextColumn();
                 if (ImGui.RadioButton(Strings.LookAndFeel.BlendNormal, blend == 0)) Commands.SelectBG(style, 0, color);
                 ImGui.SameLine();
                 if (ImGui.RadioButton(Strings.LookAndFeel.BlendDodge, blend == 2)) Commands.SelectBG(style, 2, color);
 
-                ImGui.TableNextRow();
-                ImGui.TableNextColumn();
-                ImGui.Spacing();
 
             }
             public static void ButtonColor()
@@ -477,11 +497,11 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(DimColor, Strings.LookAndFeel.ColorSubheadButtons);
+                ImGui.TextColored(DimColor, Strings.LookAndFeel.Buttons.ToUpper());
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorGlow);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ButtonGlow);
 
                 ImGui.TableNextColumn();
 
@@ -494,7 +514,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 if (ImGui.ColorEdit3("##ButtonGlow", ref glow, PickerFlags)) Commands.ButtonGlow(glow);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ColorPulse);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.ButtonPulse);
 
                 ImGui.TableNextColumn();
 
@@ -514,7 +534,7 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(DimColor, Strings.LookAndFeel.ColorSubheadTextBorders);
+                ImGui.TextColored(DimColor, Strings.LookAndFeel.TextAndBorders.ToUpper());
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
@@ -531,7 +551,7 @@ internal sealed partial class CrossUpUI : IDisposable
                 if (ImGui.ColorEdit3("##TextColor", ref textColor, PickerFlags)) Commands.TextColor(textColor, textGlow);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.TextGlow);
+                ImGui.TextColored(HighlightColor, Strings.LookAndFeel.TextGlowColor);
 
                 ImGui.TableNextColumn();
 
@@ -562,23 +582,21 @@ internal sealed partial class CrossUpUI : IDisposable
         {
             if (ImGui.BeginTabItem(Strings.LookAndFeel.TabTitle))
             {
-                var columnSize = new[] { 140, 22, 215, 60 };
-
                 ImGui.Spacing();
 
                 if (ImGui.BeginTabBar("LookFeelSubTabs"))
                 {
-                    if (ImGui.BeginTabItem(Strings.LookAndFeel.LayoutHeader))
+                    if (ImGui.BeginTabItem(Strings.LookAndFeel.CrossHotbarLayout))
                     {
                         ImGui.Spacing();
                         ImGui.Indent(10);
 
-                        if (ImGui.BeginTable("Reposition", 5, ImGuiTableFlags.SizingFixedFit))
+                        if (ImGui.BeginTable("Layout", 4, ImGuiTableFlags.SizingFixedFit|ImGuiTableFlags.ScrollX))
                         {
-                            ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * Scale);
-                            ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed, columnSize[1] * Scale);
-                            ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, columnSize[2] * Scale);
-                            ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed, columnSize[3] * Scale);
+                            ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
+                            ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed);
+                            ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
+                            ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed);
 
                             Rows.LRsplit();
                             Rows.Padlock();
@@ -594,15 +612,15 @@ internal sealed partial class CrossUpUI : IDisposable
                         ImGui.EndTabItem();
                     }
 
-                    if (ImGui.BeginTabItem(Strings.LookAndFeel.ColorHeader))
+                    if (ImGui.BeginTabItem(Strings.LookAndFeel.Colors))
                     {
                         ImGui.Spacing();
                         ImGui.Indent(10);
 
-                        if (ImGui.BeginTable("Colors", 2, ImGuiTableFlags.SizingFixedFit))
+                        if (ImGui.BeginTable("Colors", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
                         {
-                            ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed, columnSize[0] * Scale);
-                            ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed, (columnSize[1] + columnSize[2] + columnSize[3]) * Scale);
+                            ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
+                            ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
 
                             Rows.BarHighlightColor();
                             Rows.ButtonColor();
@@ -653,163 +671,151 @@ internal sealed partial class CrossUpUI : IDisposable
                 for (var i = 1; i < 10; i++) if (borrowBars[i]) borrowCount++;
 
                 ImGui.Spacing();
-
+                ImGui.Spacing();
                 ImGui.Indent(10);
 
-
-                ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
-                if (ImGui.Checkbox(Strings.SeparateEx.ToggleText, ref sepExBar)) Commands.ExBarOn(sepExBar);
-
-                ImGui.PopStyleColor(1);
-                ImGui.Spacing();
-
-                if (ImGui.BeginTable("BarBorrowDesc", 2))
+                if (ImGui.BeginTable("BarBorrowDesc", 3,ImGuiTableFlags.SizingFixedFit|ImGuiTableFlags.ScrollX))
                 {
-                    ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed, 330 * Scale);
-                    ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed, 115 * Scale);
+                    ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.TableSetupColumn("gap", ImGuiTableColumnFlags.WidthFixed,20f*Scale);
+                    ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed);
 
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
 
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
+                    if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) Commands.ExBarOn(sepExBar);
+                    ImGui.PopStyleColor(1);
+
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2);
                     ImGui.PushTextWrapPos();
-                    ImGui.TextWrapped(Strings.SeparateEx.Warning);
+                    ImGui.TextWrapped(Strings.SeparateEx.SepExWarning);
                     ImGui.PopTextWrapPos();
                     ImGui.PopStyleColor();
 
-                    if (Profile.SepExBar)
-                    {
-                        ImGui.SetCursorPosY(128f * Scale + 87f);
+                    BumpCursorY(20f*Scale);
 
-                        ImGui.Indent(20);
+
+                    if (sepExBar)
+                    {
                         ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
-                        if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOne, onlyOne)) Commands.ExBarOnlyOne(true);
+                        if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) Commands.ExBarOnlyOne(true);
+                        if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) Commands.ExBarOnlyOne(false);
+                        ImGui.PopStyleColor(1);
+
+
+                        BumpCursorY(20f * Scale);
+                        ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
+                        ImGui.Text(onlyOne ? Strings.SeparateEx.BarPosition : Strings.SeparateEx.BarPositionSpecific("L→R"));
+                        ImGui.PopStyleColor(1);
 
                         ImGui.SameLine();
-                        if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) Commands.ExBarOnlyOne(false);
+                        BumpCursorX((onlyOne?35f:5f) * Scale);
+                        ImGui.PushID("resetLRpos");
+                        if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Commands.LRpos(-214, -88);
+                        ImGui.PopID();
 
-                        ImGui.PopStyleColor(1);
-                        ImGui.Indent(-10);
-
-                        ImGui.Spacing();
-
-                        if (ImGui.BeginTable("Coords", 3, ImGuiTableFlags.SizingFixedFit))
+                        ImGui.SameLine();
+                        ImGui.BeginGroup();
                         {
-                            ImGui.TableSetupColumn("coordText", ImGuiTableColumnFlags.WidthFixed, 120 * Scale);
-                            ImGui.TableNextRow();
+                            ImGui.SetNextItemWidth(100 * Scale);
+                            if (ImGui.InputInt("##LX", ref lrX)) Commands.LRpos(lrX, lrY);
 
-                            ImGui.TableNextColumn();
-                            ImGui.Indent(-5);
+                            WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
+
+                            ImGui.SetNextItemWidth(100 * Scale);
+                            if (ImGui.InputInt("##LY", ref lrY)) Commands.LRpos(lrX, lrY);
+
+                            ImGui.SameLine();
+                            BumpCursorX(4f * Scale);
+                            WriteIcon(FontAwesomeIcon.ArrowsAltV);
+                        }
+                        ImGui.EndGroup();
+
+                        if (!onlyOne)
+                        {
 
                             ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
-                            ColumnCentredText((onlyOne ? "" : $"{Strings.Terms.LRinput} ") + Strings.SeparateEx.BarPosition);
+                            ImGui.Text(Strings.SeparateEx.BarPositionSpecific("R→L"));
                             ImGui.PopStyleColor(1);
 
-                            ImGui.TableNextColumn();
-
-                            ImGui.PushID("resetLRpos");
-                            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Commands.LRpos(-214, -88);
-
+                            ImGui.SameLine();
+                            BumpCursorX(5f * Scale);
+                            ImGui.PushID("resetRLpos");
+                            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Commands.RLpos(214, -88);
                             ImGui.PopID();
 
-                            ImGui.TableNextColumn();
-                            ImGui.SetNextItemWidth(100 * Scale);
-                            if (ImGui.InputInt("X##LX", ref lrX)) Commands.LRpos(lrX, lrY);
-
-                            ImGui.TableNextRow();
-                            ImGui.TableNextColumn();
-                            ImGui.TableNextColumn();
-                            ImGui.TableNextColumn();
-                            ImGui.SetNextItemWidth(100 * Scale);
-                            if (ImGui.InputInt("Y##LY", ref lrY)) Commands.LRpos(lrX, lrY);
-
-                            if (!onlyOne)
+                            ImGui.SameLine();
+                            ImGui.BeginGroup();
                             {
-                                ImGui.TableNextRow();
-                                ImGui.TableNextColumn();
-
-                                ImGui.PushStyleColor(ImGuiCol.Text, HighlightColor);
-                                ColumnCentredText($"{Strings.Terms.RLinput} {Strings.SeparateEx.BarPosition}");
-                                ImGui.PopStyleColor(1);
-
-                                ImGui.TableNextColumn();
-
-                                ImGui.PushID("resetRLpos");
-                                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Commands.RLpos(214, -88);
-
-                                ImGui.PopID();
-
-                                ImGui.TableNextColumn();
                                 ImGui.SetNextItemWidth(100 * Scale);
-                                if (ImGui.InputInt("X##RX", ref rlX)) Commands.LRpos(rlX, rlY);
-
-                                ImGui.TableNextRow();
-                                ImGui.TableNextColumn();
-                                ImGui.TableNextColumn();
-                                ImGui.TableNextColumn();
+                                if (ImGui.InputInt("##RX", ref rlX)) Commands.LRpos(rlX, rlY);
+                                WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
                                 ImGui.SetNextItemWidth(100 * Scale);
-                                if (ImGui.InputInt("Y##RY", ref rlY)) Commands.LRpos(rlX, rlY);
+                                if (ImGui.InputInt("##RY", ref rlY)) Commands.LRpos(rlX, rlY);
+
+                                ImGui.SameLine();
+                                BumpCursorX(4f * Scale);
+                                WriteIcon(FontAwesomeIcon.ArrowsAltV);
                             }
-
-                            ImGui.EndTable();
+                            ImGui.EndGroup();
                         }
+
+
+
+                        ImGui.TableNextColumn();
 
 
                         ImGui.TableNextColumn();
                         ImGui.Spacing();
-                        ColumnCentredText(Strings.SeparateEx.PickTwo);
+                        ImGui.Text(Strings.SeparateEx.SelectTwoBars.ToUpper());
+                        ImGui.Spacing();
 
-                        if (ImGui.BeginTable("BarBorrow", 2, ImGuiTableFlags.SizingFixedFit))
+
+                        for (var i = 1; i < 10; i++)
                         {
-                            ImGui.Indent(14);
-                            for (var i = 1; i < 10; i++)
+                            if (borrowBars[i] || borrowCount < 2)
                             {
-                                ImGui.TableNextColumn();
-
-                                if (borrowBars[i] || borrowCount < 2)
+                                if (ImGui.Checkbox($"##using{i + 1}", ref borrowBars[i]))
                                 {
-                                    if (ImGui.Checkbox($"##using{i + 1}", ref borrowBars[i]))
+                                    if (borrowBars[i])
                                     {
-                                        if (borrowBars[i])
-                                        {
-                                            if (Config.LRborrow <= 0) Config.LRborrow = i;
-                                            else if (Config.RLborrow <= 0) Config.RLborrow = i;
+                                        if (Config.LRborrow <= 0) Config.LRborrow = i;
+                                        else if (Config.RLborrow <= 0) Config.RLborrow = i;
 
-                                            Layout.ResetBars();
+                                        Layout.ResetBars();
+                                        if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable(true);
+                                        Config.Save();
+                                    }
+                                    else
+                                    {
+                                        if (Config.LRborrow == i) Config.LRborrow = -1;
+                                        else if (Config.RLborrow == i) Config.RLborrow = -1;
 
-                                            if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable(true);
-                                            Config.Save();
-                                        }
-                                        else
-                                        {
-                                            if (Config.LRborrow == i) Config.LRborrow = -1;
-                                            else if (Config.RLborrow == i) Config.RLborrow = -1;
-
-                                            Layout.ResetBars();
-                                            Layout.Update();
-                                            Config.Save();
-                                        }
+                                        Layout.ResetBars();
+                                        Layout.Update();
+                                        Config.Save();
                                     }
                                 }
-                                else
-                                {
-                                    var disabled = false;
-                                    ImGui.Checkbox("##disabled", ref disabled);
-                                }
-
-
-                                ImGui.TableNextColumn();
-                                var labelColor = CharConfig.Hotbar.Visible[i]
-                                    ? ImGuiColors.DalamudWhite
-                                    : ImGuiColors.DalamudGrey3;
-                                ImGui.TextColored(labelColor, $"{Strings.Terms.Hotbar} {i + 1}");
+                            }
+                            else
+                            {
+                                var disabled = false;
+                                ImGui.Checkbox("##disabled", ref disabled);
                             }
 
-                            ImGui.TableNextRow();
-                            ImGui.Indent(-14);
 
-                            ImGui.EndTable();
+                            ImGui.SameLine();
+                            var labelColor = CharConfig.Hotbar.Visible[i]
+                                ? ImGuiColors.DalamudWhite
+                                : ImGuiColors.DalamudGrey3;
+                            ImGui.TextColored(labelColor, Strings.SeparateEx.HotbarN(i+1));
                         }
+
+                         
+                            
+                        
                     }
 
                     ImGui.EndTable();
@@ -820,12 +826,13 @@ internal sealed partial class CrossUpUI : IDisposable
         }
     }
 
-    public static class Mapping
+    public static class SetSwitching
     {
         public static void DrawTab()
         {
-            if (ImGui.BeginTabItem(Strings.BarMapping.TabTitle))
+            if (ImGui.BeginTabItem(Strings.SetSwitching.TabTitle))
             {
+                ImGui.Spacing();
                 if (ImGui.BeginTabBar("MapTabs"))
                 {
                     SubTab(false);
@@ -839,18 +846,24 @@ internal sealed partial class CrossUpUI : IDisposable
         }
         private static void SubTab(bool type)
         {
-            var title = type ? Strings.Terms.ExpandedHold : Strings.Terms.WXHB;
+            var title = type ? Strings.SetSwitching.ExpandedHoldControls : Strings.SetSwitching.WXHB;
             if (ImGui.BeginTabItem(title))
             {
                 var featureOn = type ? Config.RemapEx : Config.RemapW;
                 var mappings = type ? Config.MappingsEx : Config.MappingsW;
                 var optionString = "";
 
-                for (var i = 1; i <= 8; i++) optionString += $"{Strings.Terms.CrossHotbar} {i} - {Strings.Terms.Left}\0{Strings.Terms.CrossHotbar} {i} - {Strings.Terms.Right}\0";
+                for (var i = 1; i <= 8; i++)
+                {
+
+
+                    optionString += $"{Strings.SetSwitching.MenuText(i, Strings.SetSwitching.Left)}\0" 
+                                  + $"{Strings.SetSwitching.MenuText(i, Strings.SetSwitching.Right)}\0";
+                }
 
                 ImGui.Spacing();
                 ImGui.Indent(10);
-                if (ImGui.Checkbox($"{Strings.BarMapping.UseSetSpecific} {title}", ref featureOn))
+                if (ImGui.Checkbox(Strings.SetSwitching.UseSetSpecific(title), ref featureOn))
                 {
                     if (type) Config.RemapEx = featureOn;
                     else Config.RemapW = featureOn;
@@ -863,29 +876,38 @@ internal sealed partial class CrossUpUI : IDisposable
                     ImGui.Spacing();
                     ImGui.Indent(10);
 
-                    if (ImGui.BeginTable($"{(type ? "EXHB" : "WXHB")} Remap", 3, ImGuiTableFlags.SizingStretchProp))
+                    if (ImGui.BeginTable($"{(type ? "EXHB" : "WXHB")} Remap", 5, ImGuiTableFlags.SizingStretchSame|ImGuiTableFlags.ScrollX))
                     {
+
+                        ImGui.TableSetupColumn("sets",ImGuiTableColumnFlags.WidthFixed,ImGui.CalcTextSize(Strings.SetSwitching.IfUsing).X+20f*Scale);
+
+                        ImGui.TableSetupColumn("gap1", ImGuiTableColumnFlags.WidthFixed,10f*Scale);
+                        ImGui.TableSetupColumn("l", ImGuiTableColumnFlags.WidthFixed);
+                        ImGui.TableSetupColumn("gap2", ImGuiTableColumnFlags.WidthFixed, 10f * Scale);
+
+                        ImGui.TableSetupColumn("r", ImGuiTableColumnFlags.WidthFixed);
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        ImGui.Text($" {Strings.BarMapping.IfUsing}");
+                        ColumnCentredText(Strings.SetSwitching.IfUsing);
 
                         ImGui.TableNextColumn();
-                        ColumnCentredText(
-                            Strings.BarMapping.MapTo(type ? Strings.Terms.LRinput : Strings.Terms.LLinput));
+                        ImGui.TableNextColumn();
+                        ColumnCentredText(Strings.SetSwitching.MapTo(type ? "L→R" : Strings.SetSwitching.DoubleTap("L")));
 
                         ImGui.TableNextColumn();
-                        ColumnCentredText(
-                            Strings.BarMapping.MapTo(type ? Strings.Terms.RLinput : Strings.Terms.RRinput));
+                        ImGui.TableNextColumn();
+                        ColumnCentredText(Strings.SetSwitching.MapTo(type ? "R→L" : Strings.SetSwitching.DoubleTap("R")));
 
                         for (var i = 0; i < 8; i++)
                         {
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
 
-                            IndentedText($"{Strings.Terms.Set} {i + 1}", 13.5F);
+                            ColumnCentredText($"{Strings.SetSwitching.Set.ToUpper()} {i + 1}");
 
                             for (var c = 0; c <= 1; c++)
                             {
+                                ImGui.TableNextColumn();
                                 ImGui.TableNextColumn();
 
                                 var indent = (ImGui.GetColumnWidth() - 170f * Scale) / 2;
@@ -916,15 +938,20 @@ internal sealed partial class CrossUpUI : IDisposable
     private static void ProfileIndicator()
     {
         var p = Config.UniqueHud ? HudSlot : 0;
-        ImGui.SetCursorPosX((p == 0 ? 351 : 385) * Scale);
-        ImGui.SetCursorPosY(400 * Scale);
+        var text = $"{(p == 0 ? Strings.Hud.AllHudSlots : Strings.Hud.HudSlot)} {Strings.NumSymbols[p]}";
+
+        var textSize = ImGui.CalcTextSize(text);
+        var windowSize = ImGui.GetWindowContentRegionMax();
+
+        ImGui.SetCursorPosX(Math.Max(30f*Scale,windowSize.X - 30f * Scale - textSize.X));
+        ImGui.SetCursorPosY(Math.Max(400 * Scale, windowSize.Y - 30f * Scale - textSize.Y));
 
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[p, 1]);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorSchemes[p, 1]);
         ImGui.PushStyleColor(ImGuiCol.Button, ColorSchemes[p, 1]);
         ImGui.PushStyleColor(ImGuiCol.Text, ColorSchemes[p, 0]);
 
-        ImGui.Button(p == 0 ? Strings.Hud.AllSlots : $"{Strings.Terms.HudSlot} {Strings.NumSymbols[p]}");
+        ImGui.Button(text);
         ImGui.PopStyleColor(4);
     }
 
@@ -937,13 +964,14 @@ internal sealed partial class CrossUpUI : IDisposable
             if (ImGui.BeginTabItem(Strings.Hud.TabTitle))
             {
                 ImGui.Spacing();
+                ImGui.Spacing();
                 ImGui.Indent(10);
 
                 var uniqueHud = Config.UniqueHud;
                 var from = CopyFrom;
                 var to = CopyTo;
 
-                if (ImGui.RadioButton(Strings.Hud.AllSame, !uniqueHud))
+                if (ImGui.RadioButton(Strings.Hud.HudAllSame, !uniqueHud))
                 {
                     Config.UniqueHud = false;
 
@@ -954,7 +982,7 @@ internal sealed partial class CrossUpUI : IDisposable
                     Config.Save();
                 }
 
-                if (ImGui.RadioButton(Strings.Hud.Unique, uniqueHud))
+                if (ImGui.RadioButton(Strings.Hud.HudUnique, uniqueHud))
                 {
                     Config.UniqueHud = true;
 
@@ -965,10 +993,9 @@ internal sealed partial class CrossUpUI : IDisposable
                 }
 
                 BumpCursorY(20f * Scale);
-                ImGui.Text(Strings.Hud.Current);
+                ImGui.Text(Strings.Hud.CurrentHudSlot);
 
                 ImGui.SameLine();
-                BumpCursorX(74f * Scale);
                 for (var i = 1; i <= 4; i++)
                 {
                     ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[i, 2]);
@@ -997,80 +1024,107 @@ internal sealed partial class CrossUpUI : IDisposable
 
                 if (uniqueHud)
                 {
-                    ImGui.Text(Strings.Hud.HighlightMsg1);
+                    var msg = Strings.Hud.HighlightMsg.Split("|");
+                    ImGui.Text(msg[0]);
                     ImGui.SameLine();
                     BumpCursorX(-5f * Scale);
-                    ImGui.TextColored(HighlightColor, Strings.Hud.HighlightMsg2);
+                    ImGui.TextColored(HighlightColor, msg[1]);
                     ImGui.SameLine();
                     BumpCursorX(-6f * Scale);
-                    ImGui.Text(Strings.Hud.HighlightMsg3);
+                    ImGui.Text(msg[2]);
                 }
                 else
                 {
                     ImGui.Text("");
                 }
+                BumpCursorY(20f * Scale);
 
-                BumpCursorY(30f * Scale);
 
-                ImGui.SetCursorPosX(195 * Scale);
-                ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.Hud.CopyProfile);
-
-                BumpCursorY(6f * Scale);
-
-                ImGui.SetCursorPosX(120 * Scale);
-                ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.Hud.From);
-                ImGui.SameLine();
-                ImGui.SetCursorPosX(170 * Scale);
-
-                for (var i = 0; i <= 4; i++)
+                if (ImGui.BeginTable("hudcopy",2,ImGuiTableFlags.SizingFixedFit))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[i, 2]);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorSchemes[i, 1]);
-                    if (from == i) ImGui.PushStyleColor(ImGuiCol.Text, ColorSchemes[i, 0]);
-                    if (from == i) ImGui.PushStyleColor(ImGuiCol.Button, ColorSchemes[i, 1]);
 
-                    if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
+                    ImGui.TableSetupColumn("fromTo",ImGuiTableColumnFlags.WidthFixed,120F*Scale);
+                    ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
 
-                    ImGui.PopStyleColor(from == i ? 4 : 2);
-                    if (i != 4) ImGui.SameLine();
-                }
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
 
-                IndentedText("", 215 * Scale);
+                    ImGui.PushStyleColor(ImGuiCol.Text,ImGuiColors.DalamudGrey3);
+                    ColumnCentredText(Strings.Hud.CopySettings.ToUpper());
+                    ImGui.PopStyleColor(1);
+                    
 
-                ImGui.SetCursorPosX(138 * Scale);
-                ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.Hud.To);
-                ImGui.SameLine();
-                ImGui.SetCursorPosX(170 * Scale);
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ColumnRightAlignText($"{Strings.Hud.From.ToUpper()} ");
+                    ImGui.TableNextColumn();
 
-                for (var i = 0; i <= 4; i++)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[i, 2]);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorSchemes[i, 1]);
-                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, ColorSchemes[i, 1]);
-                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, ColorSchemes[i, 0]);
-
-                    if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
-
-                    ImGui.PopStyleColor(to == i ? 4 : 2);
-                    if (i != 4) ImGui.SameLine();
-                }
-
-                BumpCursorY(10f * Scale);
-                ImGui.SetCursorPosX(210 * Scale);
-
-                if (ImGui.Button($"   {Strings.Hud.Copy}   "))
-                {
-                    if (CopyTo != CopyFrom)
+                    ImGui.BeginGroup();
+                    for (var i = 0; i <= 4; i++)
                     {
-                        Config.Profiles[CopyTo] = new(Config.Profiles[CopyFrom]);
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[i, 2]);
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorSchemes[i, 1]);
+                        if (from == i) ImGui.PushStyleColor(ImGuiCol.Text, ColorSchemes[i, 0]);
+                        if (from == i) ImGui.PushStyleColor(ImGuiCol.Button, ColorSchemes[i, 1]);
 
-                        PluginLog.Log($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
+                        if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
 
-                        if (!Profile.SepExBar) Layout.SeparateEx.Disable();
-                        Layout.Update(true);
-                        Color.SetAll();
+                        ImGui.PopStyleColor(from == i ? 4 : 2);
+                        if (i != 4) ImGui.SameLine();
                     }
+                    ImGui.EndGroup();
+
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
+                    ColumnCentredText("");
+
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ColumnRightAlignText($"{Strings.Hud.To.ToUpper()} ");
+                    ImGui.TableNextColumn();
+                    ImGui.BeginGroup();
+                    for (var i = 0; i <= 4; i++)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorSchemes[i, 2]);
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorSchemes[i, 1]);
+                        if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, ColorSchemes[i, 1]);
+                        if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, ColorSchemes[i, 0]);
+                        
+
+                        if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
+
+                        ImGui.PopStyleColor(to == i ? 4 : 2);
+                        if (i != 4) ImGui.SameLine();
+                    }
+                    ImGui.EndGroup();
+
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
+
+                    ImGui.Spacing();
+                    var label = $"   {Strings.Hud.Copy.ToUpper()}   ";
+
+                    if (ImGui.Button(label))
+                    {
+                        if (CopyTo != CopyFrom)
+                        {
+                            Config.Profiles[CopyTo] = new(Config.Profiles[CopyFrom]);
+
+                            PluginLog.Log($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
+
+                            if (!Profile.SepExBar) Layout.SeparateEx.Disable();
+                            Layout.Update(true);
+                            Color.SetAll();
+                        }
+                    }
+
+
+                    ImGui.EndTable();
                 }
+
             }
         }
     }

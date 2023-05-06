@@ -1,0 +1,282 @@
+﻿{
+  "HelpMsg": {
+    "message": "Open CrossUp Settings",
+    "description": "Help message for the /xup command"
+  },
+  "WindowTitle": {
+    "message": "CrossUp Settings",
+    "description": "Config window title"
+  },
+  "UpdateWarning": {
+    "message": "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.",
+    "description": "Warning message for the 0.4.2.0 update"
+  },
+  "HotbarN": {
+    "message": "Hotbar {0}",
+    "description": "Should match the term used in  (Character Configuration > Hotbar Settings > Display)"
+  },
+  "CrossHotbarMenuTerm": {
+    "message": "Cross Hotbar {0} - {1}",
+    "description": "{0} is the set number, {1} is 'Left' or 'Right'. Should match the exact term used in the dropdown menus in [Character Configuration > Hotbar Settings > Custom]."
+  },
+  "ExpandedHoldControls": {
+    "message": "Expanded Hold Controls",
+    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+  },
+  "WXHB": {
+    "message": "WXHB",
+    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+  },
+  "Left": {
+    "message": "Left",
+    "description": ""
+  },
+  "Right": {
+    "message": "Right",
+    "description": ""
+  },
+  "DoubleTap": {
+    "message": "{0} Double Tap",
+    "description": "Phrase used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+  },
+  "Set": {
+    "message": "Set",
+    "description": "As in: Cross Hotbar set"
+  },
+  "HudSlot": {
+    "message": "HUD Slot",
+    "description": ""
+  },
+  "LookFeel": {
+    "message": "Look & Feel",
+    "description": ""
+  },
+  "CrossHotbarLayout": {
+    "message": "Cross Hotbar Layout",
+    "description": ""
+  },
+  "BarSeparation": {
+    "message": "Bar Separation",
+    "description": "Refers to the plugin feature that lets the user split up the left/right halves of the Cross Hotbar."
+  },
+  "SeparateLR": {
+    "message": "Separate Left/Right",
+    "description": "Separate is a verb in this context"
+  },
+  "SplitDistance": {
+    "message": "Separation Distance",
+    "description": ""
+  },
+  "CenterPoint": {
+    "message": "Center Point",
+    "description": ""
+  },
+  "CenterNote": {
+    "message": "This will override your HUD setting for the bar's horizontal position.",
+    "description": "Help icon in the Plugin UI [CrossUp Settings > Look & Feel > Cross Hotbar Layout]"
+  },
+  "BarElements": {
+    "message": "Bar Elements",
+    "description": ""
+  },
+  "PadlockIcon": {
+    "message": "Padlock Icon",
+    "description": ""
+  },
+  "SetNumText": {
+    "message": "SET # Text",
+    "description": "Refers to the text on the Cross Hotbar that indicates the selected set number."
+  },
+  "ChangeSetDisplay": {
+    "message": "CHANGE SET Display",
+    "description": "Refers to the display for switching sets that appears when the R1/RB button is held"
+  },
+  "HideTriggerText": {
+    "message": "Hide L/R Trigger Text",
+    "description": "Refers to the L2/R2 or LT/RT text displayed on the Cross Hotbar"
+  },
+  "HideUnassignedSlots": {
+    "message": "Hide Unassigned Slots",
+    "description": "Should match the in-game config setting [Character Configuration > Hotbar Settings > Display]"
+  },
+  "Colors": {
+    "message": "Colors",
+    "description": ""
+  },
+  "SelectedBar": {
+    "message": "Selected Bar",
+    "description": ""
+  },
+  "BackdropColor": {
+    "message": "Backdrop Color",
+    "description": ""
+  },
+  "ColorBlending": {
+    "message": "Color Blending",
+    "description": ""
+  },
+  "BlendNormal": {
+    "message": "Normal",
+    "description": ""
+  },
+  "BlendDodge": {
+    "message": "Dodge",
+    "description": "Blends the selected color in a way that brightens the result. TBH I don't even know why it's called this in English."
+  },
+  "BackdropStyle": {
+    "message": "Backdrop Style",
+    "description": ""
+  },
+  "StyleFrame": {
+    "message": "Frame",
+    "description": ""
+  },
+  "StyleSolid": {
+    "message": "Solid",
+    "description": ""
+  },
+  "StyleHidden": {
+    "message": "Hidden",
+    "description": ""
+  },
+  "Buttons": {
+    "message": "Buttons",
+    "description": "Hotbar buttons, to be specific"
+  },
+  "ButtonGlow": {
+    "message": "Button Glow",
+    "description": "The glowing frame that appears around a pressed/hovered hotbar button"
+  },
+  "ButtonPulse": {
+    "message": "Button Pulse",
+    "description": "The pulse animation that appears on a pressed/clicked hotbar button"
+  },
+  "TextAndBorders": {
+    "message": "Text & Borders",
+    "description": ""
+  },
+  "TextColor": {
+    "message": "Text Color",
+    "description": ""
+  },
+  "TextGlowColor": {
+    "message": "Text Glow Color",
+    "description": ""
+  },
+  "BorderColor": {
+    "message": "Border Color",
+    "description": ""
+  },
+  "Hide": {
+    "message": "Hide",
+    "description": ""
+  },
+  "FadeOutsideCombat": {
+    "message": "Fade Outside Combat",
+    "description": ""
+  },
+  "SeparateExHold": {
+    "message": "Separate Expanded Hold",
+    "description": "Separate is an adjective in this context"
+  },
+  "DisplayExSeparately": {
+    "message": "Display Expanded Hold Controls Separately",
+    "description": ""
+  },
+  "BarPosition": {
+    "message": "Bar Position",
+    "description": "Text used if only one Expanded Hold bar is shown"
+  },
+  "BarPositionSpecific": {
+    "message": "{0} Bar Position",
+    "description": "Text used if two Expanded Hold bars are shown ('L→R Bar Position' and 'R→L Bar Position')"
+  },
+  "SepExWarning": {
+    "message": "NOTE: This feature functions by borrowing the buttons from two of your standard mouse/keyboard hotbars. The hotbars you choose will not be overwritten, but they will be unavailable while the feature is active.",
+    "description": "Warning for the Separate Expanded Hold feature. It's the weirdest thing the plugin does so it's important for this to be clear."
+  },
+  "ShowOnlyOneBar": {
+    "message": "Show Only One Bar",
+    "description": ""
+  },
+  "ShowBoth": {
+    "message": "Show Both",
+    "description": ""
+  },
+  "SelectTwoBars": {
+    "message": "Select 2 Bars:",
+    "description": ""
+  },
+  "HudOptions": {
+    "message": "HUD Options",
+    "description": ""
+  },
+  "HudAllSame": {
+    "message": "Apply the same settings to all HUD Slots",
+    "description": ""
+  },
+  "HudUnique": {
+    "message": "Apply different settings to each HUD Slot",
+    "description": ""
+  },
+  "CurrentHudSlot": {
+    "message": "Current HUD Slot:",
+    "description": ""
+  },
+  "HighlightMsg": {
+    "message": "Settings that are|highlighted|will change with your HUD.",
+    "description": "The text inside the | delimiters will be highlighted with a different color in the plugin window."
+  },
+  "CopySettings": {
+    "message": "Copy Settings",
+    "description": ""
+  },
+  "CopyFrom": {
+    "message": "From",
+    "description": ""
+  },
+  "CopyTo": {
+    "message": "To",
+    "description": ""
+  },
+  "Copy": {
+    "message": "Copy",
+    "description": ""
+  },
+  "AllHudSlots": {
+    "message": "All HUD Slots",
+    "description": ""
+  },
+  "SetSwitching": {
+    "message": "Set Switching",
+    "description": ""
+  },
+  "AutoSwitch": {
+    "message": "Auto-switch bar sets for {0}",
+    "description": "Activates the feature to change the sets on the extra bars depending on which Set the main bar is using. Value {0} is the type of hotbar receiving custom assignments (either 'Expanded Hold Controls' or 'EXHB')"
+  },
+  "IfUsing": {
+    "message": "If Using...",
+    "description": "Left column header in the Bar Assignment table. Forms the sentence 'If using [main set number], map [bar type] to [bar set]'. The window layout makes the grammatical order pretty inflexible, but you can just change this to the equivalent of 'Set #'."
+  },
+  "MapTo": {
+    "message": "Map {0} to...",
+    "description": "Middle and right column headers in the Bar Assignment table. Forms the sentence 'If using [main set number], map [bar type] to [bar set]'. The window layout makes the grammatical order pretty inflexible, but you can just change this to the equivalent of '{0} Mapping'."
+  },
+  "InCombat": {
+    "message": "In Combat",
+    "description": ""
+  },
+  "OutOfCombat": {
+    "message": "Out of Combat",
+    "description": ""
+  },
+  "PunchLine": {
+    "message": "Customize the Cross Hotbar!",
+    "description": ""
+  },
+  "DalamudDesc": {
+    "message": "This plugin provides customizations for the look and feel of the Cross Hotbar\n\n-Split up the left/right hotbars\nDisplay Expanded Hold Controls Separately\n-Customize colors and element positions\n-Greater control over which sets your extra bars are mapped to",
+    "description": ""
+  }
+}

@@ -16,6 +16,8 @@ public sealed partial class CrossUp : IDalamudPlugin
     private CommandManager CommandManager { get; }
     private CrossUpUI CrossUpUI { get; }
     private static Configuration Config { get; set; } = null!;
+    private static ResourceManager ResourceManager = null!;
+
     public CrossUp([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
                    [RequiredVersion("1.0")] CommandManager commandManager)       
     {
@@ -29,6 +31,7 @@ public sealed partial class CrossUp : IDalamudPlugin
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         PluginInterface.Create<Service>();
+        ResourceManager = new ResourceManager();
 
         CrossUpUI = new CrossUpUI(Config, this);
 
@@ -71,7 +74,7 @@ public sealed partial class CrossUp : IDalamudPlugin
         try { Color.SetAll(true);       } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
         try { DisposeUI();              } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose Plugin Interface!\n{ex}"); }
         try { IpcManager.Unregister();  } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Unregister IPC funcs!\n{ex}"); }
-        
+        try { ResourceManager.Dispose();} catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose ResourceManager!\n{ex}"); }
         IsSetUp = false;
     }
 
