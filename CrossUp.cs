@@ -49,7 +49,7 @@ public sealed partial class CrossUp : IDalamudPlugin
             Bars.GetBases();
             IsSetUp = true;
 
-            if (Layout.SeparateEx.Ready) Layout.SeparateEx.Enable(true);
+            Layout.SeparateEx.EnableIfReady();
 
             Layout.Update(true);
             Layout.ScheduleNudges(10,750);

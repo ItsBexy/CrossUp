@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.4.3.1</Version>
+    <Version>0.4.3.2</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -42,19 +42,16 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>0.4.3.1</FileVersion>
-	  <AssemblyVersion>0.4.3.1</AssemblyVersion>
+	  <FileVersion>0.4.3.2</FileVersion>
+	  <AssemblyVersion>0.4.3.2</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="UI\Localization\dePlaceholders.json" />
     <EmbeddedResource Include="UI\Localization\de.json" />
     <EmbeddedResource Include="UI\Localization\en.json" />
-    <EmbeddedResource Include="UI\Localization\frPlaceholders.json" />
     <EmbeddedResource Include="UI\Localization\fr.json" />
-    <EmbeddedResource Include="UI\Localization\jaPlaceholders.json" />
     <EmbeddedResource Include="UI\Localization\ja.json" />
   </ItemGroup>
 
@@ -100,6 +97,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UI\Tabs\" />
   </ItemGroup>
 
 </Project>

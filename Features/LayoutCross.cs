@@ -21,7 +21,7 @@ public sealed partial class CrossUp
                 Bars.Cross.Root.SetPos(Bars.Cross.Base.X - split * scale, Bars.Cross.Base.Y)
                                .SetSize((ushort)(float)(588 + split * 2), 210);
 
-                ushort? lineSize = split != 0 || Profile.SepExBar && !resetAll ? 0 : null;
+                ushort? lineSize = split != 0 || SeparateEx.Ready && !resetAll ? 0 : null;
                 Bars.Cross.VertLine.SetSize(lineSize, lineSize);
                 Bars.Cross.Padlock.SetRelativePos(Profile.PadlockOffset.X + split, Profile.PadlockOffset.Y);
                 Bars.Cross.Padlock[2u].SetVis(!Profile.HidePadlock);

@@ -1,35 +1,34 @@
 ﻿using System.Collections.Generic;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 namespace CrossUp;
 
 public sealed unsafe partial class CrossUp
 {
-    private static readonly RaptureHotbarModule* RaptureModule =
-        (RaptureHotbarModule*)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->
-            GetRaptureHotbarModule();
-
-    /// <summary>An action that can be assigned to a hotbar</summary>
-    internal struct Command
-    {
-        internal uint CommandId;
-        internal HotbarSlotType CommandType;
-    }
-
-    internal enum ExSide
-    {
-        LR = 0,
-        RL = 1
-    }
 
     /// <summary>Methods pertaining to hotbar actions</summary>
-    public static class Actions
+    internal static class Actions
     {
-        /// <summary>Gets the actions saved to a specific Hotbar</summary>
-        internal static Command[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
+        private static readonly RaptureHotbarModule* RaptureModule = (RaptureHotbarModule*)CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+
+        /// <summary>An action that can be assigned to a hotbar</summary>
+        internal struct Action
         {
-            var contents = new Command[slotCount];
+            internal uint CommandId;
+            internal HotbarSlotType CommandType;
+        }
+
+        internal enum ExSide
+        {
+            LR = 0,
+            RL = 1
+        }
+        /// <summary>Gets the actions saved to a specific Hotbar</summary>
+        internal static Action[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
+        {
+            var contents = new Action[slotCount];
             var hotbar = RaptureModule->HotBar[barID];
 
             for (var i = 0; i < slotCount; i++)
@@ -44,11 +43,11 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Retrieves the saved contents of a hotbar</summary>
-        internal static Command[] GetSaved(int job, int barID, int slotCount = 12)
+        internal static Action[] GetSaved(int job, int barID, int slotCount = 12)
         {
             if (IsPvP) job = Job.PvpID(job);
 
-            var contents = new Command[slotCount];
+            var contents = new Action[slotCount];
             var saveBar = RaptureModule->SavedClassJob[job]->Bar[barID];
 
             for (var i = 0; i < slotCount; i++)
@@ -62,8 +61,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Writes a list of actions to the user's saved hotbar settings</summary>
-        internal static void Save(IList<Command> sourceButtons, int sourceStart, int targetID, int targetStart,
-            int count, int job)
+        internal static void Save(IList<Action> sourceButtons, int sourceStart, int targetID, int targetStart, int count, int job)
         {
             if (IsPvP) job = Job.PvpID(job);
 
@@ -83,7 +81,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Copies a list of actions to a hotbar (without permanently saving them to that bar)</summary>
-        internal static void Copy(IReadOnlyList<Command> sourceButtons, int sourceStart, int targetBarID,
+        internal static void Copy(IReadOnlyList<Action> sourceButtons, int sourceStart, int targetBarID,
             int targetStart, int count)
         {
             var targetBar = RaptureModule->HotBar[targetBarID];
@@ -99,9 +97,9 @@ public sealed unsafe partial class CrossUp
 
         /// <summary>Stores a set of hotbar actions for the plugin to reference later</summary>
         internal static void Store(int barID) => Bars.StoredActions[barID] =
-            GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : Job.Current, barID);
+            GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : Job.Current, barID);
 
-        internal static Command[] GetExHoldActions(ExSide exSide)
+        internal static Action[] GetExHoldActions(ExSide exSide)
         {
             var map = GetExMap(exSide);
             return GetByBarID(map.barID, 8, map.useLeft ? 0 : 8);
@@ -109,7 +107,7 @@ public sealed unsafe partial class CrossUp
 
         internal static (int barID, bool useLeft) GetExMap(ExSide side)
         {
-            int conf = (side == ExSide.LR ? CharConfig.ExtraBarMaps.LR : CharConfig.ExtraBarMaps.RL)[CharConfig.SepPvP && IsPvP ? 1 : 0];
+            int conf = (side == ExSide.LR ? GameConfig.ExtraBarMaps.LR : GameConfig.ExtraBarMaps.RL)[GameConfig.SepPvP && IsPvP ? 1 : 0];
 
             return (barID: conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.SetID.Current + (conf < 18 ? -1 : 1) - 2) % 8 + 10,
                     useLeft: conf % 2 == (conf < 16 ? 0 : 1));

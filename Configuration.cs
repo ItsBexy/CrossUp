@@ -2,10 +2,9 @@
 using System.Numerics;
 using Dalamud.Configuration;
 using Dalamud.Plugin;
-
-// ReSharper disable MemberCanBeInternal
-// ReSharper disable ClassCanBeSealed.Global
 // ReSharper disable UnusedMember.Global
+// ReSharper disable ClassCanBeSealed.Global
+// ReSharper disable MemberCanBeInternal
 
 namespace CrossUp;
 

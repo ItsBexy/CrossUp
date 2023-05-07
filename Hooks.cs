@@ -7,6 +7,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Hooking;
 using NodeTools;
 using System.Runtime.InteropServices;
+using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 namespace CrossUp;
 
@@ -24,7 +25,7 @@ public sealed unsafe partial class CrossUp
     private delegate IntPtr GetFilePointerDelegate(byte index);
     private static GetFilePointerDelegate? GetFilePointer;
 
-    private readonly AgentHudLayout* hudLayout = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
+    private readonly AgentHudLayout* hudLayout = CSFramework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
 
     /// <summary>Sets up all of CrossUp's hooks</summary>
     private void EnableHooks()
@@ -157,10 +158,10 @@ public sealed unsafe partial class CrossUp
 
         if (!Layout.SeparateEx.Ready || (int)Bars.Cross.Selection.Current > 2) return;
 
-        var lr = (id: Bars.LR.ID, map: Actions.GetExMap(ExSide.LR), actions: Bars.LR.BorrowBar.Actions);
-        var rl = (id: Bars.RL.ID, map: Actions.GetExMap(ExSide.RL), actions: Bars.RL.BorrowBar.Actions);
+        var lr = (id: Bars.LR.ID, map: Actions.GetExMap(Actions.ExSide.LR), actions: Bars.LR.BorrowBar.Actions);
+        var rl = (id: Bars.RL.ID, map: Actions.GetExMap(Actions.ExSide.RL), actions: Bars.RL.BorrowBar.Actions);
 
-        var shared = CharConfig.Hotbar.Shared;
+        var shared = GameConfig.Hotbar.Shared;
         var stored = Bars.StoredActions;
         var job = Job.Current;
 
@@ -237,7 +238,7 @@ public sealed unsafe partial class CrossUp
     }
 
     /// <summary>Runs the fader feature when the player's condition changes</summary>
-    internal static void OnConditionChange(ConditionFlag flag = 0, bool value = true)
+    private static void OnConditionChange(ConditionFlag flag = 0, bool value = true)
     {
         if (Profile.CombatFadeInOut) FadeTween.Begin(Service.Condition[ConditionFlag.InCombat]);
     }

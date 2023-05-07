@@ -83,33 +83,35 @@ public sealed partial class CrossUp
                     .SetSize(miniSize)
                     .SetBGCoords(uvwh, offset);
             }
-            
 
             if (Bars.ActionContents.Exists)
             {
-                var dutyActionColor = Preset.White;
-                if (!reset)
-                {
-                    var saturation = System.Drawing.Color
-                        .FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255))
-                        .GetSaturation();
-
-                    dutyActionColor = new Vector3
-                    {
-                        X = multiply.X * saturation + Math.Min(1f, multiply.X * 2.55f) * (1f - saturation),
-                        Y = multiply.Y * saturation + Math.Min(1f, multiply.Y * 2.55f) * (1f - saturation),
-                        Z = multiply.Z * saturation + Math.Min(1f, multiply.Z * 2.55f) * (1f - saturation)
-                    };
-                }
-
-                Bars.ActionContents.BG1.SetColor(dutyActionColor);
-                Bars.ActionContents.BG2.SetColor(dutyActionColor).SetBlend(blend);
-                Bars.ActionContents.BG3.SetColor(dutyActionColor).SetBlend(blend);
-                Bars.ActionContents.BG4.SetColor(dutyActionColor).SetBlend(blend);
+                SetDutyActionBG(reset, multiply);
             }
 
 
             PluginLog.LogVerbose($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+        }
+
+        private static void SetDutyActionBG(bool reset, Vector3 multiply)
+        {
+            var dutyActionColor = Preset.White;
+            if (!reset)
+            {
+                var saturation = System.Drawing.Color.FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255)).GetSaturation();
+
+                dutyActionColor = new Vector3
+                {
+                    X = multiply.X * saturation + Math.Min(1f, multiply.X * 2.55f) * (1f - saturation),
+                    Y = multiply.Y * saturation + Math.Min(1f, multiply.Y * 2.55f) * (1f - saturation),
+                    Z = multiply.Z * saturation + Math.Min(1f, multiply.Z * 2.55f) * (1f - saturation)
+                };
+            }
+
+            Bars.ActionContents.BG1.SetColor(dutyActionColor);
+            Bars.ActionContents.BG2.SetColor(dutyActionColor);
+            Bars.ActionContents.BG3.SetColor(dutyActionColor);
+            Bars.ActionContents.BG4.SetColor(dutyActionColor);
         }
 
         private static readonly Vector4[,] BGStyles =

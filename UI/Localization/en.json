@@ -1,31 +1,27 @@
 ﻿{
   "HelpMsg": {
     "message": "Open CrossUp Settings",
-    "description": "Help message for the /xup command"
-  },
-  "WindowTitle": {
-    "message": "CrossUp Settings",
-    "description": "Config window title"
+    "description": ""
   },
   "UpdateWarning": {
     "message": "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.",
-    "description": "Warning message for the 0.4.2.0 update"
+    "description": ""
   },
   "HotbarN": {
     "message": "Hotbar {0}",
-    "description": "Should match the term used in  (Character Configuration > Hotbar Settings > Display)"
+    "description": ""
   },
   "CrossHotbarMenuTerm": {
     "message": "Cross Hotbar {0} - {1}",
-    "description": "{0} is the set number, {1} is 'Left' or 'Right'. Should match the exact term used in the dropdown menus in [Character Configuration > Hotbar Settings > Custom]."
+    "description": ""
   },
   "ExpandedHoldControls": {
     "message": "Expanded Hold Controls",
-    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+    "description": ""
   },
   "WXHB": {
     "message": "WXHB",
-    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+    "description": ""
   },
   "Left": {
     "message": "Left",
@@ -37,7 +33,7 @@
   },
   "DoubleTap": {
     "message": "{0} Double Tap",
-    "description": "Phrase used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+    "description": ""
   },
   "Set": {
     "message": "Set",
@@ -57,11 +53,11 @@
   },
   "BarSeparation": {
     "message": "Bar Separation",
-    "description": "Refers to the plugin feature that lets the user split up the left/right halves of the Cross Hotbar."
+    "description": ""
   },
   "SeparateLR": {
     "message": "Separate Left/Right",
-    "description": "Separate is a verb in this context"
+    "description": ""
   },
   "SplitDistance": {
     "message": "Separation Distance",
@@ -73,7 +69,7 @@
   },
   "CenterNote": {
     "message": "This will override your HUD setting for the bar's horizontal position.",
-    "description": "Help icon in the Plugin UI [CrossUp Settings > Look & Feel > Cross Hotbar Layout]"
+    "description": ""
   },
   "BarElements": {
     "message": "Bar Elements",
@@ -85,19 +81,19 @@
   },
   "SetNumText": {
     "message": "SET # Text",
-    "description": "Refers to the text on the Cross Hotbar that indicates the selected set number."
+    "description": ""
   },
   "ChangeSetDisplay": {
     "message": "CHANGE SET Display",
-    "description": "Refers to the display for switching sets that appears when the R1/RB button is held"
+    "description": ""
   },
   "HideTriggerText": {
     "message": "Hide L/R Trigger Text",
-    "description": "Refers to the L2/R2 or LT/RT text displayed on the Cross Hotbar"
+    "description": ""
   },
   "HideUnassignedSlots": {
     "message": "Hide Unassigned Slots",
-    "description": "Should match the in-game config setting [Character Configuration > Hotbar Settings > Display]"
+    "description": ""
   },
   "Colors": {
     "message": "Colors",
@@ -121,7 +117,7 @@
   },
   "BlendDodge": {
     "message": "Dodge",
-    "description": "Blends the selected color in a way that brightens the result. TBH I don't even know why it's called this in English."
+    "description": ""
   },
   "BackdropStyle": {
     "message": "Backdrop Style",
@@ -141,15 +137,15 @@
   },
   "Buttons": {
     "message": "Buttons",
-    "description": "Hotbar buttons, to be specific"
+    "description": ""
   },
   "ButtonGlow": {
     "message": "Button Glow",
-    "description": "The glowing frame that appears around a pressed/hovered hotbar button"
+    "description": ""
   },
   "ButtonPulse": {
     "message": "Button Pulse",
-    "description": "The pulse animation that appears on a pressed/clicked hotbar button"
+    "description": ""
   },
   "TextAndBorders": {
     "message": "Text & Borders",
@@ -177,7 +173,7 @@
   },
   "SeparateExHold": {
     "message": "Separate Expanded Hold",
-    "description": "Separate is an adjective in this context"
+    "description": ""
   },
   "DisplayExSeparately": {
     "message": "Display Expanded Hold Controls Separately",
@@ -185,15 +181,15 @@
   },
   "BarPosition": {
     "message": "Bar Position",
-    "description": "Text used if only one Expanded Hold bar is shown"
+    "description": ""
   },
   "BarPositionSpecific": {
     "message": "{0} Bar Position",
-    "description": "Text used if two Expanded Hold bars are shown ('L→R Bar Position' and 'R→L Bar Position')"
+    "description": ""
   },
   "SepExWarning": {
     "message": "NOTE: This feature functions by borrowing the buttons from two of your standard mouse/keyboard hotbars. The hotbars you choose will not be overwritten, but they will be unavailable while the feature is active.",
-    "description": "Warning for the Separate Expanded Hold feature. It's the weirdest thing the plugin does so it's important for this to be clear."
+    "description": ""
   },
   "ShowOnlyOneBar": {
     "message": "Show Only One Bar",
@@ -225,7 +221,7 @@
   },
   "HighlightMsg": {
     "message": "Settings that are|highlighted|will change with your HUD.",
-    "description": "The text inside the | delimiters will be highlighted with a different color in the plugin window."
+    "description": ""
   },
   "CopySettings": {
     "message": "Copy Settings",
@@ -253,15 +249,15 @@
   },
   "AutoSwitch": {
     "message": "Auto-switch bar sets for {0}",
-    "description": "Activates the feature to change the sets on the extra bars depending on which Set the main bar is using. Value {0} is the type of hotbar receiving custom assignments (either 'Expanded Hold Controls' or 'EXHB')"
+    "description": ""
   },
   "IfUsing": {
     "message": "If Using...",
-    "description": "Left column header in the Bar Assignment table. Forms the sentence 'If using [main set number], map [bar type] to [bar set]'. The window layout makes the grammatical order pretty inflexible, but you can just change this to the equivalent of 'Set #'."
+    "description": ""
   },
   "MapTo": {
     "message": "Map {0} to...",
-    "description": "Middle and right column headers in the Bar Assignment table. Forms the sentence 'If using [main set number], map [bar type] to [bar set]'. The window layout makes the grammatical order pretty inflexible, but you can just change this to the equivalent of '{0} Mapping'."
+    "description": ""
   },
   "InCombat": {
     "message": "In Combat",
@@ -277,6 +273,150 @@
   },
   "DalamudDesc": {
     "message": "This plugin provides customizations for the look and feel of the Cross Hotbar\n\n-Split up the left/right hotbars\nDisplay Expanded Hold Controls Separately\n-Customize colors and element positions\n-Greater control over which sets your extra bars are mapped to",
+    "description": ""
+  },
+  "TextCommands": {
+    "message": "Text Commands",
+    "description": ""
+  },
+  "CmdOpenClose": {
+    "message": "Opens/Closes the CrossUp Settings window",
+    "description": ""
+  },
+  "CmdTogglesFeature": {
+    "message": "Toggles the feature",
+    "description": ""
+  },
+  "CmdTogglesVis": {
+    "message": "Toggles visibility",
+    "description": ""
+  },
+  "CmdSetsX": {
+    "message": "Sets the horizontal position",
+    "description": ""
+  },
+  "CmdSetsY": {
+    "message": "Sets the vertical position",
+    "description": ""
+  },
+  "CmdSetsSeparationDistance": {
+    "message": "Sets the separation distance",
+    "description": ""
+  },
+  "CmdSetsCenter": {
+    "message": "Sets the center point",
+    "description": ""
+  },
+  "CmdSplit": {
+    "message": "Controls the left/right bar separation",
+    "description": ""
+  },
+  "CmdPadlock": {
+    "message": "Controls the Padlock Icon visibility and position",
+    "description": ""
+  },
+  "CmdSetNum": {
+    "message": "Controls the SET # Text visibility and position",
+    "description": ""
+  },
+  "CmdChangeSet": {
+    "message": "Controls the CHANGE SET Display position",
+    "description": ""
+  },
+  "CmdTriggerText": {
+    "message": "Toggles the visibility of the L/R trigger text",
+    "description": ""
+  },
+  "CmdUnassignedSlots": {
+    "message": "Toggles the visibility of unassigned slots",
+    "description": ""
+  },
+  "CmdSelectBg": {
+    "message": "Controls the selection backdrop",
+    "description": ""
+  },
+  "CmdBgStyle": {
+    "message": "Sets the backdrop style\n\nOPTIONS: solid, frame, hidden",
+    "description": ""
+  },
+  "CmdBgBlend": {
+    "message": "Sets the backdrop color blending mode\n\nOPTIONS: normal, dodge",
+    "description": ""
+  },
+  "CmdBgColor": {
+    "message": "Sets the backdrop color",
+    "description": ""
+  },
+  "CmdButtonColor": {
+    "message": "Controls the button colors",
+    "description": ""
+  },
+  "CmdButtonGlow": {
+    "message": "Sets the button glow color",
+    "description": ""
+  },
+  "CmdButtonPulse": {
+    "message": "Sets the button pulse color",
+    "description": ""
+  },
+  "CmdTextAndBorders": {
+    "message": "Controls the text & border colors",
+    "description": ""
+  },
+  "CmdTextColor": {
+    "message": "Sets the text color",
+    "description": ""
+  },
+  "CmdTextGlow": {
+    "message": "Sets the text glow color",
+    "description": ""
+  },
+  "CmdBorderColor": {
+    "message": "Sets the border element color",
+    "description": ""
+  },
+  "CmdSepEx": {
+    "message": "Controls the Separate Expanded Hold options",
+    "description": ""
+  },
+  "CmdBorrowBar": {
+    "message": "Selects a hotbar to borrow (2-9)",
+    "description": ""
+  },
+  "CmdOnlyOne": {
+    "message": "Toggles whether only one Expanded Hold bar is shown",
+    "description": ""
+  },
+  "CmdExPos": {
+    "message": "Sets the position of the {0} bar",
+    "description": ""
+  },
+  "CmdOnlyOneTip": {
+    "message": "true: only one\nfalse: both",
+    "description": ""
+  },
+  "CmdFader": {
+    "message": "Controls the combat fader option",
+    "description": ""
+  },
+  "CmdTransparency": {
+    "message": "Sets transparency (0-100)",
+    "description": ""
+  },
+  "CmdUseHex": {
+    "message": "Use hex format (ie, #ffffff)",
+    "description": ""
+  },
+  "CmdResetsToDefault": {
+    "message": "Resets to default if no parameters are given",
+    "description": ""
+  },
+  "CmdTogglesFeatureIf": {
+    "message": "Toggles the feature if no parameters are given",
+    "description": ""
+  },
+  "CmdTogglesVisIf": {
+    "message": "Toggles visibility if no parameters are given",
     "description": ""
   }
 }

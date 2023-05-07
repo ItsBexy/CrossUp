@@ -8,9 +8,9 @@ using System;
 namespace CrossUp;
 
 /// <summary>Class for retrieving/setting character configuration options</summary>
-public class CharConfig
+public class GameConfig
 {
-    private static readonly unsafe ConfigModule* ConfModule = ConfigModule.Instance();
+    private static readonly unsafe ConfigModule* Conf = ConfigModule.Instance();
 
     /// <summary>
     /// Represents a Character Configuration value<br/><br/>
@@ -23,10 +23,10 @@ public class CharConfig
         public Config(uint index) => Index = index;
         public Config(string name, uint offset = 0) => Index = IndexFromName(name) + offset;
         private readonly uint Index;
-        public unsafe short ID => (short)ConfModule->GetOption(Index)->OptionID;
-        public unsafe string Name => ConfModule->GetOption(Index)->GetName();
-        public unsafe int Get() => ConfModule->GetIntValue(Index);
-        public unsafe bool Set(int val) => ConfModule->SetOption(Index, val, 1);
+        public unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
+        public unsafe string Name => Conf->GetOption(Index)->GetName();
+        public unsafe int Get() => Conf->GetIntValue(Index);
+        public unsafe bool Set(int val) => Conf->SetOption(Index, val, 1);
         public bool Set(bool val) => Set(val ? 1 : 0);
 
         public static implicit operator int(Config cfg) => cfg.Get();
@@ -38,14 +38,13 @@ public class CharConfig
             $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
     }
 
-
     public uint HexToUint(string hex) => BitConverter.ToUInt32(Convert.FromHexString(hex));
     public static string UintToHex(uint u) => Convert.ToHexString(BitConverter.GetBytes(u));
 
     private static unsafe uint IndexFromName(string name)
     {
         for (uint i = 0; i < 701U; ++i)
-            if (ConfModule->GetOption(i)->GetName() == name)
+            if (Conf->GetOption(i)->GetName() == name)
                 return i;
         return 0;
     }

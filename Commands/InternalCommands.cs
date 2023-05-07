@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace CrossUp;
 
@@ -22,16 +23,26 @@ public sealed partial class CrossUp
             Profile.CenterPoint = c;
             ApplyLayout();
         }
-        internal static void Padlock(bool show, int x=0, int y=0)
+        internal static void Padlock(bool show, int x, int y)
         {
             Profile.HidePadlock = !show;
             Profile.PadlockOffset = new(x, y);
             ApplyLayout();
         }
-        internal static void SetNumText(bool show, int x = 0, int y = 0)
+        internal static void Padlock(bool show)
+        {
+            Profile.HidePadlock = !show;
+            ApplyLayout();
+        }
+        internal static void SetNumText(bool show, int x, int y)
         {
             Profile.HideSetText = !show;
             Profile.SetTextOffset = new(x, y);
+            ApplyLayout();
+        }
+        internal static void SetNumText(bool show)
+        {
+            Profile.HideSetText = !show;
             ApplyLayout();
         }
         internal static void ChangeSet(int x, int y)
@@ -104,7 +115,7 @@ public sealed partial class CrossUp
             Profile.LRpos = new(x, y);
             ApplyLayout();
         }
-        internal static void RLpos(int x=0, int y=0)
+        internal static void RLpos(int x, int y)
         {
             Profile.RLpos = new(x, y);
             ApplyLayout();
@@ -114,22 +125,21 @@ public sealed partial class CrossUp
             Profile.CombatFadeInOut = active;
             Profile.TranspInCombat = Math.Min(100,Math.Max(0,inCombat));
             Profile.TranspOutOfCombat = Math.Min(100, Math.Max(0, outCombat));
-            if (!active) CharConfig.Transparency.Standard.Set(0);
+            if (!active) GameConfig.Transparency.Standard.Set(0);
             else OnConditionChange();
             Config.Save();
         }
         internal static void CombatFade(bool active)
         {
             Profile.CombatFadeInOut = active;
-            if (!active) CharConfig.Transparency.Standard.Set(0);
+            if (!active) GameConfig.Transparency.Standard.Set(0);
             else OnConditionChange();
             Config.Save();
         }
         private static void ApplyExBar()
         {
             Config.Save();
-            if (!Profile.SepExBar) Layout.SeparateEx.Disable();
-            else Layout.SeparateEx.Enable();
+            Layout.SeparateEx.EnableIfReady();
         }
         private static void ApplyLayout()
         {
@@ -143,7 +153,7 @@ public sealed partial class CrossUp
         }
 
         // tuple overloads:
-        public static void SplitBar((bool split, int distance, int center) t)
+        internal static void SplitBar((bool split, int distance, int center) t)
         {
             SplitOn(t.split);
             SplitDist(t.distance);

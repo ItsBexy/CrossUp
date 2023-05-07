@@ -19,10 +19,10 @@ public sealed unsafe partial class CrossUp
             internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
 
             /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
-            internal static void Enable(bool chatty=false)
+            private static void Enable(bool chatty=false)
             {
-                PrepBar(Bars.LR.ID);
-                PrepBar(Bars.RL.ID);
+                PrepBar(Config.LRborrow);
+                PrepBar(Config.RLborrow);
 
                 if (chatty)
                 {
@@ -41,22 +41,30 @@ public sealed unsafe partial class CrossUp
 
                 Actions.Store(barID);
 
-                if (CharConfig.Hotbar.Visible[barID] == false)
+                if (GameConfig.Hotbar.Visible[barID] == false)
                 {
                       Bars.WasHidden[barID] = true;
-                      CharConfig.Hotbar.Visible[barID].Set(true); 
+                      GameConfig.Hotbar.Visible[barID].Set(true); 
                 }
 
                 for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
             }
 
+
             /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
             internal static void Disable()
             {
                 Update(true);
-                ResetBars();
+                ResetBorrowed();
 
                 for (var barID = 1; barID <= 9; barID++) Bars.StoredActions[barID] = null;
+            }
+
+            /// <summary>Enables if ready, Disables if not.</summary>
+            internal static void EnableIfReady()
+            {
+                if (Ready) Enable();
+                else Disable();
             }
 
             /// <summary>Sets the keybind visibility, empty slot visibility, and the overall alpha for Expanded Hold bars</summary>
@@ -204,7 +212,7 @@ public sealed unsafe partial class CrossUp
                     }
                 }
 
-                var alpha = (select == Select.None ? CharConfig.Transparency.Standard : CharConfig.Transparency.Inactive).IntToAlpha;
+                var alpha = (select == Select.None ? GameConfig.Transparency.Standard : GameConfig.Transparency.Inactive).IntToAlpha;
                 StyleSlots(Bars.LR.BorrowBar, alpha);
                 StyleSlots(Bars.RL.BorrowBar, alpha);
             }
@@ -216,9 +224,9 @@ public sealed unsafe partial class CrossUp
                 var rlID = Bars.RL.ID;
                 if (lrID < 1 || rlID < 1) return;
 
-                bool crossVis = CharConfig.Cross.Visible;
-                var lrVis = CharConfig.Hotbar.Visible[lrID];
-                var rlVis = CharConfig.Hotbar.Visible[rlID];
+                bool crossVis = GameConfig.Cross.Visible;
+                var lrVis = GameConfig.Hotbar.Visible[lrID];
+                var rlVis = GameConfig.Hotbar.Visible[rlID];
 
                 if (lrVis == crossVis && rlVis == crossVis) return;
 

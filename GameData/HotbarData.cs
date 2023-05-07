@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Numerics;
 using NodeTools;
-using static CrossUp.CharConfig;
+using static CrossUp.CrossUp.Actions;
+using static CrossUp.GameConfig;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMember.Local
@@ -37,7 +38,7 @@ public sealed unsafe partial class CrossUp
             private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base.UnitBase;
             private static AddonActionCross* AddonCross => (AddonActionCross*)Base.UnitBase;
             public static bool Exists => Base.Exists();
-            internal static bool Enabled => LastEnabledState = CharConfig.Cross.Enabled;
+            internal static bool Enabled => LastEnabledState = GameConfig.Cross.Enabled;
             private static bool LastEnabledState = true;
             internal static bool EnableStateChanged => LastEnabledState != Enabled;
 
@@ -101,7 +102,7 @@ public sealed unsafe partial class CrossUp
                 internal static NodeWrapper Text => Base[3u];
             }
 
-            internal static Command[] Actions => CrossUp.Actions.GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
+            internal static Action[] Actions => GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
 
             public static class SetID
             {
@@ -154,7 +155,7 @@ public sealed unsafe partial class CrossUp
             internal static int ID => Config.LRborrow;
             internal static ActionBar BorrowBar => ActionBars[ID];
             internal static bool Exists => BorrowBar.Exists;
-            internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.LR);
+            internal static Action[] Actions => GetExHoldActions(ExSide.LR);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
             private static BaseWrapper Base => BorrowBar.Base;
             internal static NodeWrapper Root => new(Base[1u]);
@@ -166,7 +167,7 @@ public sealed unsafe partial class CrossUp
             internal static int ID => Config.RLborrow;
             internal static ActionBar BorrowBar => ActionBars[ID];
             internal static bool Exists => BorrowBar.Exists;
-            internal static Command[] Actions => CrossUp.Actions.GetExHoldActions(ExSide.RL);
+            internal static Action[] Actions => GetExHoldActions(ExSide.RL);
             internal static ActionBarButtonNodes Buttons => BorrowBar.Buttons;
             private static BaseWrapper Base => BorrowBar.Base;
             internal static NodeWrapper Root => new(Base[1u]);
@@ -200,7 +201,7 @@ public sealed unsafe partial class CrossUp
             internal bool Exists => Base.Exists();
             internal NodeWrapper Root => new(Base[1u], size: DefaultBarSizes[Hotbar.GridType[ID]]);
             internal NodeWrapper BarNumText => Base[5u];
-            internal Command[] Actions => CrossUp.Actions.GetByBarID(ID, 12);
+            internal Action[] Actions => GetByBarID(ID, 12);
             internal readonly ActionBarButtonNodes Buttons;
         }
 
@@ -213,7 +214,7 @@ public sealed unsafe partial class CrossUp
         }
 
         /// <summary>Keeps track of the original actions from the Mouse/KB bars, before being borrowed/altered</summary>
-        internal static readonly Command[]?[] StoredActions = new Command[10][];
+        internal static readonly Action[]?[] StoredActions = new Action[10][];
 
         /// <summary>Original sizes for the Mouse/KB bars, by [int gridType]</summary>
         private static readonly Vector2[] DefaultBarSizes =

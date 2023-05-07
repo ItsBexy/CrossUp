@@ -22,7 +22,7 @@ public sealed unsafe partial class CrossUp
                 var scale = Bars.Cross.Root.Node->ScaleX;
                 var splitDist = Profile.SplitOn && !resetAll ? Profile.SplitDist : 0;
 
-                var mixBar = (bool)CharConfig.MixBar;
+                var mixBar = (bool)GameConfig.MixBar;
                 var arrangeEx = !resetAll && SeparateEx.Ready && Bars.RL.Exists && Bars.LR.Exists;
 
                 var lrX = arrangeEx ? Profile.LRpos.X : 0;
@@ -88,6 +88,11 @@ public sealed unsafe partial class CrossUp
             Bars.Cross.MiniSelectL.SetSize();
             Bars.Cross.MiniSelectR.SetSize();
 
+            ResetBorrowed();
+        }
+
+        internal static void ResetBorrowed()
+        {
             var job = Job.Current;
             for (var barID = 1; barID <= 9; barID++) ResetBar(barID, job);
         }
@@ -98,7 +103,7 @@ public sealed unsafe partial class CrossUp
 
             if (!Bars.ActionBars[barID].Exists) return;
 
-            Actions.Copy(Actions.GetSaved(CharConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
+            Actions.Copy(Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
                                        .SetSize()
@@ -117,7 +122,7 @@ public sealed unsafe partial class CrossUp
                 buttonNode[2u].SetVis(true);
             }
 
-            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready)) CharConfig.Hotbar.Visible[barID].Set(false);
+            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !SeparateEx.Ready)) GameConfig.Hotbar.Visible[barID].Set(false);
         }
     }
 }

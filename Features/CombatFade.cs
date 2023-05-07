@@ -16,14 +16,14 @@ public sealed partial class CrossUp
         {
             var progress = (float)decimal.Divide((DateTime.Now - Start).Milliseconds, Duration.Milliseconds);
 
-            if (!(progress >= 1) && CharConfig.Transparency.Standard != To!)
+            if (!(progress >= 1) && GameConfig.Transparency.Standard != To!)
             {
-                CharConfig.Transparency.Standard.Set((int)(progress < 1 ? (To! - From) * progress + From : To!));
+                GameConfig.Transparency.Standard.Set((int)(progress < 1 ? (To! - From) * progress + From : To!));
             }
             else
             {
                 Active = false;
-                CharConfig.Transparency.Standard.Set((int)To!);
+                GameConfig.Transparency.Standard.Set((int)To!);
                 To = null;
             }
         }
@@ -33,11 +33,11 @@ public sealed partial class CrossUp
             var to = inCombat ? Profile.TranspInCombat : Profile.TranspOutOfCombat;
             var dur = inCombat ? 150 : 350;
 
-            if ((Active && To == to) || CharConfig.Transparency.Standard == to) return;
+            if ((Active && To == to) || GameConfig.Transparency.Standard == to) return;
 
             Start = DateTime.Now;
             Duration = new(0, 0, 0, 0, dur);
-            From = CharConfig.Transparency.Standard;
+            From = GameConfig.Transparency.Standard;
             To = to;
             Active = true;
         }

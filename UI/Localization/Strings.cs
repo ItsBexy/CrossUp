@@ -8,11 +8,8 @@ internal sealed partial class CrossUpUI
 {
     public static class Strings
     {
-
         public static string HelpMsg => Loc.Localize("HelpMsg", "Open CrossUp Settings");
-        public static string WindowTitle => Loc.Localize("WindowTitle", "CrossUp Settings");
         public static string UpdateWarning0420 => Loc.Localize("UpdateWarning0420", "Hi! Thanks for using CrossUp! \n\nVersion 0.4.2.0 includes some changes\nunder the hood to the way the plugin\nsettings are saved. Your previous settings\nSHOULD™ have carried over, but you might\nneed to make some adjustments.");
-
         public static class LookAndFeel
         {
             public static string TabTitle => Loc.Localize("LookFeel", "Look & Feel");
@@ -75,7 +72,7 @@ internal sealed partial class CrossUpUI
             public static string Left => Loc.Localize("Left", "Left");
             public static string Right => Loc.Localize("Right", "Right");
             public static string Set => Loc.Localize("Set", "Set");
-            public static string MenuText(int num, string side) => $"{string.Format(Loc.Localize("CrossHotbarMenuTerm", "Cross Hotbar {0} - {1}"), num,side)}";
+            public static string MenuText(int num, string side) => string.Format(Loc.Localize("CrossHotbarMenuTerm", "Cross Hotbar {0} - {1}"), num,side);
         }
 
         public static class Hud
@@ -93,7 +90,47 @@ internal sealed partial class CrossUpUI
             public static string HudSlot => Loc.Localize("HudSlot", "HUD Slot");
         }
 
-        public static readonly string[] NumSymbols = { "", "", "", "", "" };
+        public static class TextCommands
+        {
+            public static string Header => Loc.Localize("TextCommands", "Text Commands");
+            public static string OpenClose => Loc.Localize("CmdOpenClose", "Opens/Closes the CrossUp Settings window");
+            public static string TogglesFeat => Loc.Localize("CmdTogglesFeature", "Toggles the feature");
+            public static string TogglesVis => Loc.Localize("CmdTogglesVis", "Toggles visibility");
+            public static string SetsX => Loc.Localize("CmdSetsX", "Sets the horizontal position");
+            public static string SetsY => Loc.Localize("CmdSetsY", "Sets the vertical position");
+            public static string SetsSeparationDistance => Loc.Localize("CmdSetsSeparationDistance", "Sets the separation distance");
+            public static string SetsCenterPoint => Loc.Localize("CmdSetsCenter", "Sets the center point");
+            public static string Split => $"{Loc.Localize("CmdSplit", "Controls the left/right bar separation")}\n{TogglesFeatIf}";
+            public static string Padlock => $"{Loc.Localize("CmdPadlock", "Controls the Padlock Icon visibility and position")}\n{TogglesVisIf}";
+            public static string SetNum => $"{Loc.Localize("CmdSetNum", "Controls the SET # Text visibility and position")}\n{TogglesVisIf}";
+            public static string ChangeSet => $"{Loc.Localize("CmdChangeSet", "Controls the CHANGE SET Display position")}\n{ResetsToDefault}";
+            public static string TriggerText => Loc.Localize("CmdTriggerText", "Toggles the visibility of the L/R trigger text");
+            public static string UnassignedSlots => Loc.Localize("CmdUnassignedSlots", "Toggles the visibility of unassigned slots"); 
+            public static string SelectBg => $"{Loc.Localize("CmdSelectBg", "Controls the selection backdrop")}\n{ResetsToDefault}";
+            public static string BgStyle => Loc.Localize("CmdBgStyle", "Sets the backdrop style\n\nOPTIONS: solid, frame, hidden");
+            public static string BgBlend => Loc.Localize("CmdBgBlend", "Sets the backdrop color blending mode\n\nOPTIONS: normal, dodge");
+            public static string BgColor => $"{Loc.Localize("CmdBgColor", "Sets the backdrop color")}\n\n{UseHex}";
+            public static string ButtonColor => $"{Loc.Localize("CmdButtonColor", "Controls the button colors")}\n{ResetsToDefault}";
+            public static string ButtonGlow => $"{Loc.Localize("CmdButtonGlow", "Sets the button glow color")}\n\n{UseHex}";
+            public static string ButtonPulse => $"{Loc.Localize("CmdButtonPulse", "Sets the button pulse color")}\n\n{UseHex}";
+            public static string TextAndBorders => $"{Loc.Localize("CmdTextAndBorders", "Controls the text & border colors")}\n{ResetsToDefault}";
+            public static string TextColor => $"{Loc.Localize("CmdTextColor", "Sets the text color")}\n\n{UseHex}";
+            public static string TextGlow => $"{Loc.Localize("CmdTextGlow", "Sets the text glow color")}\n\n{UseHex}";
+            public static string BorderColor => $"{Loc.Localize("CmdBorderColor", "Sets the border element color")}\n\n{UseHex}";
+            public static string SepEx => $"{Loc.Localize("CmdSepEx", "Controls the Separate Expanded Hold options")}\n{TogglesFeatIf}";
+            public static string BorrowBar => Loc.Localize("CmdBorrowBar", "Selects a hotbar to borrow (2-9)");
+            public static string OnlyOne => Loc.Localize("CmdOnlyOne", "Toggles whether only one Expanded Hold bar is shown");
+            public static string OnlyOneTip => Loc.Localize("CmdOnlyOneTip", "true: only one\nfalse: both");
+            public static string ExPos(string str) => $"{string.Format(Loc.Localize("CmdExPos", "Sets the position of the {0} bar"), str)}\n{ResetsToDefault}";
+            public static string Fader => $"{Loc.Localize("CmdFader", "Controls the combat fader option")}\n{TogglesFeatIf}";
+            public static string SetsTransparency => Loc.Localize("CmdTransparency", "Sets transparency (0-100)");
+            private static string UseHex => Loc.Localize("CmdUseHex", "Use hex format (ie, #ffffff)");
+            private static string ResetsToDefault => Loc.Localize("CmdResetsToDefault", "Resets to default if no parameters are given");
+            private static string TogglesFeatIf => Loc.Localize("CmdTogglesFeatureIf", "Toggles the feature if no parameters are given");
+            private static string TogglesVisIf => Loc.Localize("CmdTogglesVisIf", "Toggles visibility if no parameters are given");
 
+        }
+
+        public static readonly string[] NumSymbols = { "", "", "", "", "" };
     }
 }

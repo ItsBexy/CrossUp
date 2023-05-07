@@ -12,7 +12,7 @@ public sealed partial class CrossUp
     {
         try
         {
-            ParseMainCommand(args);
+            ParseTextCommand(args);
         }
         catch (Exception ex)
         {
@@ -21,7 +21,7 @@ public sealed partial class CrossUp
             CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
         }
     }
-    private void ParseMainCommand(string args)
+    private void ParseTextCommand(string args)
     {
         var argList = args.Split(" ");
 
@@ -83,6 +83,7 @@ public sealed partial class CrossUp
                 break;
 
             case "text":
+            case "textcolor":
                 Commands.Parse.TextColor(argList);
                 break;
 
@@ -98,6 +99,7 @@ public sealed partial class CrossUp
                 Commands.Parse.ExBar(argList);
                 break;
 
+            case "exonlyone":
             case "onlyone":
                 Commands.Parse.OnlyOne(argList);
                 break;
@@ -120,6 +122,10 @@ public sealed partial class CrossUp
                 Commands.Parse.CombatFade(argList);
                 break;
 
+            case "debug":
+                CrossUpUI.DebugVisible = !CrossUpUI.DebugVisible;
+                break;
+
             default:
                 CrossUpUI.SettingsVisible = !CrossUpUI.SettingsVisible;
                 break;
@@ -130,12 +136,18 @@ public sealed partial class CrossUp
     {
         internal class Parse
         {
-            private static bool TextToBool(string str, bool toggleRef = false) =>
-                str is "true" or "on" or "show" || TryParse(str, out var val) && val > 0 ||
-                str is not ("false" or "off" or "hide" or "0") && !toggleRef;
+            private static bool TextToBool(string str, bool toggleRef = false)
+            {
+                return str is "true" or "on" or "show" ||
+                       TryParse(str, out var val) && val > 0 ||
+                       str is not ("false" or "off" or "hide" or "hidden" or "0")
+                       && !toggleRef;
+            }
 
             private static Vector3 HexToColor3(string hex)
             {
+                if (hex[0].ToString() == "#") hex = hex[1..];
+
                 static float ToFloat(string hex, int start) =>
                     (float)Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
 
@@ -148,18 +160,28 @@ public sealed partial class CrossUp
 
             internal static void SplitBar(string[] argList)
             {
-                if (argList.Length >= 2) SplitOn(TextToBool(argList[1]));
-                if (argList.Length >= 3 && TryParse(argList[2], out var d)) SplitDist(d);
-                if (argList.Length >= 4 && TryParse(argList[3], out var c)) Commands.Center(c);
+                var len = argList.Length;
+                if (len < 2)
+                {
+                    SplitOn(!Profile.SplitOn);
+                }
+                else
+                {
+                    SplitOn(TextToBool(argList[1]));
+                    if (len >= 3 && TryParse(argList[2], out var d)) SplitDist(d);
+                    if (len >= 4 && TryParse(argList[3], out var c)) Commands.Center(c);
+                }
             }
-
             internal static void Center(string[] argList) =>
                 Commands.Center(argList.Length >= 2 && TryParse(argList[1], out var c) ? c : 0);
-
             internal static void Padlock(string[] argList)
             {
                 var len = argList.Length;
-                if (len < 2) return;
+                if (len < 2)
+                {
+                    Commands.Padlock(Profile.HidePadlock);
+                    return;
+                }
 
                 var show = TextToBool(argList[1], !Profile.HidePadlock);
                 var x = 0;
@@ -170,11 +192,14 @@ public sealed partial class CrossUp
 
                 Commands.Padlock(show, x, y);
             }
-
             internal static void SetNumText(string[] argList)
             {
                 var len = argList.Length;
-                if (len < 2) return;
+                if (len < 2)
+                {
+                    Commands.SetNumText(Profile.HideSetText);
+                    return;
+                }
 
                 var show = TextToBool(argList[1], !Profile.HideSetText);
                 var x = 0;
@@ -185,61 +210,71 @@ public sealed partial class CrossUp
 
                 Commands.SetNumText(show, x, y);
             }
-
             internal static void ChangeSet(string[] argList)
             {
-                if (argList.Length < 3) return;
-                TryParse(argList[1], out var x);
-                TryParse(argList[2], out var y);
-                Commands.ChangeSet(x, y);
+                if (argList.Length >= 3)
+                {
+                    TryParse(argList[1], out var x);
+                    TryParse(argList[2], out var y);
+                    Commands.ChangeSet(x, y);
+                }
+                else
+                {
+                    Commands.ChangeSet(0, 0);
+                }
             }
-
             internal static void TriggerText(string[] argList) => Commands.TriggerText(argList.Length >= 2
                 ? TextToBool(argList[1], !Profile.HideTriggerText)
                 : Profile.HideTriggerText);
-
             internal static void EmptySlots(string[] argList) => Commands.EmptySlots(argList.Length >= 2
                 ? TextToBool(argList[1], !Profile.HideUnassigned)
                 : Profile.HideUnassigned);
-
             internal static void SelectBG(string[] argList)
             {
-                if (argList.Length < 4) return;
+                if (argList.Length >= 4)
+                {
+                    var style = argList[1] is "frame" or "1"         ? 1 :
+                                argList[1] is "hide"  or "hidden" or "2" or "off" ? 2 :
+                                                                       0;
+                    var blend = argList[2] is "dodge" or "2" ? 2 : 0;
+                    var color = HexToColor3(argList[3]);
 
-                var style = argList[1] is "frame" or "1" ? 1 :
-                    argList[1] is "hide" or "2" or "off" ? 2 :
-                    0;
-                var blend = argList[2] is "dodge" or "2" ? 2 : 0;
-                var color = HexToColor3(argList[3]);
-
-                Commands.SelectBG(style, blend, color);
+                    Commands.SelectBG(style, blend, color);
+                }
+                else
+                {
+                    Commands.SelectBG(0, 0, Color.Preset.MultiplyNeutral);
+                }
             }
-
             internal static void ButtonGlow(string[] argList)
             {
-                if (argList.Length < 2) return;
-                Commands.ButtonGlow(HexToColor3(argList[1]));
-                if (argList.Length >= 3) Commands.ButtonPulse(HexToColor3(argList[2]));
+                var len = argList.Length;
+                if (len >= 2)
+                {
+                    Commands.ButtonGlow(HexToColor3(argList[1]));
+                    if (len >= 3) Commands.ButtonPulse(HexToColor3(argList[2]));
+                }
+                else
+                {
+                    Commands.ButtonGlow(Color.Preset.White);
+                }
             }
-
-            internal static void ButtonPulse(string[] argList)
-            {
-                if (argList.Length < 2) return;
-                Commands.ButtonPulse(HexToColor3(argList[1]));
-            }
-
+            internal static void ButtonPulse(string[] argList) => Commands.ButtonPulse(argList.Length >= 2 ? HexToColor3(argList[1]) : Color.Preset.White);
             internal static void TextColor(string[] argList)
             {
-                if (argList.Length >= 3) Commands.TextColor(HexToColor3(argList[1]), HexToColor3(argList[2]));
-                if (argList.Length >= 4) Commands.BorderColor(HexToColor3(argList[3]));
+                var len = argList.Length;
+                if (len >= 3)
+                {
+                    Commands.TextColor(HexToColor3(argList[1]), HexToColor3(argList[2]));
+                    if (len >= 4) Commands.BorderColor(HexToColor3(argList[3]));
+                }
+                else
+                {
+                    Commands.TextColor(Color.Preset.White, Color.Preset.TextGlow);
+                    Commands.BorderColor(Color.Preset.White);
+                }
             }
-
-            internal static void BorderColor(string[] argList)
-            {
-                if (argList.Length < 2) return;
-                Commands.BorderColor(HexToColor3(argList[1]));
-            }
-
+            internal static void BorderColor(string[] argList) => Commands.BorderColor(argList.Length >= 2 ? HexToColor3(argList[1]) : Color.Preset.White);
             internal static void ExBar(string[] argList)
             {
                 var len = argList.Length;
@@ -264,44 +299,54 @@ public sealed partial class CrossUp
                     }
                 }
             }
-
-            internal static void OnlyOne(string[] argList)
-            {
-                if (argList.Length >= 2) ExBarOnlyOne(TextToBool(argList[1]));
-            }
-
+            internal static void OnlyOne(string[] argList) => ExBarOnlyOne(argList.Length >= 2 ? TextToBool(argList[1]) : !Profile.OnlyOneEx);
             internal static void LRpos(string[] argList)
             {
-                if (argList.Length < 3) return;
-                TryParse(argList[1], out var x);
-                TryParse(argList[2], out var y);
-                Commands.LRpos(x, y);
-            }
-
-            internal static void RLpos(string[] argList)
-            {
-                if (argList.Length < 3) return;
-                TryParse(argList[1], out var x);
-                TryParse(argList[2], out var y);
-                Commands.RLpos(x, y);
-            }
-
-            internal static void CombatFade(string[] argList)
-            {
-                var len = argList.Length;
-                if (len < 2) return;
-
-                var active = TextToBool(argList[1]);
-
-                if (len >= 4)
+                if (argList.Length < 3)
                 {
-                    TryParse(argList[2], out var inCombat);
-                    TryParse(argList[3], out var outCombat);
-                    Commands.CombatFade(active, inCombat, outCombat);
+                    Commands.LRpos(-214,-88);
                 }
                 else
                 {
-                    Commands.CombatFade(active);
+                    TryParse(argList[1], out var x);
+                    TryParse(argList[2], out var y);
+                    Commands.LRpos(x, y);
+                }
+            }
+            internal static void RLpos(string[] argList)
+            {
+                if (argList.Length < 3)
+                {
+                    Commands.RLpos(214,-88);
+                }
+                else
+                {
+                    TryParse(argList[1], out var x);
+                    TryParse(argList[2], out var y);
+                    Commands.RLpos(x, y);
+                }
+            }
+            internal static void CombatFade(string[] argList)
+            {
+                var len = argList.Length;
+                if (len >= 2)
+                {
+                    var active = TextToBool(argList[1]);
+
+                    if (len >= 4)
+                    {
+                        TryParse(argList[2], out var inCombat);
+                        TryParse(argList[3], out var outCombat);
+                        Commands.CombatFade(active, inCombat, outCombat);
+                    }
+                    else
+                    {
+                        Commands.CombatFade(active);
+                    }
+                }
+                else
+                {
+                    Commands.CombatFade(!Profile.CombatFadeInOut);
                 }
             }
         }
