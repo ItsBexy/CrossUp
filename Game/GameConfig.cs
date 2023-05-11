@@ -1,11 +1,10 @@
-﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using System;
+﻿using System;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
-// ReSharper disable UnusedMethodReturnValue.Global
 // ReSharper disable UnusedMember.Global
-// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
 
-namespace CrossUp;
+namespace CrossUp.Game;
 
 /// <summary>Class for retrieving/setting character configuration options</summary>
 public class GameConfig
@@ -18,55 +17,55 @@ public class GameConfig
     /// <term>(int)</term> Returns the value itself<br/>
     /// <term>(bool)</term> Returns true if value > 0
     /// </summary>
-    public sealed class Config
+    public sealed class Option
     {
-        public Config(uint index) => Index = index;
-        public Config(string name, uint offset = 0) => Index = IndexFromName(name) + offset;
         private readonly uint Index;
-        public unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
-        public unsafe string Name => Conf->GetOption(Index)->GetName();
-        public unsafe int Get() => Conf->GetIntValue(Index);
-        public unsafe bool Set(int val) => Conf->SetOption(Index, val, 1);
-        public bool Set(bool val) => Set(val ? 1 : 0);
 
-        public static implicit operator int(Config cfg) => cfg.Get();
-        public static implicit operator bool(Config cfg) => cfg.Get() > 0;
-        public byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
+        internal Option(uint index) => Index = index;
+        internal Option(string name, uint offset = 0) => Index = IndexFromName(name) + offset;
+
+        public static implicit operator int(Option opt) => opt.Get();
+        public static implicit operator bool(Option opt) => opt.Get() > 0;
+
+        internal unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
+        internal unsafe string Name => Conf->GetOption(Index)->GetName();
+        internal unsafe int Get() => Conf->GetIntValue(Index);
+        internal unsafe void Set(int val) => Conf->SetOption(Index, val, 1);
+        internal void Set(bool val) => Set(val ? 1 : 0);
+
+        internal byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
 
         /// <returns>Index | ID | Name | Value</returns>
-        public new string ToString() =>
-            $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
+        public new string ToString() => $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
+        public static implicit operator string(Option opt) => opt.ToString();
     }
 
-    public uint HexToUint(string hex) => BitConverter.ToUInt32(Convert.FromHexString(hex));
-    public static string UintToHex(uint u) => Convert.ToHexString(BitConverter.GetBytes(u));
+    internal static string UintToHex(uint u) => Convert.ToHexString(BitConverter.GetBytes(u));
 
     private static unsafe uint IndexFromName(string name)
     {
-        for (uint i = 0; i < 701U; ++i)
-            if (Conf->GetOption(i)->GetName() == name)
-                return i;
+        for (uint i = 0; i < 701U; ++i) if (Conf->GetOption(i)->GetName() == name) return i;
         return 0;
     }
 
-    public static class Cross
+    internal static class Cross
     {
         /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
-        public static readonly Config Enabled = new("HotbarCrossDispType");
+        internal static readonly Option Enabled = new("HotbarCrossDispType");
 
         /// <summary><term>Checkbox</term> The Cross Hotbar is visible in the HUD</summary>
-        public static readonly Config Visible = new("HotbarCrossDispAlways");
+        internal static readonly Option Visible = new("HotbarCrossDispAlways");
     }
 
     /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
-    public static readonly Config SepPvP = new("HotbarCrossSetPvpModeActive");
+    internal static readonly Option SepPvP = new("HotbarCrossSetPvpModeActive");
 
     /// <summary>
     /// <term>Radio Button</term> Cross Hotbar Display Type<br/><br/>
     /// <term>0</term> D-Pad / Buttons / D-Pad / Buttons<br/>
     /// <term>1</term> D-Pad / D-Pad / Buttons / Buttons
     /// </summary>
-    public static readonly Config MixBar = new("HotbarCrossDisp");
+    internal static readonly Option MixBar = new("HotbarCrossDisp");
 
     /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
     /// Returns:<br/>
@@ -91,38 +90,36 @@ public class GameConfig
     /// <term>18</term> Cycle Down (Right)<br/>
     /// <term>19</term> Cycle Down (Left)<br/>
     /// </summary>
-    public static class ExtraBarMaps
+    internal static class ExtraBarMaps
     {
         /// <summary>L->R Expanded Hold Controls</summary>
-        public static readonly Config[] LR =
-            { new("HotbarCrossAdvancedSettingRight"), new("HotbarCrossAdvancedSettingRightPvp") };
+        internal static readonly Option[] LR = { new("HotbarCrossAdvancedSettingRight"), new("HotbarCrossAdvancedSettingRightPvp") };
 
         /// <summary>R->L Expanded Hold Controls</summary>
-        public static readonly Config[] RL =
-            { new("HotbarCrossAdvancedSettingLeft"), new("HotbarCrossAdvancedSettingLeftPvp") };
+        internal static readonly Option[] RL = { new("HotbarCrossAdvancedSettingLeft"), new("HotbarCrossAdvancedSettingLeftPvp") };
 
         /// <summary>Left WXHB</summary>
-        public static readonly Config[] LL = { new("HotbarWXHBSetLeft"), new("HotbarWXHBSetLeftPvP") };
+        internal static readonly Option[] LL = { new("HotbarWXHBSetLeft"), new("HotbarWXHBSetLeftPvP") };
 
         /// <summary>Right WXHB</summary>
-        public static readonly Config[] RR = { new("HotbarWXHBSetRight"), new("HotbarWXHBSetRightPvP") };
+        internal static readonly Option[] RR = { new("HotbarWXHBSetRight"), new("HotbarWXHBSetRightPvP") };
     }
 
     /// <summary><term>Sliders</term> Transparency settings for Cross Hotbar buttons<br/><br/>Returns 0-100 (Converted by game to alpha 0-255)</summary>
-    public class Transparency
+    internal class Transparency
     {
-        public static readonly Config Standard = new("HotbarXHBAlphaDefault");
-        public static readonly Config Active = new("HotbarXHBAlphaActiveSet");
-        public static readonly Config Inactive = new("HotbarXHBAlphaInactiveSet");
+        internal static readonly Option Standard = new("HotbarXHBAlphaDefault");
+        internal static readonly Option Active = new("HotbarXHBAlphaActiveSet");
+        internal static readonly Option Inactive = new("HotbarXHBAlphaInactiveSet");
     }
 
     /// <summary>Per-bar configuration settings, by [int BarID]</summary>
-    public class Hotbar
+    internal class Hotbar
     {
         /// <summary><term>CheckBox</term> Whether the hotbar is shared between all jobs<br/><br/>
         /// <term>0</term> Job-specific<br/>
         /// <term>1</term> Shared</summary>
-        public static readonly Config[] Shared =
+        internal static readonly Option[] Shared =
         {
             new("HotbarCommon01"),
             new("HotbarCommon02"),
@@ -148,7 +145,7 @@ public class GameConfig
         /// <summary><term>CheckBox</term> Whether the bar is set to visible<br/><br/>
         /// <term>0</term> Hidden<br/>
         /// <term>1</term> Visible</summary>
-        public static readonly Config[] Visible =
+        internal static readonly Option[] Visible =
         {
             new("HotbarDisp"),
             new("HotbarDisp", 1),
@@ -170,7 +167,7 @@ public class GameConfig
         /// <term>4</term> 2x6<br/>
         /// <term>5</term> 1x12<br/>
         /// </summary>
-        public static readonly Config[] GridType =
+        internal static readonly Option[] GridType =
         {
             new("HotbarDispSetDragType", 2), //this is not the actual name of this setting; it has no name, so we're looking up a setting we know is nearby and offsetting it
             new("HotbarDispSetDragType", 3),

@@ -1,40 +1,18 @@
 ﻿using System;
+using System.Globalization;
 using System.Numerics;
+using CrossUp.Game;
 using Dalamud.Logging;
 using ImGuiNET;
 
-namespace CrossUp;
-
-internal sealed partial class CrossUpUI
+namespace CrossUp.UI.Tabs
 {
-    private bool debugVisible;
-    public bool DebugVisible
-    {
-        get => debugVisible;
-        set => debugVisible = value;
-    }
-    private void DrawDebugWindow()
-    {
-        ImGui.SetNextWindowSize(Config.DebugWindowSize, ImGuiCond.Always);
-
-        if (!ImGui.Begin("CrossUp Debug Tools", ref debugVisible)) return;
-
-        if (ImGui.BeginTabBar("DebugTabs"))
-        {
-            ConfigDebug.DrawTab();
-            ImGui.EndTabBar();
-        }
-
-        Config.DebugWindowSize = ImGui.GetWindowSize();
-        ImGui.End();
-    }
-
-    public class ConfigDebug
+    internal class DebugConfig
     {
         private static int StartIndex;
         private static int EndIndex = 702;
 
-        public static void DrawTab()
+        internal static void DrawTab()
         {
             var startIndex = StartIndex;
             var endIndex = EndIndex;
@@ -56,12 +34,11 @@ internal sealed partial class CrossUpUI
                 for (var i = (uint)startIndex; i <= endIndex; i++)
                 {
                     if (i is < 0 or > 700) break;
-                    PluginLog.Log(new GameConfig.Config(i).ToString());
+                    PluginLog.Log(new GameConfig.Option(i));
                 }
             }
 
-            ImGui.BeginTable("configTable", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.PadOuterX |
-                                               ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY);
+            ImGui.BeginTable("configTable", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.PadOuterX | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY);
 
             ImGui.TableSetupColumn("ind", ImGuiTableColumnFlags.WidthFixed);
             ImGui.TableSetupColumn("id", ImGuiTableColumnFlags.WidthFixed);
@@ -76,7 +53,7 @@ internal sealed partial class CrossUpUI
             {
                 if (i is < 0 or > 700) break;
 
-                var conf = new GameConfig.Config(i);
+                var conf = new GameConfig.Option(i);
 
                 ImGui.TableNextRow();
 
@@ -108,7 +85,7 @@ internal sealed partial class CrossUpUI
         private static Vector4 HexToColor(string hex)
         {
             static float ToFloat(string hex, int start) =>
-                (float)int.Parse(hex.Substring(start, 2), System.Globalization.NumberStyles.HexNumber) / 255;
+                (float)int.Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
 
             var r = ToFloat(hex, 0);
             var g = ToFloat(hex, 2);
@@ -118,6 +95,4 @@ internal sealed partial class CrossUpUI
             return new Vector4(r, g, b, a);
         }
     }
-
-
 }

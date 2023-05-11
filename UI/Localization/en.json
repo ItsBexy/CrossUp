@@ -418,5 +418,69 @@
   "CmdTogglesVisIf": {
     "message": "Toggles visibility if no parameters are given",
     "description": ""
+  },
+  "CmdArgOnOff": {
+    "message": "on/off",
+    "description": ""
+  },
+  "CmdArShowHide": {
+    "message": "show/hide",
+    "description": ""
+  },
+  "CmdArgTrueFalse": {
+    "message": "true/false",
+    "description": ""
+  },
+  "CmdArgDistance": {
+    "message": "distance",
+    "description": ""
+  },
+  "CmdArgCenter": {
+    "message": "center",
+    "description": ""
+  },
+  "CmdArgStyle": {
+    "message": "style",
+    "description": ""
+  },
+  "CmdArgBlend": {
+    "message": "blend",
+    "description": ""
+  },
+  "CmdArgColor": {
+    "message": "color",
+    "description": ""
+  },
+  "CmdArgGlow": {
+    "message": "glow color",
+    "description": ""
+  },
+  "CmdArgPulse": {
+    "message": "pulse color",
+    "description": ""
+  },
+  "CmdArgTextColor": {
+    "message": "text color",
+    "description": ""
+  },
+  "CmdArgBorderColor": {
+    "message": "border color",
+    "description": ""
+  },
+  "CmdArgBorrow": {
+    "message": "borrowed hotbar",
+    "description": ""
+  },
+  "CmdArgCombatTransp": {
+    "message": "combat transparency",
+    "description": ""
+  },
+  "CmdArgIdleTransp": {
+    "message": "idle transparency",
+    "description": ""
+  },
+  "CmdExportToMacro": {
+    "message": "Export your current settings as a macro",
+    "description": ""
   }
 }

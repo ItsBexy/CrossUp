@@ -2,16 +2,16 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.String;
-using Framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 // ReSharper disable All
 
 // Original:
 //      https://git.anna.lgbt/ascclemens/XivCommon/src/branch/main/XivCommon/Functions/Chat.cs
 
-namespace CrossUp;
+namespace CrossUp.Utility;
 
 /// <summary>
 /// A class containing chat functionality

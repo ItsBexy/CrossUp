@@ -5,3 +5,4 @@ bin/
 /UI/Localization/frPlaceholders.json
 /UI/Localization/dePlaceholders.json
 /UI/Localization/jaPlaceholders.json
+/.editorconfig

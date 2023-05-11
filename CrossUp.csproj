@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.4.3.2</Version>
+    <Version>1.0.0.0</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -20,12 +20,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="UI\Localization\de.json" />
+    <Compile Remove="UI\UpdateHandling.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".editorconfig" />
+    <None Remove="CrossUp.csproj.DotSettings" />
+    <None Remove="CrossUp.sln.DotSettings" />
     <None Remove="UI\Localization\dePlaceholders.json" />
-    <None Remove="UI\Localization\en.json" />
-    <None Remove="UI\Localization\fr.json" />
     <None Remove="UI\Localization\frPlaceholders.json" />
-    <None Remove="UI\Localization\ja.json" />
     <None Remove="UI\Localization\jaPlaceholders.json" />
   </ItemGroup>
 
@@ -42,21 +45,13 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>0.4.3.2</FileVersion>
-	  <AssemblyVersion>0.4.3.2</AssemblyVersion>
+	  <FileVersion>1.0.0.0</FileVersion>
+	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="UI\Localization\de.json" />
-    <EmbeddedResource Include="UI\Localization\en.json" />
-    <EmbeddedResource Include="UI\Localization\fr.json" />
-    <EmbeddedResource Include="UI\Localization\ja.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CheapLoc" Version="1.1.8" />
     <PackageReference Include="DalamudPackager" Version="2.1.10" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
@@ -97,10 +92,22 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Update="UI\Localization\de.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\Localization\en.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\Localization\fr.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\Localization\ja.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UI\Tabs\" />
+    <EditorConfigFiles Remove="C:\Users\rebec\Source\Repos\CrossUp\.editorconfig" />
   </ItemGroup>
 
 </Project>

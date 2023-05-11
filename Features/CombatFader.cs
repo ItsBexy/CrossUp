@@ -1,10 +1,12 @@
 ﻿using System;
+using CrossUp.Game;
+using static CrossUp.CrossUp;
 
-namespace CrossUp;
+namespace CrossUp.Features;
 
-public sealed partial class CrossUp
+internal class CombatFader
 {
-    public struct FadeTween
+    internal struct FadeTween
     {
         private static DateTime Start { get; set; }
         private static TimeSpan Duration { get; set; }

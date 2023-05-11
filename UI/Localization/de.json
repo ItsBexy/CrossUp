@@ -1,15 +1,15 @@
 {
   "HotbarN": {
     "message": "Menü {0}",
-    "description": "Should match the term used in  (Character Configuration > Hotbar Settings > Display)"
+    "description": ""
   },
   "CrossHotbarMenuTerm": {
     "message": "Menü-Set {0}, {1}",
-    "description": "{0} is the set number, {1} is 'Left' or 'Right'. Should match the exact term used in the dropdown menus in [Character Configuration > Hotbar Settings > Custom]."
+    "description": ""
   },
   "WXHB": {
     "message": "Doppeltes Kreuz-Kommandomenü",
-    "description": "Term used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+    "description": ""
   },
   "Left": {
     "message": "links",
@@ -21,23 +21,23 @@
   },
   "DoubleTap": {
     "message": "{0} einblenden",
-    "description": "Phrase used in base game settings [Character Configuration > Hotbar Settings > Custom]"
+    "description": ""
   },
   "Set": {
     "message": "Set",
-    "description": "As in: Cross Hotbar set"
+    "description": ""
   },
   "HudSlot": {
     "message": "Layout-Slot",
     "description": ""
   },
   "SetNumText": {
-    "message": "\"Set #\" Text",
-    "description": "Refers to the text on the Cross Hotbar that indicates the selected set number."
+    "message": "Set # Text",
+    "description": ""
   },
   "ChangeSetDisplay": {
-    "message": "\"SETWECHSEL\" Display",
-    "description": "Refers to the display for switching sets that appears when the R1/RB button is held"
+    "message": "SETWECHSEL Display",
+    "description": ""
   },
   "HudAllSame": {
     "message": "Apply the same settings to all Layout Slots",
@@ -61,10 +61,10 @@
   },
   "CenterNote": {
     "message": "This will override your Layout setting for the bar's horizontal position.",
-    "description": "Help icon in the Plugin UI [CrossUp Settings > Look & Feel > Cross Hotbar Layout]"
+    "description": ""
   },
   "HighlightMsg": {
     "message": "Settings that are|highlighted|will change with your Layout.",
-    "description": "The text inside the | delimiters will be highlighted with a different color in the plugin window."
+    "description": ""
   }
 }
