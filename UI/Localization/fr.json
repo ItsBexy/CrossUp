@@ -1,4 +1,12 @@
 {
+  "HelpMsg": {
+    "message": "Ouvrir les paramètres de CrossUp",
+    "description": ""
+  },
+  "WindowTitle": {
+    "message": "Paramètres de CrossUp",
+    "description": ""
+  },
   "HotbarN": {
     "message": "Barre n°{0}",
     "description": ""
@@ -7,8 +15,12 @@
     "message": "Crx racc. {0} - {1}",
     "description": ""
   },
+  "ExpandedHoldControls": {
+    "message": "Contrôles étendus par maintien",
+    "description": ""
+  },
   "WXHB": {
-    "message": "Double Croix de Raccourcis",
+    "message": "double croix de raccourcis",
     "description": ""
   },
   "Left": {
@@ -19,48 +31,248 @@
     "message": "droite",
     "description": ""
   },
+  "DoubleTap": {
+    "message": "double pression {0}",
+    "description": ""
+  },
   "Set": {
     "message": "Croix",
     "description": "As in: Cross Hotbar set"
   },
   "HudSlot": {
-    "message": "ATH Slot",
+    "message": "Emplacement de l'ATH",
     "description": ""
   },
-  "SetNumText": {
-    "message": "«CROIX #» Text",
+  "LookFeel": {
+    "message": "Apparence",
     "description": ""
   },
-  "ChangeSetDisplay": {
-    "message": "«CHANGER DE CROIX» Display",
+  "CrossHotbarLayout": {
+    "message": "Disposition de la croix de raccourcis",
     "description": ""
   },
-  "HudAllSame": {
-    "message": "Apply the same settings to all ATH Slots",
+  "BarSeparation": {
+    "message": "Séparation de la croix",
     "description": ""
   },
-  "HudUnique": {
-    "message": "Apply different settings to each ATH Slot",
+  "SeparateLR": {
+    "message": "Séparer la gauche et la droite",
     "description": ""
   },
-  "CurrentHudSlot": {
-    "message": "Current ATH Slot:",
+  "SplitDistance": {
+    "message": "Distance de séparation",
     "description": ""
   },
-  "AllHudSlots": {
-    "message": "All ATH Slots",
-    "description": ""
-  },
-  "HudOptions": {
-    "message": "ATH Options",
+  "CenterPoint": {
+    "message": "Point central",
     "description": ""
   },
   "CenterNote": {
-    "message": "This will override your ATH setting for the bar's horizontal position.",
+    "message": "Cela remplacera votre configuration ATH pour la position horizontale de la croix.",
+    "description": ""
+  },
+  "BarElements": {
+    "message": "Éléments de la croix",
+    "description": ""
+  },
+  "PadlockIcon": {
+    "message": "Icône de cadenas",
+    "description": ""
+  },
+  "SetNumText": {
+    "message": "Affichage «CROIX #»",
+    "description": ""
+  },
+  "ChangeSetDisplay": {
+    "message": "Affichage «CHANGER DE CROIX»",
+    "description": ""
+  },
+  "HideTriggerText": {
+    "message": "Masquer le texte des gâchettes L/R",
+    "description": ""
+  },
+  "HideUnassignedSlots": {
+    "message": "Transparence des cases non utilisées",
+    "description": ""
+  },
+  "Colors": {
+    "message": "Couleurs",
+    "description": ""
+  },
+  "SelectedBar": {
+    "message": "Set sélectionné",
+    "description": ""
+  },
+  "BackdropColor": {
+    "message": "Couleur d'arrière-plan",
+    "description": ""
+  },
+  "ColorBlending": {
+    "message": "Modes de fusion",
+    "description": ""
+  },
+  "BlendNormal": {
+    "message": "Normal",
+    "description": ""
+  },
+  "BlendDodge": {
+    "message": "Densité",
+    "description": ""
+  },
+  "BackdropStyle": {
+    "message": "Style de l'arrière-plan",
+    "description": ""
+  },
+  "StyleFrame": {
+    "message": "Contour",
+    "description": ""
+  },
+  "StyleSolid": {
+    "message": "Solide",
+    "description": ""
+  },
+  "StyleHidden": {
+    "message": "Masqué",
+    "description": ""
+  },
+  "Buttons": {
+    "message": "Boutons",
+    "description": ""
+  },
+  "ButtonGlow": {
+    "message": "Lueur des boutons",
+    "description": ""
+  },
+  "ButtonPulse": {
+    "message": "Pulsation du bouton",
+    "description": ""
+  },
+  "TextAndBorders": {
+    "message": "Texte & bordures",
+    "description": ""
+  },
+  "TextColor": {
+    "message": "Couleur du texte",
+    "description": ""
+  },
+  "TextGlowColor": {
+    "message": "Couleur de la lueur du texte",
+    "description": ""
+  },
+  "BorderColor": {
+    "message": "Couleur des bordures",
+    "description": ""
+  },
+  "Hide": {
+    "message": "Masquer",
+    "description": ""
+  },
+  "FadeOutsideCombat": {
+    "message": "Masquer en dehors des combats",
+    "description": ""
+  },
+  "SeparateExHold": {
+    "message": "Contrôles étendus séparés",
+    "description": ""
+  },
+  "DisplayExSeparately": {
+    "message": "Afficher les contrôles étendus séparément",
+    "description": ""
+  },
+  "BarPosition": {
+    "message": "Position du set",
+    "description": ""
+  },
+  "BarPositionSpecific": {
+    "message": "Position du set {0}",
+    "description": ""
+  },
+  "SepExWarning": {
+    "message": "REMARQUE : Cette fonctionnalité utilise les boutons de deux de vos barres de raccourcis souris/clavier standard. Les barres de raccourcis que vous choisissez ne seront pas écrasées, mais elles ne seront pas disponibles lorsque la fonctionnalité est active.",
+    "description": ""
+  },
+  "ShowOnlyOneBar": {
+    "message": "N'afficher qu'un seul set",
+    "description": ""
+  },
+  "ShowBoth": {
+    "message": "Afficher les deux",
+    "description": ""
+  },
+  "SelectTwoBars": {
+    "message": "Sélectionnez 2 barres :",
+    "description": ""
+  },
+  "HudOptions": {
+    "message": "Options de l'ATH",
+    "description": ""
+  },
+  "HudAllSame": {
+    "message": "Appliquer les mêmes paramètres à toutes les configurations ATH",
+    "description": ""
+  },
+  "HudUnique": {
+    "message": "Appliquer différents paramètres à chaque configuration ATH",
+    "description": ""
+  },
+  "CurrentHudSlot": {
+    "message": "Configuration ATH actuelle :",
     "description": ""
   },
   "HighlightMsg": {
-    "message": "Settings that are|highlighted|will change with your ATH.",
+    "message": "Les paramètres qui sont|surlignés|changeront avec votre ATH.",
+    "description": ""
+  },
+  "CopySettings": {
+    "message": "Copier les paramètres",
+    "description": ""
+  },
+  "CopyFrom": {
+    "message": "À partir de",
+    "description": ""
+  },
+  "CopyTo": {
+    "message": "Vers",
+    "description": ""
+  },
+  "Copy": {
+    "message": "Copier",
+    "description": ""
+  },
+  "AllHudSlots": {
+    "message": "Toutes les configurations ATH",
+    "description": ""
+  },
+  "SetSwitching": {
+    "message": "Changement de set dynamique",
+    "description": ""
+  },
+  "AutoSwitch": {
+    "message": "Changer automatiquement les sets pour {0}",
+    "description": ""
+  },
+  "IfUsing": {
+    "message": "Quand...",
+    "description": ""
+  },
+  "MapTo": {
+    "message": "Assigner à {0}...",
+    "description": ""
+  },
+  "InCombat": {
+    "message": "En combat",
+    "description": ""
+  },
+  "OutOfCombat": {
+    "message": "Hors combat",
+    "description": ""
+  },
+  "PunchLine": {
+    "message": "Personnalisez la croix de raccourcis !",
+    "description": ""
+  },
+  "DalamudDesc": {
+    "message": "Ce plugin permet des personnalisations pour l'apparence et le style de la croix de raccourcis.\n\n- Séparer les barres de raccourcis de gauche et de droite\n- Afficher séparément les contrôles étendus par maintien\n- Personnaliser les couleurs et les positions des éléments\n- Un plus grand contrôle sur les croix auxquels vos barres supplémentaires sont associées",
     "description": ""
   }
 }

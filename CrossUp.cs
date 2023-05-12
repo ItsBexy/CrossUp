@@ -26,8 +26,8 @@ internal sealed class CrossUp : IDalamudPlugin
 
     internal static CrossUpConfig Config { get; private set; }
     internal static ConfigProfile Profile => Config.Profiles[Config.UniqueHud ? HudSlot : 0];
-
     internal static CrossUpUI UI { get; private set; }
+
     private static Hooks Hooks { get; set; }
     private static CrossUpLoc Loc { get; set; }
     private static IPC IPC { get; set; }
