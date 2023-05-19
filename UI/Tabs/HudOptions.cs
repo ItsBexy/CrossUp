@@ -18,9 +18,8 @@ internal class HudOptions
     public static void DrawTab()
     {
         if (!ImGui.BeginTabItem(Strings.Hud.TabTitle)) return;
-
-        ImGui.Spacing();
-        ImGui.Spacing();
+        
+        Helpers.Spacing(2);
         ImGui.Indent(10);
 
         var uniqueHud = Config.UniqueHud;

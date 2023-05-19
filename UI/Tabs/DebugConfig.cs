@@ -20,8 +20,7 @@ namespace CrossUp.UI.Tabs
             if (!ImGui.BeginTabItem("Game Configurations")) return;
 
             ImGui.SetNextItemWidth(100);
-            if (ImGui.InputInt("##startIndex", ref startIndex))
-                StartIndex = Math.Min(701, Math.Max(0, startIndex));
+            if (ImGui.InputInt("##startIndex", ref startIndex)) StartIndex = Math.Min(701, Math.Max(0, startIndex));
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100);
@@ -84,8 +83,7 @@ namespace CrossUp.UI.Tabs
 
         private static Vector4 HexToColor(string hex)
         {
-            static float ToFloat(string hex, int start) =>
-                (float)int.Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
+            static float ToFloat(string hex, int start) => (float)int.Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
 
             var r = ToFloat(hex, 0);
             var g = ToFloat(hex, 2);

@@ -19,15 +19,13 @@ internal static unsafe class Actions
         internal HotbarSlotType CommandType;
     }
 
-    internal enum ExSide
-    {
-        LR = 0,
-        RL = 1
-    }
+    /// <summary>Indicates the type of expanded hold input</summary>
+    internal enum ExSide { LR = 0, RL = 1 }
+
     /// <summary>Checks if the player is in a PvP match or in the Wolves' Den</summary>
     private static bool IsPvP => ClientState.IsPvP || ClientState.TerritoryType == 250;
 
-    /// <summary>Gets the actions saved to a specific Hotbar</summary>
+    /// <summary>Gets the current actions on a specific Hotbar</summary>
     internal static Action[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
     {
         var contents = new Action[slotCount];
@@ -44,7 +42,7 @@ internal static unsafe class Actions
         return contents;
     }
 
-    /// <summary>Retrieves the saved contents of a hotbar</summary>
+    /// <summary>Retrieves the saved hotbar contents for a specific job</summary>
     internal static Action[] GetSaved(int job, int barID, int slotCount = 12)
     {
         if (IsPvP) job = Job.PvpID(job);
@@ -75,7 +73,7 @@ internal static unsafe class Actions
             var sourceSlot = sourceButtons[i + sourceStart];
             if (saveSlot->ID == sourceSlot.CommandId && saveSlot->Type == sourceSlot.CommandType) continue;
 
-            PluginLog.LogDebug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+            PluginLog.LogVerbose($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
             saveSlot->Type = sourceSlot.CommandType;
             saveSlot->ID = sourceSlot.CommandId;
         }
@@ -99,15 +97,17 @@ internal static unsafe class Actions
     /// <summary>Stores a set of hotbar actions for the plugin to reference later</summary>
     internal static void Store(int barID) => Bars.StoredActions[barID] = GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : Job.Current, barID);
 
+    /// <summary>Gets the actions that correspond to the selected Expanded Hold bar</summary>
     internal static Action[] GetExHoldActions(ExSide exSide)
     {
         var map = GetExMap(exSide);
         return GetByBarID(map.barID, 8, map.useLeft ? 0 : 8);
     }
 
+    /// <summary>Parses the game configuration to identify the mapped bar for an Expanded Hold input</summary>
     private static (int barID, bool useLeft) GetExMap(ExSide side)
     {
-        int conf = (side == ExSide.LR ? GameConfig.ExtraBarMaps.LR : GameConfig.ExtraBarMaps.RL)[GameConfig.SepPvP && IsPvP ? 1 : 0];
+        int conf = (side == ExSide.LR ? GameConfig.Cross.ExMaps.LR : GameConfig.Cross.ExMaps.RL)[GameConfig.Cross.SepPvP && IsPvP ? 1 : 0];
 
         var barID = conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.SetID.Current + (conf < 18 ? -1 : 1) - 2) % 8 + 10;
         var useLeft = conf % 2 == (conf < 16 ? 0 : 1);
@@ -115,6 +115,7 @@ internal static unsafe class Actions
         return (barID, useLeft);
     }
 
+    /// <summary>Interprets a drag/drop action involving the "borrowed" hotbars that form the plugin's Expanded Hold bars, and redirects the action to the appropriate Cross Hotbar set.</summary>
     public static void HandleDragDrop()
     {
         PluginLog.LogDebug("Handling Drag/Drop Event");

@@ -15,8 +15,12 @@ namespace CrossUp.Game.Hooks
     internal sealed class HudHooks : IDisposable
     {
         private delegate IntPtr GetFilePointerDelegate(byte index);
-
         private static GetFilePointerDelegate? GetFilePointer;
+
+        private delegate uint SetHudLayoutDel(IntPtr filePtr, uint hudLayout, byte unk0, byte unk1);
+        private static Hook<SetHudLayoutDel>? SetHudLayoutHook;
+
+        public static readonly unsafe AgentHudLayout* HudLayout = Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
 
         public HudHooks()
         {
@@ -71,24 +75,18 @@ namespace CrossUp.Game.Hooks
 
             for (var i = 1; i < hudScreen.NodeListCount; i++)
             {
-                if (!hudNodes[i]->IsVisible ||
-                    Math.Abs(hudNodes[i]->Y - root->Y) > 1 ||
-                    Math.Abs(hudNodes[i]->Width - root->Width * scale) > 1 ||
-                    Math.Abs(hudNodes[i]->Height - root->Height * scale) > 1 ||
-                    Math.Abs(hudNodes[i]->X - root->X) < 1) continue;
-                hudNodes[i]->X = root->X;
-                hudNodes[i]->Flags_2 |= 0xD;
+                var node = hudNodes[i];
+                if (!node->IsVisible ||
+                    Math.Abs(node->Y - root->Y) > 1 ||
+                    Math.Abs(node->Width - root->Width * scale) > 1 ||
+                    Math.Abs(node->Height - root->Height * scale) > 1 ||
+                    Math.Abs(node->X - root->X) < 1) continue;
+                node->X = root->X;
+                node->Flags_2 |= 0xD;
                 return true;
             }
 
             return false;
         }
-
-        private delegate uint SetHudLayoutDel(IntPtr filePtr, uint hudLayout, byte unk0, byte unk1);
-
-        private static Hook<SetHudLayoutDel>? SetHudLayoutHook;
-        public static readonly unsafe AgentHudLayout* HudLayout = Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHudLayout();
-
-
     }
 }

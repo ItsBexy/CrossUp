@@ -39,8 +39,7 @@ internal class SeparateEx
         var borrowCount = 0;
         for (var i = 1; i < 10; i++) if (borrowBars[i]) borrowCount++;
 
-        ImGui.Spacing();
-        ImGui.Spacing();
+        Helpers.Spacing(2);
         ImGui.Indent(10);
 
         if (ImGui.BeginTable("BarBorrowDesc", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
@@ -53,7 +52,7 @@ internal class SeparateEx
             ImGui.TableNextColumn();
 
             ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-            if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) Internal.ExBarOn(sepExBar);
+            if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) InternalCmd.ExBarOn(sepExBar);
             ImGui.PopStyleColor(1);
 
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2);
@@ -67,8 +66,8 @@ internal class SeparateEx
             if (sepExBar)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-                if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) Internal.ExBarOnlyOne(true);
-                if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) Internal.ExBarOnlyOne(false);
+                if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) InternalCmd.ExBarOnlyOne(true);
+                if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) InternalCmd.ExBarOnlyOne(false);
                 ImGui.PopStyleColor(1);
 
 
@@ -80,19 +79,19 @@ internal class SeparateEx
                 ImGui.SameLine();
                 Helpers.BumpCursorX((onlyOne ? 35f : 5f) * Helpers.Scale);
                 ImGui.PushID("resetLRpos");
-                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Internal.LRpos(-214, -88);
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.LRpos(-214, -88);
                 ImGui.PopID();
 
                 ImGui.SameLine();
                 ImGui.BeginGroup();
                 {
                     ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LX", ref lrX)) Internal.LRpos(lrX, lrY);
+                    if (ImGui.InputInt("##LX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
 
                     Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
                     ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LY", ref lrY)) Internal.LRpos(lrX, lrY);
+                    if (ImGui.InputInt("##LY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
 
                     ImGui.SameLine();
                     Helpers.BumpCursorX(4f * Helpers.Scale);
@@ -109,17 +108,17 @@ internal class SeparateEx
                     ImGui.SameLine();
                     Helpers.BumpCursorX(5f * Helpers.Scale);
                     ImGui.PushID("resetRLpos");
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) Internal.RLpos(214, -88);
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.RLpos(214, -88);
                     ImGui.PopID();
 
                     ImGui.SameLine();
                     ImGui.BeginGroup();
                     {
                         ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RX", ref rlX)) Internal.LRpos(rlX, rlY);
+                        if (ImGui.InputInt("##RX", ref rlX)) InternalCmd.LRpos(rlX, rlY);
                         Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
                         ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RY", ref rlY)) Internal.LRpos(rlX, rlY);
+                        if (ImGui.InputInt("##RY", ref rlY)) InternalCmd.LRpos(rlX, rlY);
 
                         ImGui.SameLine();
                         Helpers.BumpCursorX(4f * Helpers.Scale);

@@ -11,8 +11,8 @@ using static CrossUp.CrossUp;
 
 namespace CrossUp.Commands;
 
-/// <summary>Methods that perform actions within CrossUp. Can be called by UI, chat commands, or IPC</summary>
-internal class Internal
+/// <summary>Methods that perform actions within CrossUp. Can be called by the plugin UI, chat commands, or IPC</summary>
+internal class InternalCmd
 {
     public static void ToggleDebug(CrossUpUI ui) => ui.DebugWindow.Show = !ui.DebugWindow.Show;
     public static void ToggleSettings(CrossUpUI ui) => ui.SettingsWindow.Show = !ui.SettingsWindow.Show;
@@ -155,16 +155,16 @@ internal class Internal
         Profile.CombatFadeInOut = active;
         Profile.TranspInCombat = Math.Min(100,Math.Max(0,inCombat));
         Profile.TranspOutOfCombat = Math.Min(100, Math.Max(0, outCombat));
-        if (!active) GameConfig.Transparency.Standard.Set(0);
-        else EventHooks.OnConditionChange();
+        if (!active) GameConfig.Cross.Transparency.Standard.Set(0);
+        else Events.OnConditionChange();
         Config.Save();
     }
 
     internal static void CombatFade(bool active)
     {
         Profile.CombatFadeInOut = active;
-        if (!active) GameConfig.Transparency.Standard.Set(0);
-        else EventHooks.OnConditionChange();
+        if (!active) GameConfig.Cross.Transparency.Standard.Set(0);
+        else Events.OnConditionChange();
         Config.Save();
     }
 
@@ -186,7 +186,7 @@ internal class Internal
         Color.SetAll();
     }
 
-    // tuple overloads:
+    // tuple overloads (used for IPC):
 
     internal static void SplitBar((bool split, int distance, int center) t)
     {

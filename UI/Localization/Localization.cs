@@ -7,21 +7,21 @@ namespace CrossUp.UI.Localization;
 
 internal sealed class CrossUpLoc : IDisposable
 {
-
     internal CrossUpLoc()
     {
-        UpdateLang(PluginInterface.UiLanguage);
-        PluginInterface.LanguageChanged += UpdateLang;
+        SetupLanguage(PluginInterface.UiLanguage);
+        PluginInterface.LanguageChanged += SetupLanguage;
     }
 
-    public void Dispose() => PluginInterface.LanguageChanged -= UpdateLang;
+    public void Dispose() => PluginInterface.LanguageChanged -= SetupLanguage;
 
-    private static void UpdateLang(string language)
+    private static void SetupLanguage(string language)
     {
         var dirPath = Path.Combine(PluginInterface.AssemblyLocation.DirectoryName!, @"UI\Localization\");
+        var filePath = $"{dirPath}{language}.json";
         var loc = new Dalamud.Localization(dirPath);
 
-        if (File.Exists($"{dirPath}{language}.json"))
+        if (File.Exists(filePath))
         {
             loc.SetupWithLangCode(language);
             PluginLog.Log($"Loaded localized text ({language})");
@@ -29,7 +29,7 @@ internal sealed class CrossUpLoc : IDisposable
         else
         {
             loc.SetupWithFallbacks();
-            PluginLog.LogWarning($"Couldn't load localized text ({language}). Using fallback text.");
+            PluginLog.LogWarning($"Couldn't load localized text ({language}). Using fallback text (en).");
         }
     }
 }

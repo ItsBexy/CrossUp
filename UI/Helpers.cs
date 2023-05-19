@@ -84,6 +84,11 @@ internal class Helpers
         return result;
     }
 
+    internal static void Spacing(int n)
+    {
+        for (var i = 0; i < n; i++) ImGui.Spacing();
+    }
+
     internal static float Scale => ImGuiHelpers.GlobalScale;
     internal const ImGuiColorEditFlags PickerFlags = ImGuiColorEditFlags.PickerMask | ImGuiColorEditFlags.DisplayHex;
 }

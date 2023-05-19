@@ -74,10 +74,12 @@ public class ConfigProfile
 
     public ConfigProfile() { }
 
+    /// <summary>Copy-constructor for cloning an existing profile</summary>
     public ConfigProfile(ConfigProfile original)
     {
         SplitOn             = original.SplitOn;
         SplitDist           = original.SplitDist;
+        CenterPoint         = original.CenterPoint;
         PadlockOffset       = original.PadlockOffset;
         SetTextOffset       = original.SetTextOffset;
         ChangeSetOffset     = original.ChangeSetOffset;

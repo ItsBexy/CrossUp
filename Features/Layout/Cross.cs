@@ -33,7 +33,7 @@ namespace CrossUp.Features.Layout
             if (!forceArrange && select == previous) return;
 
             var (lrX, lrY, rlX, rlY) = coords;
-            var miniSize = Profile.SelectStyle == 2 || (mixBar && split > 0) ? 0 : 166;
+            var miniSize = (ushort)(Profile.SelectStyle == 2 || (mixBar && split > 0) ? 0 : 166);
             switch (select)
             {
                 case Select.None:
@@ -60,8 +60,8 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.Buttons[2].ChildVis(!fromLR || mixBar).SetRelativePos(split * 2);
                     Bars.Cross.Buttons[3].ChildVis(!fromLR).SetRelativePos(split * 2);
 
-                    Bars.Cross.MiniSelectL.SetSize((ushort)miniSize, 140);
-                    Bars.Cross.MiniSelectR.SetSize((ushort)miniSize, 140);
+                    Bars.Cross.MiniSelectL.SetSize(miniSize, 140);
+                    Bars.Cross.MiniSelectR.SetSize(miniSize, 140);
                     break;
 
                 case Select.Right:
@@ -75,8 +75,8 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.Buttons[2].ChildVis(!fromRL || !mixBar).SetRelativePos();
                     Bars.Cross.Buttons[3].ChildVis(true).SetRelativePos();
 
-                    Bars.Cross.MiniSelectL.SetSize((ushort)miniSize, 140);
-                    Bars.Cross.MiniSelectR.SetSize((ushort)miniSize, 140);
+                    Bars.Cross.MiniSelectL.SetSize(miniSize, 140);
+                    Bars.Cross.MiniSelectR.SetSize(miniSize, 140);
                     break;
 
                 case Select.LR:
@@ -124,9 +124,10 @@ namespace CrossUp.Features.Layout
             if (Math.Abs(misalign) < 1) return;
 
             Bars.Cross.Base.X = baseX;
-            PluginLog.LogDebug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
+            PluginLog.LogVerbose($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
         }
 
+        /// <summary>Restores everything back to default</summary>
         public static void Reset()
         {
             Bars.Cross.VertLine.SetSize();

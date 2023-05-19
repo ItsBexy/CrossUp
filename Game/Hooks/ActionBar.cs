@@ -35,12 +35,11 @@ namespace CrossUp.Game.Hooks
             ActionBarBaseUpdateHook?.Dispose();
         }
 
-        /// <summary>Set to true when <see cref="ActionBarBaseUpdateDetour"/> detects a drag/drop change, signalling the next <see cref="ActionBarReceiveEventDetour"/> to handle it.</summary>
+        /// <summary>Set to true when <see cref="ActionBarReceiveEventDetour"/> detects a drag/drop change, signalling the next <see cref="ActionBarBaseUpdateDetour"/> to handle it.</summary>
         private static bool DragDrop;
 
         /// <summary>Called whenever a change occurs on any hotbar. Calls the plugin's main arrangement functions.</summary>
-        private static byte ActionBarBaseUpdateDetour(AddonActionBarBase* barBase, NumberArrayData** numberArrayData,
-            StringArrayData** stringArrayData)
+        private static byte ActionBarBaseUpdateDetour(AddonActionBarBase* barBase, NumberArrayData** numberArrayData, StringArrayData** stringArrayData)
         {
             var ret = ActionBarBaseUpdateHook!.Original(barBase, numberArrayData, stringArrayData);
             if (!IsSetUp) return ret;

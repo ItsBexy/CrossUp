@@ -2,7 +2,6 @@
 using CrossUp.Game;
 using CrossUp.Game.Hotbar;
 using static CrossUp.CrossUp;
-using static CrossUp.Game.Hotbar.Bars.Cross;
 
 namespace CrossUp.Features.Layout;
 
@@ -12,15 +11,17 @@ internal class Layout
     /// <summary>Checks/updates the Cross Hotbar selection and calls the main arrangement functions</summary>
     internal static unsafe void Update(bool forceArrange = false, bool resetAll = false)
     {
-        if (!Exists) return;
+        if (!Bars.Cross.Exists) return;
 
-        var select = Selection.Current;
-        if (Enabled)
+        var select = Bars.Cross.Selection.Current;
+        var previous = Bars.Cross.Selection.Previous;
+
+        if (Bars.Cross.Enabled)
         {
-            var scale = Root.Node->ScaleX;
+            var scale = Bars.Cross.Root.Node->ScaleX;
             var splitDist = Profile.SplitOn && !resetAll ? Profile.SplitDist : 0;
 
-            var mixBar = (bool)GameConfig.MixBar;
+            var mixBar = (bool)GameConfig.Cross.MixBar;
             var arrangeEx = !resetAll && SeparateEx.Ready && Bars.RL.Exists && Bars.LR.Exists;
 
             var lrX = arrangeEx ? Profile.LRpos.X : 0;
@@ -30,16 +31,16 @@ internal class Layout
 
             var coords = ((int)lrX, (int)lrY, (int)rlX, (int)rlY);
 
-            Cross.Arrange(select, Selection.Previous, scale, splitDist, mixBar, arrangeEx, coords, forceArrange, resetAll);
+            Cross.Arrange(select, previous, scale, splitDist, mixBar, arrangeEx, coords, forceArrange, resetAll);
 
-            if (arrangeEx) SeparateEx.Arrange(select, Selection.Previous, scale, splitDist, mixBar, coords, forceArrange);
+            if (arrangeEx) SeparateEx.Arrange(select, previous, scale, splitDist, mixBar, coords, forceArrange);
         }
         else
         {
             Reset();
         }
 
-        Selection.Previous = select;
+        Bars.Cross.Selection.Previous = select;
     }
 
     /// <summary>Calls the update function with arguments to reset everything</summary>
@@ -60,7 +61,7 @@ internal class Layout
     /// <summary>Reset all the node properties we've messed with and reset any borrowed bars</summary>
     internal static void Reset()
     {
-        if (!Exists) return;
+        if (!Bars.Cross.Exists) return;
 
         Cross.Reset();
         SeparateEx.Reset();

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading.Tasks;
 using CrossUp.Game;
 using CrossUp.Game.Hotbar;
-using CrossUp.Utility;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
@@ -12,22 +10,16 @@ using static CrossUp.Game.Hotbar.Bars.Cross.Selection;
 namespace CrossUp.Features.Layout
 {
     /// <summary>Plugin feature that displays the bars for Expanded Hold Controls separately from the rest of the Cross Hotbar</summary>
-    public unsafe class SeparateEx
+    public unsafe partial class SeparateEx
     {
         /// <summary>Confirms that the Separate Expanded Hold feature is active and that two valid bars are selected</summary>
         internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
 
         /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
-        private static void Enable(bool chatty=false)
+        private static void Enable()
         {
             PrepBar(Config.LRborrow);
             PrepBar(Config.RLborrow);
-
-            if (chatty)
-            {
-                PluginLog.LogDebug($"Borrowing Hotbar {Bars.LR.ID + 1} to serve as L→R Expanded Hold Bar");
-                PluginLog.LogDebug($"Borrowing Hotbar {Bars.RL.ID + 1} to serve as R→L Expanded Hold Bar");
-            }
 
             Layout.Update(true);
             Task.Delay(20).ContinueWith(static delegate { Layout.Nudge(); });
@@ -37,6 +29,8 @@ namespace CrossUp.Features.Layout
         private static void PrepBar(int barID)
         {
             if (!Bars.ActionBars[barID].Exists) return;
+
+            PluginLog.LogVerbose($"Borrowing Hotbar {barID} to use for EXHB display");
 
             Actions.Store(barID);
 
@@ -49,7 +43,6 @@ namespace CrossUp.Features.Layout
             for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
         }
 
-
         /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
         internal static void Disable()
         {
@@ -60,11 +53,7 @@ namespace CrossUp.Features.Layout
         }
 
         /// <summary>Enables if ready, Disables if not.</summary>
-        internal static void EnableIfReady()
-        {
-            if (Ready) Enable();
-            else Disable();
-        }
+        internal static void EnableIfReady() => ((Action)(Ready ? Enable : Disable)).Invoke();
 
         /// <summary>Sets the keybind visibility, empty slot visibility, and the overall alpha for Expanded Hold bars</summary>
         private static void StyleSlots(Bars.ActionBar bar, byte alpha)
@@ -82,7 +71,6 @@ namespace CrossUp.Features.Layout
         /// <summary>Visually arrange the borrowed bars to replicate the Expanded Hold bars</summary>
         internal static void Arrange(Select select, Select previous, float scale, int split, bool mixBar, (int, int, int, int) coords, bool forceArrange)
         {
-                
             SetActions(select);
             HiddenCheck();
 
@@ -147,8 +135,7 @@ namespace CrossUp.Features.Layout
                             MetaSlots.Cross[2][i].SetVis(fromLR && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
                             MetaSlots.Cross[3][i].SetVis(fromLR).SetScale(0.85F).Insert(Bars.RL.Buttons[i + 8], -rlX + split, -rlY, 0.85F);
 
-                            (!mixBar ? MetaSlots.Cross[2][i] : MetaSlots.Cross[1][i]).Insert(Bars.LR.Buttons[i + 8],
-                                (!mixBar ? split : -split) - lrX, -lrY, 0.85F);
+                            (!mixBar ? MetaSlots.Cross[2][i] : MetaSlots.Cross[1][i]).Insert(Bars.LR.Buttons[i + 8], (!mixBar ? split : -split) - lrX, -lrY, 0.85F);
                         }
 
                         break;
@@ -168,8 +155,7 @@ namespace CrossUp.Features.Layout
                             MetaSlots.Cross[2][i].SetVis(fromRL && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
                             MetaSlots.Cross[3][i].SetVis(false).SetScale(1.1F);
 
-                            (!mixBar ? MetaSlots.Cross[1][i] : MetaSlots.Cross[2][i]).Insert(Bars.RL.Buttons[i + 8],
-                                (!mixBar ? -split : split) - rlX, -rlY, 0.85F);
+                            (!mixBar ? MetaSlots.Cross[1][i] : MetaSlots.Cross[2][i]).Insert(Bars.RL.Buttons[i + 8], (!mixBar ? -split : split) - rlX, -rlY, 0.85F);
                         }
 
                         break;
@@ -210,7 +196,8 @@ namespace CrossUp.Features.Layout
                 }
             }
 
-            var alpha = (select == Select.None ? GameConfig.Transparency.Standard : GameConfig.Transparency.Inactive).IntToAlpha;
+            var alpha = (select == Select.None ? GameConfig.Cross.Transparency.Standard : GameConfig.Cross.Transparency.Inactive).IntToAlpha;
+
             StyleSlots(Bars.LR.BorrowBar, alpha);
             StyleSlots(Bars.RL.BorrowBar, alpha);
         }
@@ -290,186 +277,13 @@ namespace CrossUp.Features.Layout
             }
         }
 
-        /// <summary>MetaSlots are various positions that a "borrowed" bar's buttons can be placed in, to imitate elements of the Cross Hotbar.</summary>
-        public static class MetaSlots
-        {
-            /// <summary>A position in which a "borrowed" button can be placed</summary>
-            public sealed class MetaSlot
-            {
-                internal MetaSlot(Vector2 pos, Vector2 orig)
-                {
-                    Position = pos;
-                    Origin = orig;
-                }
-
-                internal bool Visible { get; set; } = true;
-                private Vector2 Position { get; }
-                private Vector2 Origin { get; }
-                private Vector2 Mod { get; set; }
-                internal float Scale { get; set; } = 1.0F;
-
-                private sealed class ScaleTween
-                {
-                    internal DateTime Start { get; init; }
-                    internal TimeSpan Duration { get; init; }
-                    internal float FromScale { get; init; }
-                    internal float ToScale { get; init; }
-                }
-
-                private ScaleTween? Tween { get; set; }
-                private NodeWrapper? Button { get; set; }
-
-                public static implicit operator NodeWrapper.PropertySet(MetaSlot p) => new()
-                {
-                    Position = new(p.Position.X + p.Mod.X, p.Position.Y + p.Mod.Y),
-                    Origin = p.Origin,
-                    Scale = p.Scale,
-                    Visible = p.Visible
-                };
-
-                internal MetaSlot SetVis(bool show)
-                {
-                    Visible = show;
-                    return this;
-                }
-
-                internal MetaSlot SetScale(float scale)
-                {
-                    Scale = scale;
-                    return this;
-                }
-
-                /// <summary>Places a button node into a MetaSlot, and sets it up to be animated if necessary.</summary>
-                // ReSharper disable once UnusedMethodReturnValue.Global
-                internal MetaSlot Insert(NodeWrapper button, float xMod = 0, float yMod = 0, float scale = 1F)
-                {
-                    Mod = new Vector2(xMod, yMod);
-                    Button = button;
-
-                    if (Math.Abs(scale - Scale) > 0.01f)
-                    {
-                        if (Tween == null || Math.Abs(Tween.ToScale - scale) > 0.01f)
-                        {
-                            Tween = new()
-                            {
-                                FromScale = Scale,
-                                ToScale = scale,
-                                Start = DateTime.Now,
-                                Duration = new(0, 0, 0, 0, 40)
-                            };
-                            TweensExist = true;
-                            return this;
-                        }
-                    }
-                    else
-                    {
-                        Tween = null;
-                        Scale = scale;
-                    }
-
-                    Button.SetProps(this);
-                    return this;
-                }
-
-                /// <summary>Checks if this MetaSlot has an active animation tween, and if so, processes it</summary>
-                internal void RunTween()
-                {
-                    if (Tween == null || Button == null || Button.Node == null) return;
-
-                    TweensExist = true;
-
-                    var timePassed = DateTime.Now - Tween.Start;
-                    var progress = (float)decimal.Divide(timePassed.Milliseconds, Tween.Duration.Milliseconds);
-                    var to = Tween.ToScale;
-                    var from = Tween.FromScale;
-
-                    Tween = progress < 1 ? Tween : null;
-                    Scale = progress < 1 ? (to - from) * progress + from : to;
-
-                    Button.SetProps(this);
-                }
-            }
-
-            /// <summary>Whether or not there are currently any animation tweens to run</summary>
-            internal static bool TweensExist { get; private set; }
-
-            /// <summary>Run all animations tweens for all MetaSlots</summary>
-            internal static void TweenAll()
-            {
-                TweensExist = false; // will set back to true if we find any incomplete tweens
-                foreach (var mSlot in LR) mSlot.RunTween();
-                foreach (var mSlot in RL) mSlot.RunTween();
-                foreach (var mSlot in Cross[0]) mSlot.RunTween();
-                foreach (var mSlot in Cross[1]) mSlot.RunTween();
-                foreach (var mSlot in Cross[2]) mSlot.RunTween();
-                foreach (var mSlot in Cross[3]) mSlot.RunTween();
-            }
-
-            internal static readonly MetaSlot[] LR =
-            {
-                new(pos: new(0, 24), orig: new(102, 39)),
-                new(pos: new(42, 0), orig: new(60, 63)),
-                new(pos: new(84, 24), orig: new(18, 39)),
-                new(pos: new(42, 48), orig: new(60, 15)),
-
-                new(pos: new(138, 24), orig: new(54, 39)),
-                new(pos: new(180, 0), orig: new(12, 63)),
-                new(pos: new(222, 24), orig: new(-30, 39)),
-                new(pos: new(180, 48), orig: new(12, 15))
-            };
-
-            internal static readonly MetaSlot[] RL =
-            {
-                new(pos: new(0, 24), orig: new(102, 39)),
-                new(pos: new(42, 0), orig: new(60, 63)),
-                new(pos: new(84, 24), orig: new(18, 39)),
-                new(pos: new(42, 48), orig: new(60, 15)),
-
-                new(pos: new(138, 24), orig: new(54, 39)),
-                new(pos: new(180, 0), orig: new(12, 63)),
-                new(pos: new(222, 24), orig: new(-30, 39)),
-                new(pos: new(180, 48), orig: new(12, 15))
-            };
-
-            internal static readonly MetaSlot[][] Cross =
-            {
-                new MetaSlot[]
-                {
-                    new(pos: new(-142, 24), orig: new(94, 39)),
-                    new(pos: new(-100, 0), orig: new(52, 63)),
-                    new(pos: new(-58, 24), orig: new(10, 39)),
-                    new(pos: new(-100, 48), orig: new(52, 15))
-                },
-                new MetaSlot[]
-                {
-                    new(pos: new(-4, 24), orig: new(62, 39)),
-                    new(pos: new(38, 0), orig: new(20, 63)),
-                    new(pos: new(80, 24), orig: new(-22, 39)),
-                    new(pos: new(38, 48), orig: new(20, 15))
-                },
-                new MetaSlot[]
-                {
-                    new(pos: new(142, 24), orig: new(94, 39)),
-                    new(pos: new(184, 0), orig: new(52, 63)),
-                    new(pos: new(226, 24), orig: new(10, 39)),
-                    new(pos: new(184, 48), orig: new(52, 15))
-                },
-                new MetaSlot[]
-                {
-                    new(pos: new(280, 24), orig: new(62, 39)),
-                    new(pos: new(322, 0), orig: new(20, 63)),
-                    new(pos: new(364, 24), orig: new(-22, 39)),
-                    new(pos: new(322, 48), orig: new(20, 15))
-                }
-            };
-        }
-
+        /// <summary>Resets all hotbars that may have been affected by this feature</summary>
         internal static void Reset()
         {
             for (var barID = 1; barID <= 9; barID++) ResetBar(barID, Job.Current);
         }
 
-        /// <summary>Put a borrowed hotbar back the way we found it based on HUD layout settings and saved actions</summary>
+        /// <summary>Put a hotbar back the way we found it based on HUD layout settings and saved actions</summary>
         private static void ResetBar(int barID, int job)
         {
             if (!Bars.ActionBars[barID].Exists) return;
@@ -477,8 +291,8 @@ namespace CrossUp.Features.Layout
             Actions.Copy(Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
-                .SetSize()
-                .SetScale(Bars.ActionBars[barID].Base.Scale);
+                                       .SetSize()
+                                       .SetScale(Bars.ActionBars[barID].Base.Scale);
 
             Bars.ActionBars[barID].BarNumText.SetScale();
 
@@ -487,8 +301,8 @@ namespace CrossUp.Features.Layout
                 var buttonNode = Bars.ActionBars[barID].Buttons[i, getDef: true];
 
                 buttonNode.SetRelativePos()
-                    .SetVis(true)
-                    .SetScale();
+                          .SetVis(true)
+                          .SetScale();
 
                 buttonNode[2u].SetVis(true);
             }

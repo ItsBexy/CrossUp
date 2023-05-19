@@ -89,12 +89,10 @@ internal class Color
             SetDutyActionBG(reset, multiply);
         }
 
-
         PluginLog.LogVerbose($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
     }
 
-
-
+    /// <summary>Presets for the BG texture options</summary>
     private static readonly Vector4[,] BGStyles =
     {
         {new(0,0,104,104), new(48)},
@@ -173,19 +171,22 @@ internal class Color
         Bars.Cross.SetBorder.SetColor(border);
     }
 
+    /// <summary>Set the BG color for duty-specific actions</summary>
     private static void SetDutyActionBG(bool reset, Vector3 multiply)
     {
         var dutyActionColor = Preset.White;
+
         if (!reset)
         {
-            var saturation = System.Drawing.Color
-                .FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255)).GetSaturation();
+            var saturation = System.Drawing.Color.FromArgb((int)(multiply.X * 255), (int)(multiply.Y * 255), (int)(multiply.Z * 255)).GetSaturation();
+
+            float Adjust(float val) => val * saturation + Math.Min(1f, val * 2.55f) * (1f - saturation);
 
             dutyActionColor = new Vector3
             {
-                X = multiply.X * saturation + Math.Min(1f, multiply.X * 2.55f) * (1f - saturation),
-                Y = multiply.Y * saturation + Math.Min(1f, multiply.Y * 2.55f) * (1f - saturation),
-                Z = multiply.Z * saturation + Math.Min(1f, multiply.Z * 2.55f) * (1f - saturation)
+                X = Adjust(multiply.X),
+                Y = Adjust(multiply.Y),
+                Z = Adjust(multiply.Z)
             };
         }
 

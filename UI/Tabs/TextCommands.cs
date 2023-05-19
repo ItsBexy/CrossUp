@@ -15,14 +15,12 @@ internal class TextCommands
         ImGui.BeginTable("textCommandList", 1, ImGuiTableFlags.ScrollY);
         ImGui.TableNextColumn();
 
-        ImGui.Spacing();
-        ImGui.Spacing();
+        Helpers.Spacing(2);
         ImGui.Indent(10);
 
         ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.TextCommands.Header.ToUpper());
 
-        ImGui.Spacing();
-        ImGui.Spacing();
+        Helpers.Spacing(2);
 
         foreach (var command in CommandList) command.Describe();
 

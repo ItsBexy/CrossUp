@@ -183,9 +183,10 @@ internal static unsafe class Bars
         internal static NodeWrapper BG4 => Base[9u];
     }
 
-    /// <summary>Mouse/KB Action Bars</summary>
+    /// <summary>All Mouse/KB hotbars</summary>
     internal static readonly ActionBar[] ActionBars = { new(0), new(1), new(2), new(3), new(4), new(5), new(6), new(7), new(8), new(9) };
 
+    /// <summary>A Mouse/KB hotbar</summary>
     internal sealed class ActionBar
     {
         internal ActionBar(int barID)
@@ -204,6 +205,7 @@ internal static unsafe class Bars
         internal readonly ActionBarButtonNodes Buttons;
     }
 
+    /// <summary>The buttons on a Mouse/KB hotbar</summary>
     internal sealed class ActionBarButtonNodes
     {
         internal ActionBarButtonNodes(int id) => ID = id;
@@ -275,9 +277,7 @@ internal static unsafe class Bars
     /// <summary>Visibility status of Mouse/KB  bars before they were borrowed</summary>
     internal static readonly bool[] WasHidden = new bool[10];
 
-    /// <summary>
-    /// The Main Menu (not a bar, but whatever)
-    /// </summary>
+    /// <summary>The Main Menu</summary>
     internal class MainMenu
     {
         public static BaseWrapper Base = new("_MainCross");

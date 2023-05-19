@@ -12,25 +12,30 @@ using static CrossUp.Game.Hooks.HudHooks;
 
 namespace CrossUp.Game.Hooks
 {
-    internal sealed class EventHooks : IDisposable
+    internal sealed class Events : IDisposable
     {
-        static EventHooks()
+        static Events()
         {
-            Service.Framework.Update += FrameworkUpdate;
+            Service.Framework.Update          += OnFrameUpdate;
             Service.Condition.ConditionChange += OnConditionChange;
         }
 
         public void Dispose()
         {
-            Service.Framework.Update -= FrameworkUpdate;
+            Service.Framework.Update          -= OnFrameUpdate;
             Service.Condition.ConditionChange -= OnConditionChange;
         }
 
         private static bool LogFrameCatch = true;
 
-        /// <summary>Runs every frame. Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.<br/><br/>
-        /// Also calls animation function (<see cref="SeparateEx.MetaSlots.TweenAll"/>) when relevant.</summary>
-        private static unsafe void FrameworkUpdate(Framework framework)
+        /// <summary><list type="bullet">
+        /// <item>Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.</item>
+        /// <item>Calls animation function (<see cref="SeparateEx.MetaSlots.TweenAll"/>) when relevant.</item>
+        /// <item>Tweaks the XHB's node in the HUD editor to match the bar's altered state</item>
+        /// <item>Hides the Separated EXHB if the main menu is open</item>
+        /// </list>
+        /// </summary>
+        private static unsafe void OnFrameUpdate(Framework framework)
         {
             try
             {

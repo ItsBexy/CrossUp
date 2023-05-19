@@ -17,9 +17,7 @@ internal class Job
         }
     }
 
-    /// <summary>Gets player's Job abbreviation</summary>
-    private static string Abbr => ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???";
-
+    /// <summary>The player's last known job</summary>
     private static int LastKnown;
 
     /// <summary>True if the player's Job has just changed</summary>
@@ -54,7 +52,7 @@ internal class Job
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     public static void HandleJobChange()
     {
-        PluginLog.LogDebug($"Job Change: {Abbr}");
+        PluginLog.LogVerbose($"Job Change: {ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???"}");
         if (!SeparateEx.Ready) return;
 
         Actions.Store(Bars.LR.ID);
