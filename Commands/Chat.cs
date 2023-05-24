@@ -30,6 +30,11 @@ internal sealed class ChatCmd : IDisposable
             PluginLog.LogError($"{ex}");
             CrossUp.UI.SettingsWindow.Show = !CrossUp.UI.SettingsWindow.Show;
         }
+
+        if (!CrossUp.IsSetUp)
+        {
+            PluginLog.LogWarning("The plugin isn't set up!");
+        }
     }
 
     private static class Parse

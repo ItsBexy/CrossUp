@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Numerics;
 using CrossUp.Utility;
+using Dalamud.Logging;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Actions;
 
@@ -29,6 +30,7 @@ internal static unsafe class Bars
         }
         catch
         {
+            PluginLog.LogWarning("Couldn't retrieve bar bases!");
             return false;
         }
     }

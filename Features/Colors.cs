@@ -89,7 +89,7 @@ internal class Color
             SetDutyActionBG(reset, multiply);
         }
 
-        PluginLog.LogVerbose($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+        PluginLog.LogDebug($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
     }
 
     /// <summary>Presets for the BG texture options</summary>
@@ -142,7 +142,7 @@ internal class Color
             }
         }
 
-        PluginLog.LogVerbose($"Button Colors Set; Glow: {glowA}, Pulse: {glowB}");
+        PluginLog.LogDebug($"Button Colors Set; Glow: {glowA}, Pulse: {glowB}");
     }
 
     /// <summary>Set/Reset Text and border colors</summary>

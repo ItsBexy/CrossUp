@@ -30,8 +30,6 @@ namespace CrossUp.Features.Layout
         {
             if (!Bars.ActionBars[barID].Exists) return;
 
-            PluginLog.LogVerbose($"Borrowing Hotbar {barID} to use for EXHB display");
-
             Actions.Store(barID);
 
             if (GameConfig.Hotbar.Visible[barID] == false)

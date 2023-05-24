@@ -21,20 +21,26 @@ public class GameConfig
     public sealed class Option
     {
         private readonly uint Index;
+        internal unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
+        internal unsafe string Name => Conf->GetOption(Index)->GetName();
 
         internal Option(uint index) => Index = index;
         internal Option(string name, uint offset = 0) => Index = IndexFromName(name) + offset;
 
+        /// <summary>Retrieves the option from its name (this is the preferred approach, since the ID and Index frequently change with patches)</summary>
+        private static unsafe uint IndexFromName(string name)
+        {
+            for (uint i = 0; i < 701U; ++i) if (Conf->GetOption(i)->GetName() == name) return i;
+            return 0;
+        }
+
+        internal unsafe int Get() => Conf->GetIntValue(Index);
         public static implicit operator int(Option opt) => opt.Get();
         public static implicit operator bool(Option opt) => opt.Get() > 0;
+        internal byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
 
-        internal unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
-        internal unsafe string Name => Conf->GetOption(Index)->GetName();
-        internal unsafe int Get() => Conf->GetIntValue(Index);
         internal unsafe void Set(int val) => Conf->SetOption(Index, val, 1);
         internal void Set(bool val) => Set(val ? 1 : 0);
-
-        internal byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
 
         /// <returns>Index | ID | Name | Value</returns>
         public new string ToString() => $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
@@ -43,13 +49,6 @@ public class GameConfig
 
     /// <summary>Converts to a hex value (relevant for color options)</summary>
     internal static string UintToHex(uint u) => Convert.ToHexString(BitConverter.GetBytes(u));
-
-    /// <summary>Retrieves the option from its name (this is the preferred approach, since the ID and Index frequently change with patches)</summary>
-    private static unsafe uint IndexFromName(string name)
-    {
-        for (uint i = 0; i < 701U; ++i) if (Conf->GetOption(i)->GetName() == name) return i;
-        return 0;
-    }
 
     /// <summary>Cross Hotbar options</summary>
     internal static class Cross

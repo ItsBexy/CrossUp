@@ -79,7 +79,7 @@ namespace CrossUp.Game.Hooks
                     case 50 or 54 when SeparateEx.Ready:
                     {
                         var barID = barBase->HotbarID;
-                        PluginLog.LogDebug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBase Update");
+                        PluginLog.LogDebug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBaseUpdate");
                         Cross.UnassignedSlotVis(Profile.HideUnassigned);
                         DragDrop = true;
                         break;

@@ -73,7 +73,7 @@ internal static unsafe class Actions
             var sourceSlot = sourceButtons[i + sourceStart];
             if (saveSlot->ID == sourceSlot.CommandId && saveSlot->Type == sourceSlot.CommandType) continue;
 
-            PluginLog.LogVerbose($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+            PluginLog.LogDebug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
             saveSlot->Type = sourceSlot.CommandType;
             saveSlot->ID = sourceSlot.CommandId;
         }

@@ -124,7 +124,7 @@ namespace CrossUp.Features.Layout
             if (Math.Abs(misalign) < 1) return;
 
             Bars.Cross.Base.X = baseX;
-            PluginLog.LogVerbose($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
+            PluginLog.LogDebug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
         }
 
         /// <summary>Restores everything back to default</summary>

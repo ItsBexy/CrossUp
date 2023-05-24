@@ -52,7 +52,7 @@ internal class Job
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     public static void HandleJobChange()
     {
-        PluginLog.LogVerbose($"Job Change: {ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???"}");
+        PluginLog.LogDebug($"Job Change: {ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???"}");
         if (!SeparateEx.Ready) return;
 
         Actions.Store(Bars.LR.ID);
