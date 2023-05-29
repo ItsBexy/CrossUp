@@ -18,4 +18,6 @@ internal class Service
     [PluginService] internal static GameGui GameGui               { get; private set; }
     [PluginService] internal static SigScanner SigScanner         { get; private set; }
     [PluginService] internal static CommandManager CommandManager { get; private set; }
+
+    [PluginService] internal static Dalamud.Game.Config.GameConfig DalamudGameConfig { get; private set; }
 }

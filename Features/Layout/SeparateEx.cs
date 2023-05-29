@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CrossUp.Game;
 using CrossUp.Game.Hotbar;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Bars.Cross.Selection;

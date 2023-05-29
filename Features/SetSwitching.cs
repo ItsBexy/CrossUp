@@ -1,6 +1,6 @@
-﻿using CrossUp.Game;
-using CrossUp.Game.Hotbar;
+﻿using CrossUp.Game.Hotbar;
 using CrossUp.Utility;
+using CrossUp.Game;
 using static CrossUp.CrossUp;
 
 namespace CrossUp.Features;
@@ -19,7 +19,7 @@ internal class SetSwitching
     {
         var mode = GameConfig.Cross.SepPvP && Service.ClientState.IsPvP ? 1 : 0;
         var set = barID - 10;
-            
+
         if (Config.RemapEx) OverrideEx(set, mode);
         if (Config.RemapW) OverrideW(set, mode);
     }

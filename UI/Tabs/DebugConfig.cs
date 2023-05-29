@@ -33,7 +33,7 @@ namespace CrossUp.UI.Tabs
                 for (var i = (uint)startIndex; i <= endIndex; i++)
                 {
                     if (i is < 0 or > 700) break;
-                    PluginLog.Log(new GameConfig.Option(i));
+                    PluginLog.Log(new GameConfig.IndexedOption(i));
                 }
             }
 
@@ -52,7 +52,7 @@ namespace CrossUp.UI.Tabs
             {
                 if (i is < 0 or > 700) break;
 
-                var conf = new GameConfig.Option(i);
+                var conf = new GameConfig.IndexedOption(i);
 
                 ImGui.TableNextRow();
 

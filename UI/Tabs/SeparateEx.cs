@@ -86,12 +86,12 @@ internal class SeparateEx
                 ImGui.BeginGroup();
                 {
                     ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
+                    if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
 
                     Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
                     ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
+                    if (ImGui.InputInt("##LRY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
 
                     ImGui.SameLine();
                     Helpers.BumpCursorX(4f * Helpers.Scale);
@@ -115,10 +115,10 @@ internal class SeparateEx
                     ImGui.BeginGroup();
                     {
                         ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RX", ref rlX)) InternalCmd.LRpos(rlX, rlY);
+                        if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
                         Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
                         ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RY", ref rlY)) InternalCmd.LRpos(rlX, rlY);
+                        if (ImGui.InputInt("##RLY", ref rlY)) InternalCmd.RLpos(rlX, rlY);
 
                         ImGui.SameLine();
                         Helpers.BumpCursorX(4f * Helpers.Scale);
