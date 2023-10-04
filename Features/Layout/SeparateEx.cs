@@ -30,14 +30,14 @@ namespace CrossUp.Features.Layout
             if (!Bars.ActionBars[barID].Exists) return;
 
             Actions.Store(barID);
-
-            if (GameConfig.Hotbar.Visible[barID] == false)
+            
+            if (GameConfig.Hotbar.GetVis(barID) == false)
             {
                 Bars.WasHidden[barID] = true;
-                GameConfig.Hotbar.Visible[barID].Set(true); 
+                GameConfig.Hotbar.SetVis(barID, true);
             }
 
-            for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->Flags_2 |= 0xD;
+            for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->DrawFlags |= 0xD;
         }
 
         /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
@@ -207,13 +207,13 @@ namespace CrossUp.Features.Layout
             if (lrID < 1 || rlID < 1) return;
 
             bool crossVis = GameConfig.Cross.Visible;
-            var lrVis = GameConfig.Hotbar.Visible[lrID];
-            var rlVis = GameConfig.Hotbar.Visible[rlID];
+            var lrVis = GameConfig.Hotbar.GetVis(lrID);
+            var rlVis = GameConfig.Hotbar.GetVis(rlID);
 
             if (lrVis == crossVis && rlVis == crossVis) return;
 
-            lrVis.Set(crossVis);
-            rlVis.Set(crossVis);
+            GameConfig.Hotbar.SetVis(lrID, crossVis);
+            GameConfig.Hotbar.SetVis(rlID, crossVis);
         }
 
         /// <summary>Sets the visibility of the EXHB when the main menu is opened via gamepad</summary>
@@ -304,7 +304,7 @@ namespace CrossUp.Features.Layout
                 buttonNode[2u].SetVis(true);
             }
 
-            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !Ready)) GameConfig.Hotbar.Visible[barID].Set(false);
+            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !Ready)) GameConfig.Hotbar.SetVis(barID,false);
         }
     }
 }

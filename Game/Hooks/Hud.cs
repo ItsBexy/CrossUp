@@ -4,9 +4,10 @@ using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
 using CrossUp.Utility;
 using Dalamud.Hooking;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using static CrossUp.CrossUp;
+using static CrossUp.Utility.Service;
+using Framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
@@ -24,10 +25,10 @@ namespace CrossUp.Game.Hooks
 
         public HudHooks()
         {
-            SetHudLayoutHook ??= Hook<SetHudLayoutDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 33 C0 EB 15"), SetHudLayoutDetour);
-            SetHudLayoutHook?.Enable();
+            SetHudLayoutHook = GameInteropProvider.HookFromSignature<SetHudLayoutDel>("E8 ?? ?? ?? ?? 33 C0 EB 15", SetHudLayoutDetour);
+            SetHudLayoutHook.Enable();
 
-            var ptr = Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 85 C0 74 14 83 7B 44 00");
+            var ptr = SigScanner.ScanText("E8 ?? ?? ?? ?? 48 85 C0 74 14 83 7B 44 00");
             if (ptr != IntPtr.Zero) GetFilePointer = Marshal.GetDelegateForFunctionPointer<GetFilePointerDelegate>(ptr);
         }
 
@@ -43,7 +44,7 @@ namespace CrossUp.Game.Hooks
             {
                 var filePtr = GetFilePointer?.Invoke(0) ?? IntPtr.Zero;
                 var dataPtr = filePtr + 0x50;
-                return (int)*(uint*)(Marshal.ReadIntPtr(dataPtr) + 0x6378) + 1;
+                return (int)*(uint*)(Marshal.ReadIntPtr(dataPtr) + 0x9E88) + 1;
             }
             catch
             {
@@ -82,7 +83,7 @@ namespace CrossUp.Game.Hooks
                     Math.Abs(node->Height - root->Height * scale) > 1 ||
                     Math.Abs(node->X - root->X) < 1) continue;
                 node->X = root->X;
-                node->Flags_2 |= 0xD;
+                node->DrawFlags |= 0xD;
                 return true;
             }
 

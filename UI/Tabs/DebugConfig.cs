@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
 using System.Numerics;
-using CrossUp.Game;
-using Dalamud.Logging;
 using ImGuiNET;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.UI.Tabs
 {
@@ -29,11 +28,11 @@ namespace CrossUp.UI.Tabs
             ImGui.SameLine();
             if (ImGui.Button("Log Config Indexes", new Vector2(150, 20)))
             {
-                PluginLog.Log("Index\tID\tName\tValue");
+                Log.Info("Index\tID\tName\tValue");
                 for (var i = (uint)startIndex; i <= endIndex; i++)
                 {
                     if (i is < 0 or > 700) break;
-                    PluginLog.Log(new GameConfig.IndexedOption(i));
+                  //  PluginLog.Log(new GameConfig.IndexedOption(i));
                 }
             }
 
@@ -52,7 +51,7 @@ namespace CrossUp.UI.Tabs
             {
                 if (i is < 0 or > 700) break;
 
-                var conf = new GameConfig.IndexedOption(i);
+               // var conf = new GameConfig.IndexedOption(i);
 
                 ImGui.TableNextRow();
 
@@ -60,27 +59,28 @@ namespace CrossUp.UI.Tabs
                 ImGui.Text($"{i}");
                 ImGui.TableNextColumn();
 
-                ImGui.Text($"{conf.ID}");
+               // ImGui.Text($"{conf.ID}");
                 ImGui.TableNextColumn();
-                ImGui.Text($"{conf.Name}");
+               // ImGui.Text($"{conf.Name}");
                 ImGui.SetNextItemWidth(100);
                 ImGui.TableNextColumn();
-                ImGui.Text($"{conf.Get()}");
+               // ImGui.Text($"{conf.Get()}");
                 ImGui.TableNextColumn();
-                ImGui.Text($"{(uint)conf.Get()}");
+                //ImGui.Text($"{(uint)conf.Get()}");
                 ImGui.TableNextColumn();
 
-                var hex = GameConfig.UintToHex((uint)conf.Get());
+              //  var hex = GameConfig.UintToHex((uint)conf.Get());
 
-                ImGui.TextColored(HexToColor(hex), "");
+              //  ImGui.TextColored(HexToColor(hex), "");
                 ImGui.SameLine();
-                ImGui.Text(hex);
+               // ImGui.Text(hex);
             }
 
             ImGui.EndTable();
             ImGui.EndTabItem();
         }
 
+        // ReSharper disable once UnusedMember.Local
         private static Vector4 HexToColor(string hex)
         {
             static float ToFloat(string hex, int start) => (float)int.Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;

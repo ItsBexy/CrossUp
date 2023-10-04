@@ -2,8 +2,8 @@
 using System.Numerics;
 using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
-using Dalamud.Logging;
 using static CrossUp.CrossUp;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.Features;
 
@@ -89,7 +89,7 @@ internal class Color
             SetDutyActionBG(reset, multiply);
         }
 
-        PluginLog.LogDebug($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
+        Log.Debug($"Selection Color Set: {multiply}, {(reset ? 0 : Profile.SelectBlend) switch { 0 => "Normal", 1 => "Hide", _ => "Dodge" }}");
     }
 
     /// <summary>Presets for the BG texture options</summary>
@@ -142,7 +142,7 @@ internal class Color
             }
         }
 
-        PluginLog.LogDebug($"Button Colors Set; Glow: {glowA}, Pulse: {glowB}");
+        Log.Debug($"Button Colors Set; Glow: {glowA}, Pulse: {glowB}");
     }
 
     /// <summary>Set/Reset Text and border colors</summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Dalamud.Logging;
 using static CrossUp.CrossUp;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.UI.Localization;
 
@@ -24,12 +24,12 @@ internal sealed class CrossUpLoc : IDisposable
         if (File.Exists(filePath))
         {
             loc.SetupWithLangCode(language);
-            PluginLog.Log($"Loaded localized text ({language})");
+            Log.Info($"Loaded localized text ({language})");
         }
         else
         {
             loc.SetupWithFallbacks();
-            PluginLog.LogWarning($"Couldn't load localized text ({language}). Using fallback text (en).");
+            Log.Info($"Couldn't load localized text ({language}). Using fallback text (en).");
         }
     }
 }

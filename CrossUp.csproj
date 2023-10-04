@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.1.0</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -45,14 +45,24 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>1.0.0.1</FileVersion>
-	  <AssemblyVersion>1.0.0.1</AssemblyVersion>
+	  <FileVersion>1.0.1.0</FileVersion>
+	  <AssemblyVersion>1.0.1.0</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NoWarn>1701;1702;0619;</NoWarn>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NoWarn>1701;1702;0619;</NoWarn>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.10" />
+    <PackageReference Include="DalamudPackager" Version="2.1.12" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>

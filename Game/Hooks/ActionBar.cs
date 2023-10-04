@@ -2,11 +2,11 @@
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
-using CrossUp.Utility;
 using Dalamud.Hooking;
-using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using static CrossUp.CrossUp;
+using static CrossUp.Utility.Service;
 
 // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
@@ -22,11 +22,11 @@ namespace CrossUp.Game.Hooks
 
         public ActionBarHooks()
         {
-            ActionBarReceiveEventHook ??= Hook<ActionBarReceiveEventDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? FF 66 83 FB ?? ?? ?? ?? BF 3F"), ActionBarReceiveEventDetour);
-            ActionBarReceiveEventHook?.Enable();
+            ActionBarReceiveEventHook = GameInteropProvider.HookFromSignature<ActionBarReceiveEventDel>("E8 ?? ?? ?? FF 66 83 FB ?? ?? ?? ?? BF 3F", ActionBarReceiveEventDetour);
+            ActionBarReceiveEventHook.Enable();
 
-            ActionBarBaseUpdateHook ??= Hook<ActionBarBaseUpdateDel>.FromAddress(Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09"), ActionBarBaseUpdateDetour);
-            ActionBarBaseUpdateHook?.Enable();
+            ActionBarBaseUpdateHook = GameInteropProvider.HookFromSignature<ActionBarBaseUpdateDel>("E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? ?? 75 09", ActionBarBaseUpdateDetour);
+            ActionBarBaseUpdateHook.Enable();
         }
 
         public void Dispose()
@@ -52,12 +52,12 @@ namespace CrossUp.Game.Hooks
                     DragDrop = false;
                 }
                 if (Job.HasChanged) Job.HandleJobChange();
-                if (barBase->HotbarID == 1) Layout.Update(Bars.Cross.EnableStateChanged);
-                if (barBase->HotbarSlotCount == 16 && Bars.Cross.SetID.HasChanged(barBase)) SetSwitching.HandleSetChange(barBase);
+                if (barBase->RaptureHotbarId == 1) Layout.Update(Bars.Cross.EnableStateChanged);
+                if (barBase->SlotCount == 16 && Bars.Cross.SetID.HasChanged(barBase)) SetSwitching.HandleSetChange(barBase);
             }
             catch (Exception ex)
             {
-                PluginLog.LogError($"Exception: ActionBarBaseUpdateDetour Failed!\n{ex}");
+                Log.Error($"Exception: ActionBarBaseUpdateDetour Failed!\n{ex}");
             }
 
             return ret;
@@ -78,8 +78,8 @@ namespace CrossUp.Game.Hooks
                 {
                     case 50 or 54 when SeparateEx.Ready:
                     {
-                        var barID = barBase->HotbarID;
-                        PluginLog.LogDebug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBaseUpdate");
+                        var barID = barBase->RaptureHotbarId;
+                        Log.Debug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBaseUpdate");
                         Cross.UnassignedSlotVis(Profile.HideUnassigned);
                         DragDrop = true;
                         break;
@@ -91,7 +91,7 @@ namespace CrossUp.Game.Hooks
             }
             catch (Exception ex)
             {
-                PluginLog.LogError($"Exception: ActionBarReceiveEventDetour Failed!\n{ex}");
+                Log.Error($"Exception: ActionBarReceiveEventDetour Failed!\n{ex}");
             }
 
             return ActionBarReceiveEventHook!.Original(barBase, eventType, a3, a4, numberArrayData);

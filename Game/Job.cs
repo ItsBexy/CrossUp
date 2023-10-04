@@ -1,6 +1,5 @@
 ﻿using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
-using Dalamud.Logging;
 using static CrossUp.Utility.Service;
 
 namespace CrossUp.Game;
@@ -52,7 +51,7 @@ internal class Job
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     public static void HandleJobChange()
     {
-        PluginLog.LogDebug($"Job Change: {ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???"}");
+        Log.Debug($"Job Change: {ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???"}");
         if (!SeparateEx.Ready) return;
 
         Actions.Store(Bars.LR.ID);

@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Numerics;
 using CrossUp.Utility;
-using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Actions;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.Game.Hotbar;
 
@@ -30,7 +31,7 @@ internal static unsafe class Bars
         }
         catch
         {
-            PluginLog.LogWarning("Couldn't retrieve bar bases!");
+            Log.Warning("Couldn't retrieve bar bases!");
             return false;
         }
     }
@@ -109,8 +110,8 @@ internal static unsafe class Bars
         public static class SetID
         {
             private static int Previous;
-            internal static int Current => Previous = AddonBase->HotbarID;
-            internal static bool HasChanged(AddonActionBarBase* barBase) => Previous != (Previous = barBase->HotbarID);
+            internal static int Current => Previous = AddonBase->RaptureHotbarId;
+            internal static bool HasChanged(AddonActionBarBase* barBase) => Previous != (Previous = barBase->RaptureHotbarId);
         }
 
         internal sealed class ButtonSet
@@ -201,7 +202,8 @@ internal static unsafe class Bars
         private readonly int ID;
         internal readonly BaseWrapper Base;
         internal bool Exists => Base.Exists();
-        internal NodeWrapper Root => new(Base[1u], size: DefaultBarSizes[GameConfig.Hotbar.GridType[ID]]);
+        internal int GridType => (int)((AddonActionBarX*)Base.UnitBase)->ActionBarLayout;
+        internal NodeWrapper Root => new(Base[1u], size: DefaultBarSizes[GridType]);
         internal NodeWrapper BarNumText => Base[5u];
         internal Action[] Actions => GetByBarID(ID, 12);
         internal readonly ActionBarButtonNodes Buttons;
@@ -213,7 +215,7 @@ internal static unsafe class Bars
         internal ActionBarButtonNodes(int id) => ID = id;
         private readonly int ID;
         private BaseWrapper Base => ActionBars[ID].Base;
-        internal NodeWrapper this[int b, bool getDef = false] => new(Base[(uint)(b + 8)], getDef ? DefaultBarGrids[(int)GameConfig.Hotbar.GridType[ID], b] : null);
+        internal NodeWrapper this[int b, bool getDef = false] => new(Base[(uint)(b + 8)], getDef ? DefaultBarGrids[ActionBars[ID].GridType, b] : null);
     }
 
     /// <summary>Keeps track of the original actions from the Mouse/KB bars, before being borrowed/altered</summary>

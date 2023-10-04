@@ -1,9 +1,6 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
 using Dalamud.IoC;
+using Dalamud.Plugin.Services;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 #pragma warning disable CS8618
@@ -12,12 +9,13 @@ namespace CrossUp.Utility;
 
 internal class Service
 {
-    [PluginService] internal static ClientState ClientState       { get; private set; }
-    [PluginService] internal static Framework Framework           { get; private set; }
-    [PluginService] internal static Condition Condition           { get; private set; }
-    [PluginService] internal static GameGui GameGui               { get; private set; }
-    [PluginService] internal static SigScanner SigScanner         { get; private set; }
-    [PluginService] internal static CommandManager CommandManager { get; private set; }
-
-    [PluginService] internal static Dalamud.Game.Config.GameConfig DalamudGameConfig { get; private set; }
+    [PluginService] internal static IFramework Framework                     { get; private set; }
+    [PluginService] internal static IGameConfig DalamudGameConfig            { get; private set; }
+    [PluginService] internal static IGameGui GameGui                         { get; private set; }
+    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; }
+    [PluginService] internal static IClientState ClientState                 { get; private set; }
+    [PluginService] internal static ICommandManager CommandManager           { get; private set; }
+    [PluginService] internal static ICondition Condition                     { get; private set; }
+    [PluginService] internal static IPluginLog Log                           { get; private set; }
+    [PluginService] internal static ISigScanner SigScanner                   { get; private set; }
 }

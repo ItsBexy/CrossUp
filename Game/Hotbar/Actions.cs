@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using CrossUp.Features.Layout;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.Utility.Service;
 using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
@@ -10,7 +10,7 @@ namespace CrossUp.Game.Hotbar;
 /// <summary>Methods pertaining to hotbar actions</summary>
 internal static unsafe class Actions
 {
-    private static readonly RaptureHotbarModule* RaptureModule = (RaptureHotbarModule*)CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+    private static readonly RaptureHotbarModule* RaptureModule = CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar</summary>
     internal struct Action
@@ -29,11 +29,14 @@ internal static unsafe class Actions
     internal static Action[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
     {
         var contents = new Action[slotCount];
-        var hotbar = RaptureModule->HotBar[barID];
+
+        ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
 
         for (var i = 0; i < slotCount; i++)
         {
-            var slot = hotbar->Slot[i + fromSlot];
+            ref var span = ref hotbar.SlotsSpan[i+fromSlot];
+            var slot = (HotBarSlot*)Unsafe.AsPointer(ref span);
+            
             if (slot == null) continue;
             contents[i].CommandType = slot->CommandType;
             contents[i].CommandId = slot->CommandId;
@@ -48,13 +51,15 @@ internal static unsafe class Actions
         if (IsPvP) job = Job.PvpID(job);
 
         var contents = new Action[slotCount];
-        var saveBar = RaptureModule->SavedClassJob[job]->Bar[barID];
+        ref var savedBar = ref RaptureModule->SavedHotBarsSpan[job].HotBarsSpan[barID];
 
         for (var i = 0; i < slotCount; i++)
         {
-            var savedSlot = saveBar->Slot[i];
-            contents[i].CommandType = savedSlot->Type;
-            contents[i].CommandId = savedSlot->ID;
+            ref var savedSpan = ref savedBar.SlotsSpan[i];
+            var savedSlot = (SavedHotBarSlot*)Unsafe.AsPointer(ref savedSpan);
+
+            contents[i].CommandType = savedSlot->CommandType;
+            contents[i].CommandId = savedSlot->CommandId;
         }
 
         return contents;
@@ -64,18 +69,19 @@ internal static unsafe class Actions
     private static void Save(IList<Action> sourceButtons, int sourceStart, int targetID, int targetStart, int count, int job)
     {
         if (IsPvP) job = Job.PvpID(job);
-
-        var saveBar = RaptureModule->SavedClassJob[job]->Bar[targetID];
+        
+        ref var savedBar = ref RaptureModule->SavedHotBarsSpan[job].HotBarsSpan[targetID];
 
         for (var i = 0; i < count; i++)
         {
-            var saveSlot = saveBar->Slot[i + targetStart];
+            ref var savedSpan = ref savedBar.SlotsSpan[i + targetStart];
+            var savedSlot = (SavedHotBarSlot*)Unsafe.AsPointer(ref savedSpan);
             var sourceSlot = sourceButtons[i + sourceStart];
-            if (saveSlot->ID == sourceSlot.CommandId && saveSlot->Type == sourceSlot.CommandType) continue;
+            if (savedSlot->CommandId == sourceSlot.CommandId && savedSlot->CommandType == sourceSlot.CommandType) continue;
 
-            PluginLog.LogDebug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
-            saveSlot->Type = sourceSlot.CommandType;
-            saveSlot->ID = sourceSlot.CommandId;
+            Log.Debug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+            savedSlot->CommandType = sourceSlot.CommandType;
+            savedSlot->CommandId = sourceSlot.CommandId;
         }
     }
 
@@ -83,10 +89,11 @@ internal static unsafe class Actions
     internal static void Copy(IReadOnlyList<Action> sourceButtons, int sourceStart, int targetBarID,
         int targetStart, int count)
     {
-        var targetBar = RaptureModule->HotBar[targetBarID];
+        ref var targetBar = ref RaptureModule->HotBarsSpan[targetBarID];
         for (var i = 0; i < count; i++)
         {
-            var targetSlot = targetBar->Slot[i + targetStart];
+            ref var targetSpan = ref targetBar.SlotsSpan[i + targetStart];
+            var targetSlot = (HotBarSlot*)Unsafe.AsPointer(ref targetSpan);
             var sourceSlot = sourceButtons[i + sourceStart];
 
             if (targetSlot->CommandId != sourceSlot.CommandId || targetSlot->CommandType != sourceSlot.CommandType)
@@ -118,7 +125,7 @@ internal static unsafe class Actions
     /// <summary>Interprets a drag/drop action involving the "borrowed" hotbars that form the plugin's Expanded Hold bars, and redirects the action to the appropriate Cross Hotbar set.</summary>
     public static void HandleDragDrop()
     {
-        PluginLog.LogDebug("Handling Drag/Drop Event");
+        Log.Debug("Handling Drag/Drop Event");
 
         if (!SeparateEx.Ready || (int)Bars.Cross.Selection.Current > 2) return;
 

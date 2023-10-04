@@ -4,9 +4,8 @@ using System.Globalization;
 using System.Numerics;
 using CrossUp.Features;
 using CrossUp.UI;
-using CrossUp.Utility;
-using Dalamud.Logging;
 using static System.Int32;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.Commands;
 
@@ -14,9 +13,9 @@ internal sealed class ChatCmd : IDisposable
 {
     private const string MainCommand = "/xup";
 
-    public ChatCmd() => Service.CommandManager.AddHandler(MainCommand, new(OnMainCommand) { HelpMessage = Strings.HelpMsg });
+    public ChatCmd() => CommandManager.AddHandler(MainCommand, new(OnMainCommand) { HelpMessage = Strings.HelpMsg });
 
-    public void Dispose() => Service.CommandManager.RemoveHandler(MainCommand);
+    public void Dispose() => CommandManager.RemoveHandler(MainCommand);
 
     private static void OnMainCommand(string command, string args)
     {
@@ -26,14 +25,14 @@ internal sealed class ChatCmd : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.LogWarning($"Couldn't execute CrossUp command: {command} {args}");
-            PluginLog.LogError($"{ex}");
+            Log.Warning($"Couldn't execute CrossUp command: {command} {args}");
+            Log.Error($"{ex}");
             CrossUp.UI.SettingsWindow.Show = !CrossUp.UI.SettingsWindow.Show;
         }
 
         if (!CrossUp.IsSetUp)
         {
-            PluginLog.LogWarning("The plugin isn't set up!");
+            Log.Warning("The plugin isn't set up!");
         }
     }
 
@@ -141,7 +140,7 @@ internal sealed class ChatCmd : IDisposable
                     break;
 
                 case "debug":
-                    InternalCmd.ToggleDebug(CrossUp.UI);
+                  //  InternalCmd.ToggleDebug(CrossUp.UI);
                     break;
 
                 default:

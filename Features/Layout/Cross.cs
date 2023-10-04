@@ -1,9 +1,9 @@
 ﻿using System;
 using CrossUp.Game.Hotbar;
-using Dalamud.Interface;
-using Dalamud.Logging;
+using Dalamud.Interface.Utility;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Bars.Cross.Selection;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.Features.Layout
 {
@@ -124,7 +124,7 @@ namespace CrossUp.Features.Layout
             if (Math.Abs(misalign) < 1) return;
 
             Bars.Cross.Base.X = baseX;
-            PluginLog.LogDebug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
+            Log.Debug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
         }
 
         /// <summary>Restores everything back to default</summary>

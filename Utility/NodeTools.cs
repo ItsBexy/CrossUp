@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Numerics;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using static CrossUp.Utility.Service;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Global
@@ -25,7 +25,7 @@ namespace CrossUp.Utility
         /// <param name="addonName">The internal name of a UI Addon</param>
         public BaseWrapper(string addonName)
         {
-            UnitBase = (AtkUnitBase*)Service.GameGui.GetAddonByName(addonName);
+            UnitBase = (AtkUnitBase*)GameGui.GetAddonByName(addonName);
             AddonName = addonName;
         }
 
@@ -35,7 +35,7 @@ namespace CrossUp.Utility
         public static bool BaseCheck(AtkUnitBase* unitBase, bool posCheck = true) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && (!posCheck || unitBase->X != 0 || unitBase->Y != 0);
 
         public bool Exists(bool posCheck = true) => BaseCheck(UnitBase, posCheck) ||
-                                                    BaseCheck((AtkUnitBase*)Service.GameGui.GetAddonByName(AddonName),posCheck);
+                                                    BaseCheck((AtkUnitBase*)GameGui.GetAddonByName(AddonName),posCheck);
 
         public AtkResNode** NodeList => UnitBase->UldManager.NodeList;
         public ushort NodeListSize => UnitBase->UldManager.NodeListSize;
@@ -158,7 +158,7 @@ namespace CrossUp.Utility
         /// <summary>Logs a warning but still returns the NodeWrapper</summary>
         public NodeWrapper Warning(string message)
         {
-            PluginLog.LogWarning(message);
+            Log.Warning(message);
             return this;
         }
 
@@ -184,9 +184,10 @@ namespace CrossUp.Utility
         {
             if (Node != null)
             {
-                if (show) Node->Flags |= 0x10;
-                else Node->Flags &= ~0x10;
-                Node->Flags_2 |= 0xD;
+                if (show) Node->NodeFlags |= NodeFlags.Visible;
+                else Node->NodeFlags &= ~NodeFlags.Visible;
+
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -209,7 +210,7 @@ namespace CrossUp.Utility
             {
                 Node->ScaleX = scale;
                 Node->ScaleY = scale;
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -250,7 +251,7 @@ namespace CrossUp.Utility
                 Node->Color.R = (byte)(color.X * 255f);
                 Node->Color.G = (byte)(color.Y * 255f);
                 Node->Color.B = (byte)(color.Z * 255f);
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -263,7 +264,7 @@ namespace CrossUp.Utility
                 Node->MultiplyRed = (byte)(color.X * 255f);
                 Node->MultiplyGreen = (byte)(color.Y * 255f);
                 Node->MultiplyBlue = (byte)(color.Z * 255f);
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -274,7 +275,7 @@ namespace CrossUp.Utility
             if (Node != null)
             {
                 Node->Color.A = a;
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -310,7 +311,7 @@ namespace CrossUp.Utility
             {
                 Node->OriginX = x;
                 Node->OriginY = y;
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -351,7 +352,7 @@ namespace CrossUp.Utility
                 tnode->TextColor.R = (byte)(color.X * 255f);
                 tnode->TextColor.G = (byte)(color.Y * 255f);
                 tnode->TextColor.B = (byte)(color.Z * 255f);
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;
@@ -371,7 +372,7 @@ namespace CrossUp.Utility
                 if (props.Alpha != null) SetAlpha((byte)props.Alpha);
                 if (props.Origin != null) SetOrigin((Vector2)props.Origin);
 
-                Node->Flags_2 |= 0xD;
+                Node->DrawFlags |= 0xD;
             }
 
             return this;

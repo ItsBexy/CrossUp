@@ -8,9 +8,9 @@ using CrossUp.UI;
 using CrossUp.UI.Localization;
 using CrossUp.Utility;
 using Dalamud.IoC;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using static CrossUp.Game.Hooks.HudHooks;
+using static CrossUp.Utility.Service;
 
 #pragma warning disable CS8618
 
@@ -63,7 +63,7 @@ internal sealed class CrossUp : IDalamudPlugin
         }
         catch (Exception ex)
         {
-            PluginLog.LogError($"Exception: Setup Failed!\n{ex}");
+            Log.Error($"Exception: Setup Failed!\n{ex}");
             IsSetUp = false;
         }
     }
@@ -71,14 +71,14 @@ internal sealed class CrossUp : IDalamudPlugin
     /// <summary>Put all modified nodes back in place and remove hooks</summary>
     public void Dispose()
     {
-        try { Hooks.Dispose();    } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Remove hooks!\n{ex}"); }
-        try { Layout.TidyUp();    } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Cross Hotbar layout!\n{ex}"); }
-        try { Layout.Reset();     } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
-        try { Color.SetAll(true); } catch (Exception ex) { PluginLog.LogWarning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
-        try { ChatCmd.Dispose();  } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't remove chat commands!\n{ex}"); }
-        try { IPC.Dispose();      } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Unregister IPC funcs!\n{ex}"); }
-        try { Loc.Dispose();      } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose Localization!\n{ex}"); }
-        try { UI.Dispose();       } catch (Exception ex) { PluginLog.LogError($"Exception on Dispose: Couldn't Dispose UI!\n{ex}"); }
+        try { Hooks.Dispose();    } catch (Exception ex) { Log.Error($"Exception on Dispose: Couldn't Remove hooks!\n{ex}"); }
+        try { Layout.TidyUp();    } catch (Exception ex) { Log.Warning($"Exception on Dispose: Couldn't reset Cross Hotbar layout!\n{ex}"); }
+        try { Layout.Reset();     } catch (Exception ex) { Log.Warning($"Exception on Dispose: Couldn't reset Action Bars!\n{ex}"); }
+        try { Color.SetAll(true); } catch (Exception ex) { Log.Warning($"Exception on Dispose: Couldn't reset colors!\n{ex}"); }
+        try { ChatCmd.Dispose();  } catch (Exception ex) { Log.Error($"Exception on Dispose: Couldn't remove chat commands!\n{ex}"); }
+        try { IPC.Dispose();      } catch (Exception ex) { Log.Error($"Exception on Dispose: Couldn't Unregister IPC funcs!\n{ex}"); }
+        try { Loc.Dispose();      } catch (Exception ex) { Log.Error($"Exception on Dispose: Couldn't Dispose Localization!\n{ex}"); }
+        try { UI.Dispose();       } catch (Exception ex) { Log.Error($"Exception on Dispose: Couldn't Dispose UI!\n{ex}"); }
         IsSetUp = false;
     }
 }

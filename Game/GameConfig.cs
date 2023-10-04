@@ -1,8 +1,6 @@
 ﻿using Dalamud.Game.Config;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
 using CrossUp.Utility;
-using FFXIVClientStructs.FFXIV.Common.Configuration;
 
 // ReSharper disable InconsistentNaming
 
@@ -11,8 +9,6 @@ namespace CrossUp.Game;
 /// <summary>Class for retrieving/setting character configuration options</summary>
 public class GameConfig
 {
-    private static readonly unsafe ConfigModule* Conf = ConfigModule.Instance();
-
     public sealed class GameOption
     {
         private readonly dynamic Option;
@@ -27,7 +23,6 @@ public class GameConfig
 
         public static implicit operator bool(GameOption o)
         {
-            
             Service.DalamudGameConfig.TryGet(o.Option, out bool val);
             return val;
         }
@@ -45,48 +40,6 @@ public class GameConfig
         }
 
         internal byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
-    }
-
-
-    /// <summary>
-    /// Represents a Character Configuration value<br/><br/>
-    /// <term cref="Set(int)">Set()</term> Updates the value in-game<br/>
-    /// <term>(int)</term> Returns the value itself<br/>
-    /// <term>(bool)</term> Returns true if value > 0
-    /// <term>(string)</term> Writes out the Index, ID, Name, uint value, and hex value
-    /// </summary>
-    public sealed class IndexedOption
-    {
-        private readonly uint Index;
-        internal unsafe short ID => (short)Conf->GetOption(Index)->OptionID;
-        internal unsafe string Name => Conf->GetOption(Index)->GetName();
-
-        internal IndexedOption(uint index) => Index = index;
-        internal IndexedOption(string name, uint offset = 0) => Index = IndexFromName(name) + offset;
-
-        /// <summary>Retrieves the option from its name (this is the preferred approach, since the ID and Index frequently change with patches)</summary>
-        private static unsafe uint IndexFromName(string name)
-        {
-            for (uint i = 0; i < 701U; ++i) if (Conf->GetOption(i)->GetName() == name) return i;
-            return 0;
-        }
-
-        internal unsafe int Get() => Conf->GetIntValue(Index);
-
-        public static implicit operator int(IndexedOption opt) => opt.Get();
-        public static implicit operator bool(IndexedOption opt) => opt.Get() > 0;
-
-        private unsafe void Set(int val)
-        {
-            var blah = new ConfigEntry();
-            Conf->SetOption(Index, val, 1);
-        }
-
-        internal void Set(bool val) => Set(val ? 1 : 0);
-
-        /// <returns>Index | ID | Name | Value</returns>
-        public new string ToString() => $"{Index} | {ID} | {Name} | {(uint)Get()} | {UintToHex((uint)Get())}";
-        public static implicit operator string(IndexedOption opt) => opt.ToString();
     }
 
     /// <summary>Converts to a hex value (relevant for color options)</summary>
@@ -188,44 +141,24 @@ public class GameConfig
             new(UiConfigOption.HotbarCrossCommon08)
         };
 
-        /// <summary><term>CheckBox</term> Whether the bar is set to visible<br/><br/>
-        /// <term>0</term> Hidden<br/>
-        /// <term>1</term> Visible</summary>
-        internal static readonly IndexedOption[] Visible =
-        {
-            new("HotbarDisp"),
-            new("HotbarDisp", 1),
-            new("HotbarDisp", 2),
-            new("HotbarDisp", 3),
-            new("HotbarDisp", 4),
-            new("HotbarDisp", 5),
-            new("HotbarDisp", 6),
-            new("HotbarDisp", 7),
-            new("HotbarDisp", 8),
-            new("HotbarDisp", 9)
-        };
+        private static readonly GameOption VisMask = new(UiControlOption.HotbarDisp);
 
-        /// <summary><term>Radio Button</term> The bar's grid layout setting<br/><br/>
-        /// <term>0</term> 12x1<br/>
-        /// <term>1</term> 6x2<br/>
-        /// <term>2</term> 4x3<br/>
-        /// <term>3</term> 3x4<br/>
-        /// <term>4</term> 2x6<br/>
-        /// <term>5</term> 1x12<br/>
-        /// </summary>
-        internal static readonly IndexedOption[] GridType =
+        public static bool GetVis(int id)
         {
-            new("HotbarDispSetDragType", 2), //this is not the actual name of this setting; it has no name, so we're looking up a setting we know is nearby and offsetting it
-            new("HotbarDispSetDragType", 3),
-            new("HotbarDispSetDragType", 4),
-            new("HotbarDispSetDragType", 5),
-            new("HotbarDispSetDragType", 6),
-            new("HotbarDispSetDragType", 7),
-            new("HotbarDispSetDragType", 8),
-            new("HotbarDispSetDragType", 9),
-            new("HotbarDispSetDragType", 10),
-            new("HotbarDispSetDragType", 11)
-        };
+            var offset = (int)Math.Pow(2, id);
+            return ((int)VisMask & offset) == offset;
+        }
+
+        public static void SetVis(int id, bool show)
+        {
+            var mask = (int)VisMask;
+            var offset = (int)Math.Pow(2, id);
+
+            if (show) mask |= offset;
+            else mask &= ~offset;
+
+            VisMask.Set(mask);
+        }
     }
 
 }

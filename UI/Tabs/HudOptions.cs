@@ -4,9 +4,9 @@ using CrossUp.Features.Layout;
 using CrossUp.Game.Hooks;
 using CrossUp.Utility;
 using Dalamud.Interface.Colors;
-using Dalamud.Logging;
 using ImGuiNET;
 using static CrossUp.CrossUp;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.UI.Tabs;
 
@@ -168,7 +168,7 @@ internal class HudOptions
                 {
                     Config.Profiles[CopyTo] = new(Config.Profiles[CopyFrom]);
 
-                    PluginLog.Log($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
+                    Log.Info($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
 
                     if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
                     Layout.Update(true);

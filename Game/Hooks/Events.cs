@@ -3,12 +3,11 @@ using System.Threading.Tasks;
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
-using CrossUp.Utility;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hooks.HudHooks;
+using static CrossUp.Utility.Service;
 
 namespace CrossUp.Game.Hooks
 {
@@ -16,14 +15,14 @@ namespace CrossUp.Game.Hooks
     {
         static Events()
         {
-            Service.Framework.Update          += OnFrameUpdate;
-            Service.Condition.ConditionChange += OnConditionChange;
+            Framework.Update          += OnFrameUpdate;
+            Condition.ConditionChange += OnConditionChange;
         }
 
         public void Dispose()
         {
-            Service.Framework.Update          -= OnFrameUpdate;
-            Service.Condition.ConditionChange -= OnConditionChange;
+            Framework.Update          -= OnFrameUpdate;
+            Condition.ConditionChange -= OnConditionChange;
         }
 
         private static bool LogFrameCatch = true;
@@ -35,7 +34,7 @@ namespace CrossUp.Game.Hooks
         /// <item>Hides the Separated EXHB if the main menu is open</item>
         /// </list>
         /// </summary>
-        private static unsafe void OnFrameUpdate(Framework framework)
+        private static unsafe void OnFrameUpdate(IFramework framework)
         {
             try
             {
@@ -52,13 +51,13 @@ namespace CrossUp.Game.Hooks
                     }
                     else
                     {
-                        PluginLog.LogDebug("Cross Hotbar nodes not found; disabling plugin features");
+                        Log.Debug("Cross Hotbar nodes not found; disabling plugin features");
                         IsSetUp = false;
                     }
                 }
                 else if (Bars.AllExist && Job.Current != 0)
                 {
-                    PluginLog.LogDebug("Cross Hotbar nodes found; setting up plugin features");
+                    Log.Debug("Cross Hotbar nodes found; setting up plugin features");
                     HudSlot = GetHudSlot();
                     Setup();
                 }
@@ -68,7 +67,7 @@ namespace CrossUp.Game.Hooks
                 if (LogFrameCatch)
                 {
                     LogFrameCatch = false;
-                    PluginLog.LogError($"Exception: Framework Update Function Failed!\n{ex}");
+                    Log.Error($"Exception: Framework Update Function Failed!\n{ex}");
                     Task.Delay(5000).ContinueWith(static delegate { LogFrameCatch = true; }); // So we aren't spamming if something goes terribly wrong
                 }
             }
@@ -77,7 +76,7 @@ namespace CrossUp.Game.Hooks
         /// <summary>Runs the fader feature when the player's condition changes</summary>
         public static void OnConditionChange(ConditionFlag flag = 0, bool value = true)
         {
-            if (Profile.CombatFadeInOut) CombatFader.FadeTween.Begin(Service.Condition[ConditionFlag.InCombat]);
+            if (Profile.CombatFadeInOut) CombatFader.FadeTween.Begin(Condition[ConditionFlag.InCombat]);
         }
     }
 }

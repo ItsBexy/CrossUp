@@ -1,6 +1,6 @@
-﻿using CrossUp.Game.Hotbar;
-using CrossUp.Utility;
+﻿using CrossUp.Utility;
 using CrossUp.Game;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using static CrossUp.CrossUp;
 
 namespace CrossUp.Features;
@@ -11,7 +11,7 @@ internal class SetSwitching
     /// <summary>Responds to the player changing the Cross Hotbar set</summary>
     public static unsafe void HandleSetChange(AddonActionBarBase* barBase)
     {
-        if (Config.RemapEx || Config.RemapW) Override(barBase->HotbarID);
+        if (Config.RemapEx || Config.RemapW) Override(barBase->RaptureHotbarId);
     }
 
     /// <summary>Overrides the Character Configuration settings for WXHB / Expanded Hold mappings</summary>
