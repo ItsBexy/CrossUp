@@ -27,7 +27,7 @@ internal sealed class ChatCmd : IDisposable
         {
             Log.Warning($"Couldn't execute CrossUp command: {command} {args}");
             Log.Error($"{ex}");
-            CrossUp.UI.SettingsWindow.Show = !CrossUp.UI.SettingsWindow.Show;
+            CrossUp.UI.SettingsWindow.Toggle();
         }
 
         if (!CrossUp.IsSetUp)
@@ -139,12 +139,8 @@ internal sealed class ChatCmd : IDisposable
                     CombatFade(argList);
                     break;
 
-                case "debug":
-                  //  InternalCmd.ToggleDebug(CrossUp.UI);
-                    break;
-
                 default:
-                    InternalCmd.ToggleSettings(CrossUp.UI);
+                    CrossUp.UI.SettingsWindow.Toggle();
                     break;
             }
         }

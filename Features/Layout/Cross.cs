@@ -1,6 +1,6 @@
-﻿using System;
-using CrossUp.Game.Hotbar;
+﻿using CrossUp.Game.Hotbar;
 using Dalamud.Interface.Utility;
+using System;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Bars.Cross.Selection;
 using static CrossUp.Utility.Service;

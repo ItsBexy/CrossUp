@@ -12,11 +12,12 @@ namespace CrossUp.Features.Layout
     public unsafe partial class SeparateEx
     {
         /// <summary>Confirms that the Separate Expanded Hold feature is active and that two valid bars are selected</summary>
-        internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0;
+        internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0 && GameConfig.Cross.Enabled;
 
         /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
         private static void Enable()
         {
+
             PrepBar(Config.LRborrow);
             PrepBar(Config.RLborrow);
 
@@ -285,7 +286,8 @@ namespace CrossUp.Features.Layout
         {
             if (!Bars.ActionBars[barID].Exists) return;
 
-            Actions.Copy(Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID), 0, barID, 0, 12);
+            var savedActions = Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID);
+            if (savedActions != null) Actions.Copy(savedActions, 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
                                        .SetSize()

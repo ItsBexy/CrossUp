@@ -1,5 +1,4 @@
-﻿using CrossUp.Utility;
-using CrossUp.Game;
+﻿using CrossUp.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using static CrossUp.CrossUp;
 
@@ -17,7 +16,7 @@ internal class SetSwitching
     /// <summary>Overrides the Character Configuration settings for WXHB / Expanded Hold mappings</summary>
     private static void Override(int barID)
     {
-        var mode = GameConfig.Cross.SepPvP && Service.ClientState.IsPvP ? 1 : 0;
+        var mode = GameConfig.Cross.SepPvP && Job.IsPvP ? 1 : 0;
         var set = barID - 10;
 
         if (Config.RemapEx) OverrideEx(set, mode);

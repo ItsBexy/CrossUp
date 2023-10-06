@@ -76,7 +76,7 @@ namespace CrossUp.Game.Hooks
             {
                 switch (eventType)
                 {
-                    case 50 or 54 when SeparateEx.Ready:
+                    case 50 or 54 when SeparateEx.Ready && GameConfig.Cross.Enabled:
                     {
                         var barID = barBase->RaptureHotbarId;
                         Log.Debug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next ActionBarBaseUpdate");

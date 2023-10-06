@@ -35,7 +35,7 @@ internal sealed class IPC : IDisposable
         Provider.Available.RegisterFunc(static () => true);
 
         Provider.OpenSettings = PluginInterface.GetIpcProvider<bool>("CrossUp.Open");
-        Provider.OpenSettings.RegisterAction(static () => InternalCmd.ToggleSettings(CrossUp.UI,true));
+        Provider.OpenSettings.RegisterAction(static () => CrossUp.UI.SettingsWindow.IsOpen=true);
 
         Provider.SplitBar = PluginInterface.GetIpcProvider<(bool, int, int), bool>("CrossUp.SplitBar");
         Provider.SplitBar.RegisterAction(InternalCmd.SplitBar);

@@ -3,7 +3,7 @@ using System.Numerics;
 using Dalamud.Configuration;
 using Dalamud.Plugin;
 using static CrossUp.Features.Color;
-
+// ReSharper disable UnusedMember.Global
 // ReSharper disable ClassCanBeSealed.Global
 // ReSharper disable MemberCanBeInternal
 
@@ -14,7 +14,6 @@ public class CrossUpConfig : IPluginConfiguration
 {
     public int Version                 { get; set; } = 0;
     public Vector2 ConfigWindowSize    { get; set; } = new(500, 450);
-    public Vector2 DebugWindowSize     { get; set; } = new(600, 800);
 
     // unique configs per HUD Slot
     public bool UniqueHud              { get; set; }

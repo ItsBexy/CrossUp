@@ -64,8 +64,8 @@ internal static unsafe class Bars
             internal static Select Previous = Select.None;
             internal static Select Current => AddonCross->LeftBar ? Select.Left :
                 AddonCross->RightBar ? Select.Right :
-                AddonCross->LRBar > 0 ? Select.LR :
-                AddonCross->RLBar > 0 ? Select.RL :
+                AddonCross->ExpandedHoldControlsLTRT > 0 ? Select.LR :
+                AddonCross->ExpandedHoldControlsRTLT > 0 ? Select.RL :
                 WXHB.LL.AddonCross->Selected ? Select.LL :
                 WXHB.RR.AddonCross->Selected ? Select.RR :
                 Select.None;
@@ -236,8 +236,7 @@ internal static unsafe class Bars
     private static readonly Vector2[,] DefaultBarGrids =
     {
         {
-            new(34,  0),  new(79, 0), new(124, 0), new(169, 0), new(214, 0), new(259, 0), new(304, 0), new(349, 0),
-            new(394, 0), new(439, 0), new(484, 0), new(529, 0)
+            new(34,  0),  new(79, 0), new(124, 0), new(169, 0), new(214, 0), new(259, 0), new(304, 0), new(349, 0), new(394, 0), new(439, 0), new(484, 0), new(529, 0)
         },
         {
             new(34, 0),  new(79, 0),  new(124, 0),  new(169, 0),  new(214, 0),  new(259, 0),

@@ -1,8 +1,7 @@
 ﻿using Dalamud.Game.Config;
 using System;
 using CrossUp.Utility;
-
-// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
 
 namespace CrossUp.Game;
 
@@ -141,16 +140,32 @@ public class GameConfig
             new(UiConfigOption.HotbarCrossCommon08)
         };
 
+        /// <summary>
+        /// <term>Bitmask</term> Represents the visibility setting for each action bar. Use <see cref="GetVis"/> and <see cref="SetVis"/> to read / set the visibility of individual bars.
+        /// </summary>
         private static readonly GameOption VisMask = new(UiControlOption.HotbarDisp);
 
+        /// <summary>
+        /// Gets the visibility of an action bar
+        /// </summary>
+        /// <param name="id">The bar's ID</param>
+        /// <returns></returns>
         public static bool GetVis(int id)
         {
+            if (id is < 0 or > 9) return false;
             var offset = (int)Math.Pow(2, id);
             return ((int)VisMask & offset) == offset;
         }
 
+        /// <summary>
+        /// Sets the visibility of an action bar
+        /// </summary>
+        /// <param name="id">The bar's ID</param>
+        /// <param name="show">The visibility state to set</param>
         public static void SetVis(int id, bool show)
         {
+            if (id is < 0 or > 9) return;
+
             var mask = (int)VisMask;
             var offset = (int)Math.Pow(2, id);
 

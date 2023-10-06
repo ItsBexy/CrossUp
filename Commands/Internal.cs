@@ -4,7 +4,6 @@ using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game;
 using CrossUp.Game.Hooks;
-using CrossUp.UI;
 using static CrossUp.CrossUp;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -14,10 +13,6 @@ namespace CrossUp.Commands;
 /// <summary>Methods that perform actions within CrossUp. Can be called by the plugin UI, chat commands, or IPC</summary>
 internal class InternalCmd
 {
-    public static void ToggleDebug(CrossUpUI ui) => ui.DebugWindow.Show = !ui.DebugWindow.Show;
-    public static void ToggleSettings(CrossUpUI ui) => ui.SettingsWindow.Show = !ui.SettingsWindow.Show;
-    public static void ToggleSettings(CrossUpUI ui, bool show) => ui.SettingsWindow.Show = show;
-
     internal static void SplitOn(bool on)
     {
         Profile.SplitOn = on;

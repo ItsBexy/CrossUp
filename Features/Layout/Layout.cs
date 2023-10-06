@@ -55,7 +55,7 @@ internal class Layout
     /// <summary>Re-run the update function</summary>
     public static void Nudge()
     {
-        if (IsSetUp) Update(true);
+        if (IsSetUp && GameConfig.Cross.Enabled) Update(true);
     }
 
     /// <summary>Reset all the node properties we've messed with and reset any borrowed bars</summary>

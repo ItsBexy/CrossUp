@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CrossUp.Features.Layout;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
@@ -10,6 +11,7 @@ namespace CrossUp.Game.Hotbar;
 /// <summary>Methods pertaining to hotbar actions</summary>
 internal static unsafe class Actions
 {
+
     private static readonly RaptureHotbarModule* RaptureModule = CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar</summary>
@@ -17,87 +19,139 @@ internal static unsafe class Actions
     {
         internal uint CommandId;
         internal HotbarSlotType CommandType;
+        internal HotBarSlot? Slot;
+
+        internal bool Matches(HotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
+        internal bool Matches(SavedHotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
+
+        private Action(uint id, HotbarSlotType type,HotBarSlot? slot = null)
+        {
+            CommandId = id;
+            CommandType = type;
+            Slot = slot;
+        }
+
+        public static implicit operator Action(SavedHotBarSlot s) => new(s.CommandId, s.CommandType);
+        public static implicit operator Action(HotBarSlot h) => new(h.CommandId, h.CommandType, h);
+        public static implicit operator HotBarSlot(Action a) => new() { CommandId = a.CommandId, CommandType = a.CommandType };
+        public static implicit operator HotBarSlot*(Action a)
+        {
+            var h = a.Slot ?? a;
+            return (HotBarSlot*)Unsafe.AsPointer(ref h);
+        }
+
     }
 
     /// <summary>Indicates the type of expanded hold input</summary>
     internal enum ExSide { LR = 0, RL = 1 }
 
-    /// <summary>Checks if the player is in a PvP match or in the Wolves' Den</summary>
-    private static bool IsPvP => ClientState.IsPvP || ClientState.TerritoryType == 250;
-
     /// <summary>Gets the current actions on a specific Hotbar</summary>
     internal static Action[] GetByBarID(int barID, int slotCount, int fromSlot = 0)
     {
         var contents = new Action[slotCount];
-
-        ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
-
-        for (var i = 0; i < slotCount; i++)
+        try
         {
-            ref var span = ref hotbar.SlotsSpan[i+fromSlot];
-            var slot = (HotBarSlot*)Unsafe.AsPointer(ref span);
-            
-            if (slot == null) continue;
-            contents[i].CommandType = slot->CommandType;
-            contents[i].CommandId = slot->CommandId;
-        }
+            ref var hotbar =
+            ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
+            var span = hotbar.SlotsSpan;
 
-        return contents;
+            if (span == null) return contents;
+
+            for (var i = 0; i < slotCount; i++)
+            {
+                ref var slot = ref span[i + fromSlot];
+
+                contents[i].CommandType = slot.CommandType;
+                contents[i].CommandId = slot.CommandId;
+                contents[i].Slot = slot;
+            }
+
+            return contents;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{ex}");
+            return contents;
+        }
+    }
+
+    private static Span<SavedHotBarSlot> GetSavedSpan(int job, int barID)
+    {
+        var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
+        var savedBars = new Span<SavedHotBarGroup>(RaptureModule->SavedHotBars, 63);
+        ref var savedBar = ref savedBars[adjustedJob].HotBarsSpan[barID];
+        return savedBar.SlotsSpan;
     }
 
     /// <summary>Retrieves the saved hotbar contents for a specific job</summary>
     internal static Action[] GetSaved(int job, int barID, int slotCount = 12)
     {
-        if (IsPvP) job = Job.PvpID(job);
-
         var contents = new Action[slotCount];
-        ref var savedBar = ref RaptureModule->SavedHotBarsSpan[job].HotBarsSpan[barID];
 
-        for (var i = 0; i < slotCount; i++)
+        try
         {
-            ref var savedSpan = ref savedBar.SlotsSpan[i];
-            var savedSlot = (SavedHotBarSlot*)Unsafe.AsPointer(ref savedSpan);
+            var span = GetSavedSpan(job, barID);
 
-            contents[i].CommandType = savedSlot->CommandType;
-            contents[i].CommandId = savedSlot->CommandId;
+            for (var i = 0; i < slotCount; i++)
+            {
+                ref var savedSlot = ref span[i];
+                contents[i] = savedSlot;
+            }
+
+            return contents;
         }
-
-        return contents;
+        catch (Exception ex)
+        {
+            Log.Error($"{ex}");
+            return contents;
+        }
     }
 
     /// <summary>Writes a list of actions to the user's saved hotbar settings</summary>
-    private static void Save(IList<Action> sourceButtons, int sourceStart, int targetID, int targetStart, int count, int job)
+    private static void Save(IList<Action> sourceActions, int sourceStart, int targetID, int targetStart, int count, int job)
     {
-        if (IsPvP) job = Job.PvpID(job);
-        
-        ref var savedBar = ref RaptureModule->SavedHotBarsSpan[job].HotBarsSpan[targetID];
-
-        for (var i = 0; i < count; i++)
+        try
         {
-            ref var savedSpan = ref savedBar.SlotsSpan[i + targetStart];
-            var savedSlot = (SavedHotBarSlot*)Unsafe.AsPointer(ref savedSpan);
-            var sourceSlot = sourceButtons[i + sourceStart];
-            if (savedSlot->CommandId == sourceSlot.CommandId && savedSlot->CommandType == sourceSlot.CommandType) continue;
+            var span = GetSavedSpan(job, targetID);
 
-            Log.Debug($"Saving {sourceSlot.CommandType} {sourceSlot.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
-            savedSlot->CommandType = sourceSlot.CommandType;
-            savedSlot->CommandId = sourceSlot.CommandId;
+            for (var i = 0; i < count; i++)
+            {
+                ref var savedSlot = ref span[i + targetStart];
+                var source = sourceActions[i + sourceStart];
+                
+                if (source.Matches(savedSlot)) continue;
+
+                RaptureModule->WriteSavedSlot((uint)job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
+
+                Log.Verbose($"Saving {source.CommandType} {source.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{ex}");
         }
     }
 
     /// <summary>Copies a list of actions to a hotbar (without permanently saving them to that bar)</summary>
-    internal static void Copy(IReadOnlyList<Action> sourceButtons, int sourceStart, int targetBarID,
-        int targetStart, int count)
+    internal static void Copy(IReadOnlyList<Action> sourceButtons, int sourceStart, int targetBarID, int targetStart, int count)
     {
-        ref var targetBar = ref RaptureModule->HotBarsSpan[targetBarID];
-        for (var i = 0; i < count; i++)
+        try
         {
-            ref var targetSpan = ref targetBar.SlotsSpan[i + targetStart];
-            var targetSlot = (HotBarSlot*)Unsafe.AsPointer(ref targetSpan);
-            var sourceSlot = sourceButtons[i + sourceStart];
+            ref var targetBar = ref RaptureModule->HotBarsSpan[targetBarID];
 
-            if (targetSlot->CommandId != sourceSlot.CommandId || targetSlot->CommandType != sourceSlot.CommandType)
-                targetSlot->Set(sourceSlot.CommandType, sourceSlot.CommandId);
+            for (var i = 0; i < count; i++)
+            {
+                ref var targetSlot = ref targetBar.SlotsSpan[i + targetStart];
+                var source = sourceButtons[i + sourceStart];
+
+                if (source.Matches(targetSlot)) continue;
+
+                targetSlot.Set(source.CommandType, source.CommandId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{ex}");
         }
     }
 
@@ -114,7 +168,7 @@ internal static unsafe class Actions
     /// <summary>Parses the game configuration to identify the mapped bar for an Expanded Hold input</summary>
     private static (int barID, bool useLeft) GetExMap(ExSide side)
     {
-        int conf = (side == ExSide.LR ? GameConfig.Cross.ExMaps.LR : GameConfig.Cross.ExMaps.RL)[GameConfig.Cross.SepPvP && IsPvP ? 1 : 0];
+        int conf = (side == ExSide.LR ? GameConfig.Cross.ExMaps.LR : GameConfig.Cross.ExMaps.RL)[GameConfig.Cross.SepPvP && Job.IsPvP ? 1 : 0];
 
         var barID = conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.SetID.Current + (conf < 18 ? -1 : 1) - 2) % 8 + 10;
         var useLeft = conf % 2 == (conf < 16 ? 0 : 1);

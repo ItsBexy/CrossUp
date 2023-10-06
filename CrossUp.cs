@@ -18,6 +18,7 @@ namespace CrossUp;
 
 internal sealed class CrossUp : IDalamudPlugin
 {
+    // ReSharper disable once UnusedMember.Global
     public string Name => "CrossUp";
 
     internal static DalamudPluginInterface PluginInterface { get; private set; }
@@ -54,7 +55,7 @@ internal sealed class CrossUp : IDalamudPlugin
         try
         {
             IsSetUp = Bars.GetBases();
-
+            
             SeparateEx.EnableIfReady();
             Layout.Update(true);
             Layout.ScheduleNudges(10,750);
