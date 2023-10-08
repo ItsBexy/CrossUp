@@ -2,6 +2,7 @@
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.UI;
 // ReSharper disable StructMemberCanBeMadeReadOnly
+// ReSharper disable UnusedMember.Global
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -68,7 +69,7 @@ namespace CrossUp.Game.Hotbar
     /// <summary>
     /// Possible selection states for the Cross Hotbar.
     /// </summary>
-    public enum ActionCrossSelect { None, Left, Right, LR, RL }
+    public enum ActionCrossSelect { None, Left, Right, LR, RL, DoubleCrossLeft, DoubleCrossRight }
 
 
 

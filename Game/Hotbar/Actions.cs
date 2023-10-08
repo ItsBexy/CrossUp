@@ -14,22 +14,22 @@ internal static unsafe class Actions
 
     private static readonly RaptureHotbarModule* RaptureModule = CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
-    /// <summary>An action that can be assigned to a hotbar</summary>
-    internal struct Action
+    /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
+    internal readonly struct Action
     {
-        internal uint CommandId;
-        internal HotbarSlotType CommandType;
-        internal HotBarSlot? Slot;
+        internal readonly uint CommandId;
+        internal readonly HotbarSlotType CommandType;
+        private readonly HotBarSlot? Slot;
 
-        internal bool Matches(HotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
-        internal bool Matches(SavedHotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
-
-        private Action(uint id, HotbarSlotType type,HotBarSlot? slot = null)
+        private Action(uint id, HotbarSlotType type, HotBarSlot? slot = null)
         {
             CommandId = id;
             CommandType = type;
             Slot = slot;
         }
+
+        internal bool Matches(HotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
+        internal bool Matches(SavedHotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
 
         public static implicit operator Action(SavedHotBarSlot s) => new(s.CommandId, s.CommandType);
         public static implicit operator Action(HotBarSlot h) => new(h.CommandId, h.CommandType, h);
@@ -39,7 +39,6 @@ internal static unsafe class Actions
             var h = a.Slot ?? a;
             return (HotBarSlot*)Unsafe.AsPointer(ref h);
         }
-
     }
 
     /// <summary>Indicates the type of expanded hold input</summary>
@@ -51,8 +50,7 @@ internal static unsafe class Actions
         var contents = new Action[slotCount];
         try
         {
-            ref var hotbar =
-            ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
+            ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
             var span = hotbar.SlotsSpan;
 
             if (span == null) return contents;
@@ -60,10 +58,7 @@ internal static unsafe class Actions
             for (var i = 0; i < slotCount; i++)
             {
                 ref var slot = ref span[i + fromSlot];
-
-                contents[i].CommandType = slot.CommandType;
-                contents[i].CommandId = slot.CommandId;
-                contents[i].Slot = slot;
+                contents[i] = slot;
             }
 
             return contents;

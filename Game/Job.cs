@@ -20,7 +20,7 @@ internal class Job
     private static int LastKnown;
 
     /// <summary>The Job abbreviation</summary>
-    internal static string Abbr => ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???";
+    private static string Abbr => ClientState.LocalPlayer?.ClassJob.GameData?.Abbreviation ?? "???";
 
     /// <summary>The current PvP state</summary>
     public static bool IsPvP => WasPvP = ClientState.IsPvP || ClientState.TerritoryType == 250;

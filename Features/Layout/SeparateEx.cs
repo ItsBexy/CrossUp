@@ -287,7 +287,7 @@ namespace CrossUp.Features.Layout
             if (!Bars.ActionBars[barID].Exists) return;
 
             var savedActions = Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID);
-            if (savedActions != null) Actions.Copy(savedActions, 0, barID, 0, 12);
+            Actions.Copy(savedActions, 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
                                        .SetSize()

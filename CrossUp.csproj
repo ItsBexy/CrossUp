@@ -45,8 +45,8 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>1.0.1.1</FileVersion>
-	  <AssemblyVersion>1.0.1.1</AssemblyVersion>
+	  <FileVersion>1.0.1.2</FileVersion>
+	  <AssemblyVersion>1.0.1.2</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>

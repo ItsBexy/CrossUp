@@ -32,10 +32,15 @@ namespace CrossUp.Utility
         public string AddonName { get; }
         public readonly AtkUnitBase* UnitBase;
 
-        public static bool BaseCheck(AtkUnitBase* unitBase, bool posCheck = true) => unitBase != null && unitBase->UldManager.NodeListSize > 0 && (!posCheck || unitBase->X != 0 || unitBase->Y != 0);
-
-        public bool Exists(bool posCheck = true) => BaseCheck(UnitBase, posCheck) ||
-                                                    BaseCheck((AtkUnitBase*)GameGui.GetAddonByName(AddonName),posCheck);
+        public bool Exists(bool posCheck = true)
+        {
+            var unitBase = (AtkUnitBase*)GameGui.GetAddonByName(AddonName);
+            return unitBase != null && 
+                   unitBase->UldManager.NodeListSize > 0 && 
+                   unitBase->RootNode != null && 
+                   unitBase->RootNode->ChildNode != null && 
+                   (!posCheck || unitBase->X != 0 || unitBase->Y != 0);
+        }
 
         public AtkResNode** NodeList => UnitBase->UldManager.NodeList;
         public ushort NodeListSize => UnitBase->UldManager.NodeListSize;
@@ -65,8 +70,35 @@ namespace CrossUp.Utility
             set => UnitBase->IsVisible = value;
         }
 
-        public NodeWrapper this[uint id] => new(UnitBase->GetNodeById(id));
-        public NodeWrapper this[int i] => new(NodeListSize > i ? NodeList[i] : null);
+        public NodeWrapper this[uint id]
+        {
+            get
+            {
+                try
+                {
+                    return new(Exists(false) ? UnitBase->GetNodeById(id) : null);
+                }
+                catch
+                {
+                    return new NodeWrapper(null).Warning($"Error retrieving child node width ID {id}\n{new StackTrace()}");
+                }
+            }
+        }
+
+        public NodeWrapper this[int i]
+        {
+            get
+            {
+                try
+                {
+                    return new(NodeListSize > i ? NodeList[i] : null);
+                }
+                catch
+                {
+                    return new NodeWrapper(null).Warning($"Error retrieving child node at index {i}\n{new StackTrace()}");
+                }
+            }
+        }
 
         public BaseWrapper SetPos(short x, short y)
         {
@@ -108,6 +140,7 @@ namespace CrossUp.Utility
         public Vector2? DefaultPos;
         public Vector2 DefaultSize;
         public readonly AtkResNode* Node;
+
         public AtkNineGridNode* NineGrid => Node->GetAsAtkNineGridNode();
         public AtkUldPart* NGParts => NineGrid->PartsList->Parts;
 
