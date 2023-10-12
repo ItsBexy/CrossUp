@@ -167,9 +167,12 @@ internal class SeparateEx
                     }
 
                     ImGui.SameLine();
-                    var labelColor = GameConfig.Hotbar.GetVis(i) ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
+                    var visible = GameConfig.Hotbar.GetVis(i);
+                    var labelColor = visible ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
                     ImGui.TextColored(labelColor, Strings.SeparateEx.HotbarN(i + 1));
                 }
+                
+
             }
 
             ImGui.EndTable();

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using CrossUp.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -12,9 +11,6 @@ namespace CrossUp.Game.Hotbar;
 /// <summary>Reference (and some default properties) for all the hotbar nodes we're working with.</summary>
 internal static unsafe class Bars
 {
-    /// <summary>Whether all the hotbars are loaded</summary>
-    internal static bool AllExist => Cross.Exists && WXHB.Exists && ActionContents.Exists && MainMenu.Exists && ActionBars.All(static bar => bar.Exists);
-
     /// <summary>Get fresh new pointers for all the hotbar AtkUnitBases</summary>
     internal static bool GetBases()
     {
@@ -41,7 +37,7 @@ internal static unsafe class Bars
     {
         public static BaseWrapper Base = new("_ActionCross");
         private static AddonActionBarBase* AddonBase => (AddonActionBarBase*)Base.UnitBase;
-        private static AddonActionCross* AddonCross => (AddonActionCross*)Base.UnitBase;
+        public static AddonActionCross* AddonCross => (AddonActionCross*)Base.UnitBase;
         public static bool Exists => Base.Exists();
         internal static bool Enabled => LastEnabledState = GameConfig.Cross.Enabled;
         private static bool LastEnabledState = true;
@@ -111,7 +107,7 @@ internal static unsafe class Bars
         {
             private static int Previous;
             internal static int Current => Previous = AddonBase->RaptureHotbarId;
-            internal static bool HasChanged(AddonActionBarBase* barBase) => Previous != (Previous = barBase->RaptureHotbarId);
+            internal static bool HasChanged() => Previous != Current;
         }
 
         internal sealed class ButtonSet

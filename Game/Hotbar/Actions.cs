@@ -73,7 +73,7 @@ internal static unsafe class Actions
     private static Span<SavedHotBarSlot> GetSavedSpan(int job, int barID)
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
-        var savedBars = new Span<SavedHotBarGroup>(RaptureModule->SavedHotBars, 63);
+        var savedBars = new Span<SavedHotBarGroup>(RaptureModule->SavedHotBars, 65);
         ref var savedBar = ref savedBars[adjustedJob].HotBarsSpan[barID];
         return savedBar.SlotsSpan;
     }

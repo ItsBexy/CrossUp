@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game.Hotbar;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Plugin.Services;
 using static CrossUp.CrossUp;
 using static CrossUp.Game.Hooks.HudHooks;
 using static CrossUp.Utility.Service;
@@ -15,18 +16,20 @@ namespace CrossUp.Game.Hooks
     {
         static Events()
         {
-            Framework.Update          += OnFrameUpdate;
+            AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "_ActionCross", OnFinalizeCross);
+            AddonLifecycle.RegisterListener(AddonEvent.PreDraw,"_ActionCross",OnDrawCross);
             Condition.ConditionChange += OnConditionChange;
         }
 
         public void Dispose()
         {
-            Framework.Update          -= OnFrameUpdate;
+            AddonLifecycle.UnregisterListener(AddonEvent.PreFinalize, "_ActionCross", OnFinalizeCross);
+            AddonLifecycle.UnregisterListener(AddonEvent.PreDraw, "_ActionCross", OnDrawCross);
             Condition.ConditionChange -= OnConditionChange;
         }
 
         private static bool LogFrameCatch = true;
-
+       
         /// <summary><list type="bullet">
         /// <item>Checks if conditions are right to initialize the plugin, or (once initialized) if it needs to be disabled again.</item>
         /// <item>Calls animation function (<see cref="SeparateEx.MetaSlots.TweenAll"/>) when relevant.</item>
@@ -34,30 +37,22 @@ namespace CrossUp.Game.Hooks
         /// <item>Hides the Separated EXHB if the main menu is open</item>
         /// </list>
         /// </summary>
-        private static unsafe void OnFrameUpdate(IFramework framework)
+        private static unsafe void OnDrawCross(AddonEvent type, AddonArgs args)
         {
             try
             {
                 if (IsSetUp)
                 {
-                    if (Bars.Cross.Exists)
-                    {
-                        if (SeparateEx.MetaSlots.TweensExist) SeparateEx.MetaSlots.TweenAll(); // animate button sizes if needed
-                        if (Profile.CombatFadeInOut && CombatFader.FadeTween.Active) { CombatFader.FadeTween.Run(); } // run fader animation if needed
+                    if (SeparateEx.MetaSlots.TweensExist) SeparateEx.MetaSlots.TweenAll(); // animate button sizes if needed
+                    if (Profile.CombatFadeInOut && CombatFader.FadeTween.Active) { CombatFader.FadeTween.Run(); } // run fader animation if needed
 
-                        HudChecked = HudLayout->AgentInterface.IsAgentActive() && (HudChecked || AdjustHudNode()); // if HUD layout editor is open, perform this fix once
+                    HudChecked = HudLayout->AgentInterface.IsAgentActive() && (HudChecked || AdjustHudNode()); // if HUD layout editor is open, perform this fix once
 
-                        if (SeparateEx.Ready && Bars.MainMenu.Exists) SeparateEx.HideForMenu();
-                    }
-                    else
-                    {
-                        Log.Debug("Cross Hotbar nodes not found; disabling plugin features");
-                        IsSetUp = false;
-                    }
+                    if (SeparateEx.Ready && Bars.MainMenu.Exists) SeparateEx.HideForMenu();
                 }
-                else if (Bars.AllExist && Job.Current != 0)
+                else if (Job.Current != 0 && Bars.GetBases())
                 {
-                    Log.Debug("Cross Hotbar nodes found; setting up plugin features");
+                    Log.Info("Cross Hotbar nodes found; setting up plugin features");
                     HudSlot = GetHudSlot();
                     Setup();
                 }
@@ -67,10 +62,16 @@ namespace CrossUp.Game.Hooks
                 if (LogFrameCatch)
                 {
                     LogFrameCatch = false;
-                    Log.Error($"Exception: Framework Update Function Failed!\n{ex}");
+                    Log.Error($"Exception: PreDraw Listener Failed!\n{ex}");
                     Task.Delay(5000).ContinueWith(static delegate { LogFrameCatch = true; }); // So we aren't spamming if something goes terribly wrong
                 }
             }
+        }
+
+        private static void OnFinalizeCross(AddonEvent type, AddonArgs args)
+        {
+            Log.Warning("Hotbar nodes disposed; disabling plugin features");
+            IsSetUp = false;
         }
 
         /// <summary>Runs the fader feature when the player's condition changes</summary>

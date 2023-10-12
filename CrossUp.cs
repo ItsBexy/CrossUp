@@ -3,7 +3,6 @@ using CrossUp.Commands;
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game.Hooks;
-using CrossUp.Game.Hotbar;
 using CrossUp.UI;
 using CrossUp.UI.Localization;
 using CrossUp.Utility;
@@ -49,12 +48,12 @@ internal sealed class CrossUp : IDalamudPlugin
     /// <summary>Indicates that hotbar addons exist, the player is logged in, and the plugin's features can properly run.</summary>
     internal static bool IsSetUp;
 
-    /// <summary>Sets up the plugin's main features and applies user configs. Runs as soon as <see cref="Events.OnFrameUpdate"/> detects all the hotbar addons. Runs again if the addons are destroyed then restored.</summary>
+    /// <summary>Sets up the plugin's main features and applies user configs. Runs as soon as <see cref="Events.OnDrawCross"/> detects all the hotbar addons. Runs again if the addons are destroyed then restored.</summary>
     internal static void Setup()
     {
         try
         {
-            IsSetUp = Bars.GetBases();
+            IsSetUp = true;
             
             SeparateEx.EnableIfReady();
             Layout.Update(true);

@@ -53,7 +53,7 @@ namespace CrossUp.Game.Hooks
                 }
                 if (Job.HasChanged) Job.HandleJobChange();
                 if (barBase->RaptureHotbarId == 1) Layout.Update(Bars.Cross.EnableStateChanged);
-                if (barBase->SlotCount == 16 && Bars.Cross.SetID.HasChanged(barBase)) SetSwitching.HandleSetChange(barBase);
+                if (barBase->SlotCount == 16 && Bars.Cross.SetID.HasChanged()) SetSwitching.HandleSetChange(barBase);
             }
             catch (Exception ex)
             {
@@ -69,8 +69,7 @@ namespace CrossUp.Game.Hooks
         ///<term>50</term> Drag/Drop onto a slot<br/>
         ///<term>54</term> Drag/Discard from a slot
         /// </summary>
-        private static byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4,
-            NumberArrayData** numberArrayData)
+        private static byte ActionBarReceiveEventDetour(AddonActionBarBase* barBase, uint eventType, void* a3, void* a4, NumberArrayData** numberArrayData)
         {
             try
             {

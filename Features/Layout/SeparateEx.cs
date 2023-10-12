@@ -306,7 +306,8 @@ namespace CrossUp.Features.Layout
                 buttonNode[2u].SetVis(true);
             }
 
-            if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !Ready)) GameConfig.Hotbar.SetVis(barID,false);
+            // Tentatively (permanently?) disabling this behaviour due to reports of overaggressively hiding bars.
+            // if (Bars.WasHidden[barID] && ((barID != Bars.LR.ID && barID != Bars.RL.ID) || !Ready)) GameConfig.Hotbar.SetVis(barID,false);
         }
     }
 }
