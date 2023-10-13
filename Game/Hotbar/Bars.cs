@@ -46,25 +46,17 @@ internal static unsafe class Bars
         /// <summary>The selection state of the Cross Hotbar</summary>
         internal static class Selection
         {
-            internal enum Select
-            {
-                None,
-                Left,
-                Right,
-                LR,
-                RL,
-                LL,
-                RR
-            }
+            internal static ActionCrossSelect Previous = ActionCrossSelect.None;
+            internal static ActionCrossSelect Current = ActionCrossSelect.None;
 
-            internal static Select Previous = Select.None;
-            internal static Select Current => AddonCross->LeftBar ? Select.Left :
-                AddonCross->RightBar ? Select.Right :
-                AddonCross->ExpandedHoldControlsLTRT > 0 ? Select.LR :
-                AddonCross->ExpandedHoldControlsRTLT > 0 ? Select.RL :
-                WXHB.LL.AddonCross->Selected ? Select.LL :
-                WXHB.RR.AddonCross->Selected ? Select.RR :
-                Select.None;
+            internal static void Check()
+            {
+                var selected = AddonCross->Selected;
+                if (selected == Current) return;
+                Log.Verbose(Current+"->"+selected);
+                Previous = Current;
+                Current = selected;
+            }
         }
 
         internal static NodeWrapper Root        => Base[1u];
@@ -126,7 +118,6 @@ internal static unsafe class Bars
         {
             internal static BaseWrapper Base = new("_ActionDoubleCrossL");
             internal static bool Exists => Base.Exists();
-            internal static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base.UnitBase;
             internal static NodeWrapper SelectBG => new(Base[8u], size: new(304, 140));
             internal static NodeWrapper MiniSelect => new(Base[7u], size: new(166, 140));
         }
@@ -135,7 +126,6 @@ internal static unsafe class Bars
         {
             internal static BaseWrapper Base = new("_ActionDoubleCrossR");
             internal static bool Exists => Base.Exists();
-            internal static AddonActionDoubleCrossBase* AddonCross => (AddonActionDoubleCrossBase*)Base.UnitBase;
             internal static NodeWrapper SelectBG => new(Base[8u], size: new(304, 140));
             internal static NodeWrapper MiniSelect => new(Base[7u], size: new(166, 140));
         }

@@ -16,6 +16,7 @@ namespace CrossUp.Game.Hooks
     {
         static Events()
         {
+            AddonLifecycle.RegisterListener(AddonEvent.PreDraw,"_MainCross",OnDrawMainMenu);
             AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "_ActionCross", OnFinalizeCross);
             AddonLifecycle.RegisterListener(AddonEvent.PreDraw,"_ActionCross",OnDrawCross);
             Condition.ConditionChange += OnConditionChange;
@@ -23,6 +24,7 @@ namespace CrossUp.Game.Hooks
 
         public void Dispose()
         {
+            AddonLifecycle.UnregisterListener(AddonEvent.PreDraw, "_MainCross", OnDrawMainMenu);
             AddonLifecycle.UnregisterListener(AddonEvent.PreFinalize, "_ActionCross", OnFinalizeCross);
             AddonLifecycle.UnregisterListener(AddonEvent.PreDraw, "_ActionCross", OnDrawCross);
             Condition.ConditionChange -= OnConditionChange;
@@ -47,8 +49,6 @@ namespace CrossUp.Game.Hooks
                     if (Profile.CombatFadeInOut && CombatFader.FadeTween.Active) { CombatFader.FadeTween.Run(); } // run fader animation if needed
 
                     HudChecked = HudLayout->AgentInterface.IsAgentActive() && (HudChecked || AdjustHudNode()); // if HUD layout editor is open, perform this fix once
-
-                    if (SeparateEx.Ready && Bars.MainMenu.Exists) SeparateEx.HideForMenu();
                 }
                 else if (Job.Current != 0 && Bars.GetBases())
                 {
@@ -73,6 +73,9 @@ namespace CrossUp.Game.Hooks
             Log.Warning("Hotbar nodes disposed; disabling plugin features");
             IsSetUp = false;
         }
+
+        /// <summary>Sets the visibility of the EXHB when the main menu is opened via gamepad</summary>
+        private static void OnDrawMainMenu(AddonEvent type, AddonArgs args) => SeparateEx.MainMenuCheck();
 
         /// <summary>Runs the fader feature when the player's condition changes</summary>
         public static void OnConditionChange(ConditionFlag flag = 0, bool value = true)

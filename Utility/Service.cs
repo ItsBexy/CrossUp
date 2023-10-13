@@ -9,7 +9,6 @@ namespace CrossUp.Utility;
 
 internal class Service
 {
-    [PluginService] internal static IFramework Framework                     { get; private set; }
     [PluginService] internal static IGameConfig DalamudGameConfig            { get; private set; }
     [PluginService] internal static IGameGui GameGui                         { get; private set; }
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; }

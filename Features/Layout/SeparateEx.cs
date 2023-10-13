@@ -4,7 +4,6 @@ using CrossUp.Game;
 using CrossUp.Game.Hotbar;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
-using static CrossUp.Game.Hotbar.Bars.Cross.Selection;
 
 namespace CrossUp.Features.Layout
 {
@@ -67,7 +66,7 @@ namespace CrossUp.Features.Layout
         }
 
         /// <summary>Visually arrange the borrowed bars to replicate the Expanded Hold bars</summary>
-        internal static void Arrange(Select select, Select previous, float scale, int split, bool mixBar, (int, int, int, int) coords, bool forceArrange)
+        internal static void Arrange(ActionCrossSelect select, ActionCrossSelect previous, float scale, int split, bool mixBar, (int, int, int, int) coords, bool forceArrange)
         {
             SetActions(select);
             HiddenCheck();
@@ -95,12 +94,12 @@ namespace CrossUp.Features.Layout
             {
                 switch (select)
                 {
-                    case Select.None:
-                    case Select.LL:
-                    case Select.RR:
+                    case ActionCrossSelect.None:
+                    case ActionCrossSelect.DoubleCrossLeft:
+                    case ActionCrossSelect.DoubleCrossRight:
                     default:
                     {
-                        var exScale = select is Select.LL or Select.RR ? 0.85F : 1F;
+                        var exScale = select is ActionCrossSelect.DoubleCrossLeft or ActionCrossSelect.DoubleCrossRight ? 0.85F : 1F;
                         for (var i = 0; i < 8; i++)
                         {
                             MetaSlots.LR[i].Insert(Bars.LR.Buttons[i], 0F, 0F, exScale); // L->R bar
@@ -118,7 +117,7 @@ namespace CrossUp.Features.Layout
 
                         break;
                     }
-                    case Select.Left:
+                    case ActionCrossSelect.Left:
                     {
                         for (var i = 0; i < 8; i++)
                         {
@@ -128,7 +127,7 @@ namespace CrossUp.Features.Layout
 
                             // XHB
                             MetaSlots.Cross[0][i].SetVis(false).SetScale(1.1F);
-                            var fromLR = previous == Select.LR;
+                            var fromLR = previous == ActionCrossSelect.LR;
                             MetaSlots.Cross[1][i].SetVis(fromLR && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
                             MetaSlots.Cross[2][i].SetVis(fromLR && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
                             MetaSlots.Cross[3][i].SetVis(fromLR).SetScale(0.85F).Insert(Bars.RL.Buttons[i + 8], -rlX + split, -rlY, 0.85F);
@@ -138,7 +137,7 @@ namespace CrossUp.Features.Layout
 
                         break;
                     }
-                    case Select.Right:
+                    case ActionCrossSelect.Right:
                     {
                         for (var i = 0; i < 8; i++)
                         {
@@ -147,7 +146,7 @@ namespace CrossUp.Features.Layout
                             if (i >= 4) continue;
 
                             // XHB
-                            var fromRL = previous == Select.RL;
+                            var fromRL = previous == ActionCrossSelect.RL;
                             MetaSlots.Cross[0][i].SetVis(fromRL).SetScale(0.85F).Insert(Bars.LR.Buttons[i + 8], -lrX - split, -lrY, 0.85F);
                             MetaSlots.Cross[1][i].SetVis(fromRL && !mixBar).SetScale(!mixBar ? 0.85F : 1.1F);
                             MetaSlots.Cross[2][i].SetVis(fromRL && mixBar).SetScale(!mixBar ? 1.1F : 0.85F);
@@ -158,7 +157,7 @@ namespace CrossUp.Features.Layout
 
                         break;
                     }
-                    case Select.LR:
+                    case ActionCrossSelect.LR:
                     {
                         for (var i = 0; i < 8; i++)
                         {
@@ -175,7 +174,7 @@ namespace CrossUp.Features.Layout
 
                         break;
                     }
-                    case Select.RL:
+                    case ActionCrossSelect.RL:
                         for (var i = 0; i < 8; i++)
                         {
                             MetaSlots.RL[i].SetScale(1.1F);
@@ -194,7 +193,7 @@ namespace CrossUp.Features.Layout
                 }
             }
 
-            var alpha = (select == Select.None ? GameConfig.Cross.Transparency.Standard : GameConfig.Cross.Transparency.Inactive).IntToAlpha;
+            var alpha = (select == ActionCrossSelect.None ? GameConfig.Cross.Transparency.Standard : GameConfig.Cross.Transparency.Inactive).IntToAlpha;
 
             StyleSlots(Bars.LR.BorrowBar, alpha);
             StyleSlots(Bars.RL.BorrowBar, alpha);
@@ -217,31 +216,32 @@ namespace CrossUp.Features.Layout
             GameConfig.Hotbar.SetVis(rlID, crossVis);
         }
 
-        /// <summary>Sets the visibility of the EXHB when the main menu is opened via gamepad</summary>
-        internal static void HideForMenu()
+        internal static void MainMenuCheck()
         {
+            if (!Ready || !Bars.MainMenu.Exists) return;
+
             var alpha = (byte)(Bars.MainMenu.Base.Visible ? 0 : 255);
             Bars.LR.Root.SetAlpha(alpha);
             Bars.RL.Root.SetAlpha(alpha);
         }
 
         /// <summary>Copies the appropriate actions to the borrowed bars</summary>
-        private static void SetActions(Select select)
+        private static void SetActions(ActionCrossSelect select)
         {
             var actions = (Cross: Bars.Cross.Actions, LR: Bars.LR.Actions, RL: Bars.RL.Actions);
 
             switch (select)
             {
-                case Select.None:
-                case Select.LL:
-                case Select.RR:
+                case ActionCrossSelect.None:
+                case ActionCrossSelect.DoubleCrossLeft:
+                case ActionCrossSelect.DoubleCrossRight:
                 default:
                 {
                     Actions.Copy(actions.LR, 0, Bars.LR.ID, 0, 8);
                     Actions.Copy(actions.RL, 0, Bars.RL.ID, 0, 8);
                     break;
                 }
-                case Select.Left:
+                case ActionCrossSelect.Left:
                 {
                     Actions.Copy(actions.LR, 0, Bars.LR.ID, 0, 8);
                     Actions.Copy(actions.RL, 0, Bars.RL.ID, 0, 8);
@@ -249,7 +249,7 @@ namespace CrossUp.Features.Layout
                     Actions.Copy(actions.Cross, 12, Bars.RL.ID, 8, 4);
                     break;
                 }
-                case Select.Right:
+                case ActionCrossSelect.Right:
                 {
                     Actions.Copy(actions.LR, 0, Bars.LR.ID, 0, 8);
                     Actions.Copy(actions.RL, 0, Bars.RL.ID, 0, 8);
@@ -257,14 +257,14 @@ namespace CrossUp.Features.Layout
                     Actions.Copy(actions.Cross, 4, Bars.RL.ID, 8, 4);
                     break;
                 }
-                case Select.LR:
+                case ActionCrossSelect.LR:
                 {
                     Actions.Copy(actions.RL, 0, Bars.RL.ID, 0, 8);
                     Actions.Copy(actions.Cross, 0, Bars.LR.ID, 0, 12);
                     Actions.Copy(actions.Cross, 12, Bars.RL.ID, 8, 4);
                     break;
                 }
-                case Select.RL:
+                case ActionCrossSelect.RL:
                 {
                     Actions.Copy(actions.LR, 0, Bars.LR.ID, 0, 8);
                     Actions.Copy(actions.Cross, 0, Bars.LR.ID, 8, 4);

@@ -13,6 +13,7 @@ internal class Layout
     {
         if (!Bars.Cross.Exists) return;
 
+        Bars.Cross.Selection.Check();
         var select = Bars.Cross.Selection.Current;
         var previous = Bars.Cross.Selection.Previous;
 

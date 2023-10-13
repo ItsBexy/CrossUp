@@ -176,7 +176,7 @@ internal static unsafe class Actions
     {
         Log.Debug("Handling Drag/Drop Event");
 
-        if (!SeparateEx.Ready || (int)Bars.Cross.Selection.Current > 2) return;
+        if (!SeparateEx.Ready || (int)Bars.Cross.AddonCross->Selected > 2) return;
 
         var lr = (id: Bars.LR.ID, map: GetExMap(ExSide.LR), actions: Bars.LR.BorrowBar.Actions);
         var rl = (id: Bars.RL.ID, map: GetExMap(ExSide.RL), actions: Bars.RL.BorrowBar.Actions);

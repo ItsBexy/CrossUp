@@ -2,7 +2,6 @@
 using Dalamud.Interface.Utility;
 using System;
 using static CrossUp.CrossUp;
-using static CrossUp.Game.Hotbar.Bars.Cross.Selection;
 using static CrossUp.Utility.Service;
 
 namespace CrossUp.Features.Layout
@@ -11,7 +10,7 @@ namespace CrossUp.Features.Layout
     internal static class Cross
     {
         /// <summary>Arranges all elements of the main Cross Hotbar based on current selection status and other factors</summary>
-        public static void Arrange(Select select, Select previous, float scale, int split, bool mixBar, bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)
+        public static void Arrange(ActionCrossSelect select, ActionCrossSelect previous, float scale, int split, bool mixBar, bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)
         {
             if (Profile.SplitOn) Recenter(scale);
 
@@ -36,9 +35,9 @@ namespace CrossUp.Features.Layout
             var miniSize = (ushort)(Profile.SelectStyle == 2 || (mixBar && split > 0) ? 0 : 166);
             switch (select)
             {
-                case Select.None:
-                case Select.LL:
-                case Select.RR:
+                case ActionCrossSelect.None:
+                case ActionCrossSelect.DoubleCrossLeft:
+                case ActionCrossSelect.DoubleCrossRight:
                 default:
                     Bars.Cross.Container.SetRelativePos();
                     Bars.Cross.LTtext.SetRelativePos();
@@ -49,12 +48,12 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.Buttons[2].ChildVis(true).SetRelativePos(split * 2);
                     Bars.Cross.Buttons[3].ChildVis(true).SetRelativePos(split * 2);
                     break;
-                case Select.Left:
+                case ActionCrossSelect.Left:
                     Bars.Cross.Container.SetRelativePos();
                     Bars.Cross.LTtext.SetRelativePos();
                     Bars.Cross.RTtext.SetRelativePos(split * 2);
 
-                    var fromLR = previous == Select.LR && arrangeEx;
+                    var fromLR = previous == ActionCrossSelect.LR && arrangeEx;
                     Bars.Cross.Buttons[0].ChildVis(true).SetRelativePos();
                     Bars.Cross.Buttons[1].ChildVis(!fromLR || !mixBar).SetRelativePos();
                     Bars.Cross.Buttons[2].ChildVis(!fromLR || mixBar).SetRelativePos(split * 2);
@@ -64,12 +63,12 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.MiniSelectR.SetSize(miniSize, 140);
                     break;
 
-                case Select.Right:
+                case ActionCrossSelect.Right:
                     Bars.Cross.Container.SetRelativePos(split * 2);
                     Bars.Cross.LTtext.SetRelativePos(-split * 2);
                     Bars.Cross.RTtext.SetRelativePos();
 
-                    var fromRL = previous == Select.RL && arrangeEx;
+                    var fromRL = previous == ActionCrossSelect.RL && arrangeEx;
                     Bars.Cross.Buttons[0].ChildVis(!fromRL).SetRelativePos(-split * 2);
                     Bars.Cross.Buttons[1].ChildVis(!fromRL || mixBar).SetRelativePos(-split * 2);
                     Bars.Cross.Buttons[2].ChildVis(!fromRL || !mixBar).SetRelativePos();
@@ -79,7 +78,7 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.MiniSelectR.SetSize(miniSize, 140);
                     break;
 
-                case Select.LR:
+                case ActionCrossSelect.LR:
                     Bars.Cross.Container.SetRelativePos(lrX + split, lrY);
                     Bars.Cross.LTtext.SetRelativePos(-lrX - split, -lrY);
                     Bars.Cross.RTtext.SetRelativePos(-lrX + split, -lrY);
@@ -90,7 +89,7 @@ namespace CrossUp.Features.Layout
                     Bars.Cross.Buttons[3].ChildVis(false).SetRelativePos();
                     break;
 
-                case Select.RL:
+                case ActionCrossSelect.RL:
                     Bars.Cross.Container.SetRelativePos(rlX + split, rlY);
                     Bars.Cross.LTtext.SetRelativePos(-rlX - split, -rlY);
                     Bars.Cross.RTtext.SetRelativePos(-rlX + split, -rlY);
@@ -124,7 +123,7 @@ namespace CrossUp.Features.Layout
             if (Math.Abs(misalign) < 1) return;
 
             Bars.Cross.Base.X = baseX;
-            Log.Debug($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
+            Log.Verbose($"Realigning Cross Hotbar to Center Point {Profile.CenterPoint} (was off by {misalign})");
         }
 
         /// <summary>Restores everything back to default</summary>

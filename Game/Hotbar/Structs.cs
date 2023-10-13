@@ -1,12 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.UI;
-// ReSharper disable StructMemberCanBeMadeReadOnly
-// ReSharper disable UnusedMember.Global
-
+// ReSharper disable MemberCanBeInternal
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
-// ReSharper disable MemberCanBeInternal
+// ReSharper disable StructMemberCanBeMadeReadOnly
+// ReSharper disable UnusedMember.Global
 
 namespace CrossUp.Game.Hotbar
 {
@@ -94,14 +93,4 @@ namespace CrossUp.Game.Hotbar
     /// Possible selection states for the Cross Hotbar.
     /// </summary>
     public enum ActionCrossSelect { None, Left, Right, LR, RL, DoubleCrossLeft, DoubleCrossRight }
-
-    [StructLayout(LayoutKind.Explicit, Size = 0x2F8)]
-    [Addon("_ActionDoubleCrossL", "_ActionDoubleCrossR")]
-    public struct AddonActionDoubleCrossBase
-    {
-        /// <summary>
-        /// Indicates whether this bar is currently selected.
-        /// </summary>
-        [FieldOffset(0x2E0)] public bool Selected;
-    }
 }
