@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CrossUp.Features.Layout;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.Utility.Service;
-using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 namespace CrossUp.Game.Hotbar;
 
@@ -12,7 +12,7 @@ namespace CrossUp.Game.Hotbar;
 internal static unsafe class Actions
 {
 
-    private static readonly RaptureHotbarModule* RaptureModule = CSFramework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+    private static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
     internal readonly struct Action

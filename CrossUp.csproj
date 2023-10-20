@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>1.0.1.4</Version>
+    <Version>1.0.1.5</Version>
     <Description>Customize the Cross Hotbar!</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/ItsBexy/CrossUp</PackageProjectUrl>
@@ -45,8 +45,8 @@
 	  <PackageIcon>icon.png</PackageIcon>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/ItsBexy/CrossUp</RepositoryUrl>
-	  <FileVersion>1.0.1.4</FileVersion>
-	  <AssemblyVersion>1.0.1.4</AssemblyVersion>
+	  <FileVersion>1.0.1.5</FileVersion>
+	  <AssemblyVersion>1.0.1.5</AssemblyVersion>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	  <IsPublishable>True</IsPublishable>
   </PropertyGroup>

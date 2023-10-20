@@ -1,7 +1,7 @@
-﻿using System;
+﻿using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
 using System.Diagnostics;
 using System.Numerics;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using static CrossUp.Utility.Service;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -23,17 +23,29 @@ namespace CrossUp.Utility
     public sealed unsafe class BaseWrapper
     {
         /// <param name="addonName">The internal name of a UI Addon</param>
-        public BaseWrapper(string addonName)
+        /// <param name="fromEvent">Whether this unitBase was triggered by an AddonLifeCycle listener (bypasses null-checks)</param>
+        public BaseWrapper(string addonName, bool fromEvent = false)
         {
             UnitBase = (AtkUnitBase*)GameGui.GetAddonByName(addonName);
             AddonName = addonName;
+            FromEvent = fromEvent;
+        }
+
+        public BaseWrapper(AtkUnitBase* unitBase, string addonName, bool fromEvent = false)
+        {
+            UnitBase = unitBase;
+            AddonName = addonName;
+            FromEvent = fromEvent;
         }
 
         public string AddonName { get; }
         public readonly AtkUnitBase* UnitBase;
+        public readonly bool FromEvent;
 
         public bool Exists(bool posCheck = true)
         {
+            if (FromEvent) return !posCheck || UnitBase->X != 0 || UnitBase->Y != 0;
+
             var unitBase = (AtkUnitBase*)GameGui.GetAddonByName(AddonName);
             return unitBase != null && 
                    unitBase->UldManager.NodeListSize > 0 && 

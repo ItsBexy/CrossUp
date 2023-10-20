@@ -7,7 +7,7 @@ using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
-using Framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 

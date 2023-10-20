@@ -6,3 +6,4 @@ bin/
 /UI/Localization/dePlaceholders.json
 /UI/Localization/jaPlaceholders.json
 /.editorconfig
+/CrossUp - Backup.csproj

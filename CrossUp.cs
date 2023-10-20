@@ -48,7 +48,7 @@ internal sealed class CrossUp : IDalamudPlugin
     /// <summary>Indicates that hotbar addons exist, the player is logged in, and the plugin's features can properly run.</summary>
     internal static bool IsSetUp;
 
-    /// <summary>Sets up the plugin's main features and applies user configs. Runs as soon as <see cref="Events.OnDrawCross"/> detects all the hotbar addons. Runs again if the addons are destroyed then restored.</summary>
+    /// <summary>Sets up the plugin's main features and applies user configs. Runs as soon as <see cref="Events.OnDrawCross"/> detects the Cross hotbar. Runs again if the addons are destroyed then restored.</summary>
     internal static void Setup()
     {
         try

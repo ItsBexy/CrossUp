@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CrossUp.Game;
+using CrossUp.Game.Hooks;
 using CrossUp.Game.Hotbar;
+using CrossUp.Utility;
+using Dalamud.Game.Addon.Lifecycle;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
 
@@ -16,7 +19,6 @@ namespace CrossUp.Features.Layout
         /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
         private static void Enable()
         {
-
             PrepBar(Config.LRborrow);
             PrepBar(Config.RLborrow);
 
@@ -30,7 +32,9 @@ namespace CrossUp.Features.Layout
             if (!Bars.ActionBars[barID].Exists) return;
 
             Actions.Store(barID);
-            
+
+            Service.AddonLifecycle.RegisterListener(AddonEvent.PreDraw, Bars.ActionBars[barID].Base.AddonName, Events.ActionBars.PreDraw);
+
             if (GameConfig.Hotbar.GetVis(barID) == false)
             {
                 Bars.WasHidden[barID] = true;

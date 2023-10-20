@@ -14,6 +14,12 @@ namespace CrossUp.Game.Hotbar
     public struct AddonActionCross
     {
         [FieldOffset(0x000)] public AddonActionBarBase ActionBarBase;
+        
+        /// <summary>
+        /// Bitmask representing the current input state of the D-Pad and 4 face buttons.
+        /// </summary>
+        /// <remarks>This is not the raw controller input data; it represents the state of these input values after mappings &amp; keybinds are applied.</remarks>
+        [FieldOffset(0x6E0)] public byte ButtonMask;
 
         /// <summary>
         /// The selection state and/or the mapped hotbar set of the Left->Right Expanded Hold Bar.<br/>
@@ -74,17 +80,17 @@ namespace CrossUp.Game.Hotbar
         [FieldOffset(0x704)] public bool PetBar;
 
         /// <summary>
-        /// The "Standard" transparency slider for the Cross Hotbar, as an alpha value.
+        /// Alpha value based on the "Standard" transparency configuration slider for the Cross Hotbar.
         /// </summary>
         [FieldOffset(0x708)] public byte AlphaStandard;
 
         /// <summary>
-        /// The "Active" transparency slider for the Cross Hotbar, as an alpha value.
+        /// Alpha value based on the "Active" transparency configuration slider for the Cross Hotbar.
         /// </summary>
         [FieldOffset(0x709)] public byte AlphaActive;
 
         /// <summary>
-        /// The "Inactive" transparency slider for the Cross Hotbar, as an alpha value.
+        /// Alpha value based on the "Inactive" transparency configuration slider for the Cross Hotbar.
         /// </summary>
         [FieldOffset(0x70A)] public byte AlphaInactive;
     }
