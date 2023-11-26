@@ -109,7 +109,7 @@ namespace CrossUp.Features.Layout
             /// <summary>Whether or not there are currently any animation tweens to run</summary>
             internal static bool TweensExist { get; private set; }
 
-            /// <summary>Run all animations tweens for all MetaSlots</summary>
+            /// <summary>Run all animation tweens for all MetaSlots</summary>
             internal static void TweenAll()
             {
                 TweensExist = false; // will set back to true if we find any incomplete tweens

@@ -32,7 +32,7 @@ internal class Layout
 
             var coords = ((int)lrX, (int)lrY, (int)rlX, (int)rlY);
 
-            Cross.Arrange(select, previous, scale, splitDist, mixBar, arrangeEx, coords, forceArrange, resetAll);
+            CrossLayout.Arrange(select, previous, scale, splitDist, mixBar, arrangeEx, coords, forceArrange, resetAll);
 
             if (arrangeEx) SeparateEx.Arrange(select, previous, scale, splitDist, mixBar, coords, forceArrange);
         }
@@ -64,7 +64,7 @@ internal class Layout
     {
         if (!Bars.Cross.Exists) return;
 
-        Cross.Reset();
+        CrossLayout.Reset();
         SeparateEx.Reset();
     }
 }

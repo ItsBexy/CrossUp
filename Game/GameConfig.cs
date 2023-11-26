@@ -6,9 +6,9 @@ using CrossUp.Utility;
 namespace CrossUp.Game;
 
 /// <summary>Class for retrieving/setting character configuration options</summary>
-public class GameConfig
+public static class GameConfig
 {
-    public sealed class GameOption
+    public readonly struct GameOption
     {
         private readonly dynamic Option;
 
@@ -37,8 +37,6 @@ public class GameConfig
             Service.DalamudGameConfig.TryGet(o.Option, out uint val);
             return (int)val;
         }
-
-        internal byte IntToAlpha => (byte)((100 - (int)this) * 2.55);
     }
 
     /// <summary>Converts to a hex value (relevant for color options)</summary>
@@ -50,6 +48,15 @@ public class GameConfig
 
         /// <summary><term>Checkbox</term> The Cross Hotbar is Enabled</summary>
         internal static readonly GameOption Enabled = new(UiControlOption.HotbarCrossDispType);
+
+        /// <summary>Expanded hold controls are enabled in PvE</summary>
+        private static readonly GameOption EnabledExPvE = new(UiConfigOption.HotbarCrossAdvancedSetting);
+
+        /// <summary>Expanded hold controls are enabled in PvP</summary>
+        private static readonly GameOption EnabledExPvP = new(UiConfigOption.HotbarCrossAdvancedSettingPvp);
+
+        /// <summary>Gets Expanded hold state based on PvP state</summary>
+        internal static GameOption EnabledEx => (Job.IsPvP && SepPvP) ? EnabledExPvP : EnabledExPvE;
 
         /// <summary><term>Checkbox</term> The Cross Hotbar is visible in the HUD</summary>
         internal static readonly GameOption Visible = new(UiControlOption.HotbarCrossDispAlways);
@@ -64,6 +71,7 @@ public class GameConfig
         /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
         internal static readonly GameOption SepPvP = new(UiConfigOption.HotbarCrossSetPvpModeActive);
 
+  
         /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
         /// Returns:<br/>
         /// <term>0</term> Cross Hotbar 1 (Left)<br/>
@@ -154,7 +162,7 @@ public class GameConfig
         {
             if (id is < 0 or > 9) return false;
             var offset = (int)Math.Pow(2, id);
-            return ((int)VisMask & offset) == offset;
+            return (VisMask & offset) == offset;
         }
 
         /// <summary>

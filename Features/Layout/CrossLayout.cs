@@ -1,13 +1,14 @@
 ﻿using CrossUp.Game.Hotbar;
 using Dalamud.Interface.Utility;
 using System;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
 
 namespace CrossUp.Features.Layout
 {
     /// <summary>Methods for rearranging the main Cross Hotbar</summary>
-    internal static class Cross
+    internal static class CrossLayout
     {
         /// <summary>Arranges all elements of the main Cross Hotbar based on current selection status and other factors</summary>
         public static void Arrange(ActionCrossSelect select, ActionCrossSelect previous, float scale, int split, bool mixBar, bool arrangeEx, (int, int, int, int) coords, bool forceArrange, bool resetAll)

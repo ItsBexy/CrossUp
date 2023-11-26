@@ -31,7 +31,7 @@ internal sealed class CrossUpUI : IDisposable
 
 internal sealed class SettingsWindow : Window
 {
-    public SettingsWindow(string name = "CrossUp##CrossUpSettings", ImGuiWindowFlags flags = ImGuiWindowFlags.NoScrollbar, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
+    public SettingsWindow(string name = "CrossUp##CrossUpSettings", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
     {
         SizeConstraints = new WindowSizeConstraints
         {

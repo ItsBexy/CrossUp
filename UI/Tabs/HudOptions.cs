@@ -1,7 +1,7 @@
 ﻿using System;
 using CrossUp.Features;
 using CrossUp.Features.Layout;
-using CrossUp.Game.Hooks;
+using CrossUp.Game;
 using CrossUp.Utility;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
@@ -56,7 +56,7 @@ internal class HudOptions
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
 
-            var current = HudHooks.HudSlot == i;
+            var current = HudData.CurrentSlot == i;
             if (current) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
             if (current) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
 
@@ -185,7 +185,7 @@ internal class HudOptions
 
     public static void ProfileIndicator()
     {
-        var p = Config.UniqueHud ? HudHooks.HudSlot : 0;
+        var p = Config.UniqueHud ? HudData.CurrentSlot : 0;
         var text = $"{(p == 0 ? Strings.Hud.AllHudSlots : Strings.Hud.HudSlot)} {Strings.NumSymbols[p]}";
 
         var textSize = ImGui.CalcTextSize(text);

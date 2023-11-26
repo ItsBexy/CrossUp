@@ -32,30 +32,7 @@ internal class Job
     internal static bool HasChanged => LastKnown != Current || WasPvP != IsPvP;
 
     /// <summary>Retrieves the ID of a job's PvP hotbar sets (NOT future-proofed for more jobs being added)</summary>
-    internal static int PvpID(int job) => job switch
-    {
-        0 => 43, // shared
-        19 => 44, // PLD
-        20 => 45, // MNK
-        21 => 46, // WAR
-        22 => 47, // DRG
-        23 => 48, // BRD
-        24 => 49, // WHM
-        25 => 50, // BLM
-        27 => 51, // SMN
-        28 => 52, // SCH
-        30 => 53, // NIN
-        31 => 54, // MCH
-        32 => 55, // DRK
-        33 => 56, // AST
-        34 => 57, // SAM
-        35 => 58, // RDM
-        37 => 59, // GNB
-        38 => 60, // DNC
-        39 => 61, // RPR
-        40 => 62, // SGE
-        _ => job
-    };
+    internal static unsafe int PvpID(int job) => Actions.RaptureModule->GetPvPSavedHotbarIndexForClassJobId((uint)job);
 
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     public static void HandleJobChange()

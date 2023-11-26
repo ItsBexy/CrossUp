@@ -12,7 +12,7 @@ namespace CrossUp.Game.Hotbar;
 internal static unsafe class Actions
 {
 
-    private static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+    public static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
     internal readonly struct Action
@@ -73,7 +73,7 @@ internal static unsafe class Actions
     private static Span<SavedHotBarSlot> GetSavedSpan(int job, int barID)
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
-        var savedBars = new Span<SavedHotBarGroup>(RaptureModule->SavedHotBars, 65);
+        var savedBars = RaptureModule->SavedHotBarsSpan;
         ref var savedBar = ref savedBars[adjustedJob].HotBarsSpan[barID];
         return savedBar.SlotsSpan;
     }
@@ -163,10 +163,10 @@ internal static unsafe class Actions
     /// <summary>Parses the game configuration to identify the mapped bar for an Expanded Hold input</summary>
     private static (int barID, bool useLeft) GetExMap(ExSide side)
     {
-        int conf = (side == ExSide.LR ? GameConfig.Cross.ExMaps.LR : GameConfig.Cross.ExMaps.RL)[GameConfig.Cross.SepPvP && Job.IsPvP ? 1 : 0];
+        var conf = (side == ExSide.LR ? GameConfig.Cross.ExMaps.LR : GameConfig.Cross.ExMaps.RL)[GameConfig.Cross.SepPvP && Job.IsPvP ? 1 : 0];
 
-        var barID = conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.SetID.Current + (conf < 18 ? -1 : 1) - 2) % 8 + 10;
-        var useLeft = conf % 2 == (conf < 16 ? 0 : 1);
+        var barID = conf < 16 ? (conf >> 1) + 10 : (Bars.Cross.SetID.Current + (conf < 18 ? 1 : -1) - 2) % 8 + 10;
+        var useLeft = conf % 2 == 0;
 
         return (barID, useLeft);
     }

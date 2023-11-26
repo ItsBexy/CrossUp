@@ -232,7 +232,7 @@ namespace CrossUp.Utility
                 if (show) Node->NodeFlags |= NodeFlags.Visible;
                 else Node->NodeFlags &= ~NodeFlags.Visible;
 
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -255,7 +255,7 @@ namespace CrossUp.Utility
             {
                 Node->ScaleX = scale;
                 Node->ScaleY = scale;
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -296,7 +296,7 @@ namespace CrossUp.Utility
                 Node->Color.R = (byte)(color.X * 255f);
                 Node->Color.G = (byte)(color.Y * 255f);
                 Node->Color.B = (byte)(color.Z * 255f);
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -309,7 +309,7 @@ namespace CrossUp.Utility
                 Node->MultiplyRed = (byte)(color.X * 255f);
                 Node->MultiplyGreen = (byte)(color.Y * 255f);
                 Node->MultiplyBlue = (byte)(color.Z * 255f);
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -320,7 +320,7 @@ namespace CrossUp.Utility
             if (Node != null)
             {
                 Node->Color.A = a;
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -356,7 +356,7 @@ namespace CrossUp.Utility
             {
                 Node->OriginX = x;
                 Node->OriginY = y;
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
@@ -397,7 +397,8 @@ namespace CrossUp.Utility
                 tnode->TextColor.R = (byte)(color.X * 255f);
                 tnode->TextColor.G = (byte)(color.Y * 255f);
                 tnode->TextColor.B = (byte)(color.Z * 255f);
-                Node->DrawFlags |= 0xD;
+
+                EnableDrawFlags();
             }
 
             return this;
@@ -417,10 +418,16 @@ namespace CrossUp.Utility
                 if (props.Alpha != null) SetAlpha((byte)props.Alpha);
                 if (props.Origin != null) SetOrigin((Vector2)props.Origin);
 
-                Node->DrawFlags |= 0xD;
+                EnableDrawFlags();
             }
 
             return this;
+        }
+
+        public void EnableDrawFlags()
+        {
+            Node->DrawFlags |= 0x5;
+            Node->DrawFlags |= 0x800000;
         }
     }
 }

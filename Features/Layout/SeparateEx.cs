@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CrossUp.Game;
-using CrossUp.Game.Hooks;
 using CrossUp.Game.Hotbar;
 using CrossUp.Utility;
 using Dalamud.Game.Addon.Lifecycle;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
 
@@ -14,7 +14,7 @@ namespace CrossUp.Features.Layout
     public unsafe partial class SeparateEx
     {
         /// <summary>Confirms that the Separate Expanded Hold feature is active and that two valid bars are selected</summary>
-        internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0 && GameConfig.Cross.Enabled;
+        internal static bool Ready => IsSetUp && Profile.SepExBar && Bars.LR.ID > 0 && Bars.RL.ID > 0 && GameConfig.Cross.Enabled && GameConfig.Cross.EnabledEx;
 
         /// <summary>Enable the Separate Expanded Hold Bars feature</summary>
         private static void Enable()
@@ -33,7 +33,8 @@ namespace CrossUp.Features.Layout
 
             Actions.Store(barID);
 
-            Service.AddonLifecycle.RegisterListener(AddonEvent.PreDraw, Bars.ActionBars[barID].Base.AddonName, Events.ActionBars.PreDraw);
+            var barName = Bars.ActionBars[barID].Base.AddonName;
+            Service.AddonLifecycle.RegisterListener(AddonEvent.PreDraw, barName, Bars.ActionBar.OnDraw);
 
             if (GameConfig.Hotbar.GetVis(barID) == false)
             {
@@ -41,7 +42,7 @@ namespace CrossUp.Features.Layout
                 GameConfig.Hotbar.SetVis(barID, true);
             }
 
-            for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].Node->DrawFlags |= 0xD;
+            for (var i = 0; i < 12; i++) Bars.ActionBars[barID].Buttons[i].EnableDrawFlags();
         }
 
         /// <summary>Disable the Separate Expanded Hold Bars feature.</summary>
@@ -196,8 +197,8 @@ namespace CrossUp.Features.Layout
                         break;
                 }
             }
-
-            var alpha = (select == ActionCrossSelect.None ? GameConfig.Cross.Transparency.Standard : GameConfig.Cross.Transparency.Inactive).IntToAlpha;
+            
+            var alpha = select == ActionCrossSelect.None ? Bars.Cross.AddonCross->AlphaStandard : Bars.Cross.AddonCross->AlphaInactive;
 
             StyleSlots(Bars.LR.BorrowBar, alpha);
             StyleSlots(Bars.RL.BorrowBar, alpha);
@@ -206,8 +207,8 @@ namespace CrossUp.Features.Layout
         /// <summary>Checks if the borrowed bars have been unexpectedly hidden (ie by the user or another plugin)</summary>
         private static void HiddenCheck()
         {
-            var lrID = Bars.LR.ID;
-            var rlID = Bars.RL.ID;
+            int lrID = Bars.LR.ID;
+            int rlID = Bars.RL.ID;
             if (lrID < 1 || rlID < 1) return;
 
             bool crossVis = GameConfig.Cross.Visible;
@@ -218,15 +219,6 @@ namespace CrossUp.Features.Layout
 
             GameConfig.Hotbar.SetVis(lrID, crossVis);
             GameConfig.Hotbar.SetVis(rlID, crossVis);
-        }
-
-        internal static void MainMenuCheck()
-        {
-            if (!Ready || !Bars.MainMenu.Exists) return;
-
-            var alpha = (byte)(Bars.MainMenu.Base.Visible ? 0 : 255);
-            Bars.LR.Root.SetAlpha(alpha);
-            Bars.RL.Root.SetAlpha(alpha);
         }
 
         /// <summary>Copies the appropriate actions to the borrowed bars</summary>

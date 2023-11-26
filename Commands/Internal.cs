@@ -3,8 +3,8 @@ using System.Numerics;
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Game;
-using CrossUp.Game.Hooks;
 using static CrossUp.CrossUp;
+using Events = CrossUp.Game.Events;
 
 // ReSharper disable MemberCanBePrivate.Global
 

@@ -1,9 +1,9 @@
 ﻿using System.Numerics;
+using CrossUp.Game;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using static CrossUp.CrossUp;
-using static CrossUp.Game.Hooks.HudHooks;
 using static Dalamud.Interface.Colors.ImGuiColors;
 
 namespace CrossUp.UI;
@@ -39,8 +39,8 @@ internal class Helpers
         }
     };
 
-    internal static Vector4 HighlightColor => Config.UniqueHud ? ColorSchemes[HudSlot, 0] : DalamudWhite;
-    internal static Vector4 DimColor => Config.UniqueHud ? ColorSchemes[HudSlot, 1] : DalamudGrey3;
+    internal static Vector4 HighlightColor => Config.UniqueHud ? ColorSchemes[HudData.CurrentSlot, 0] : DalamudWhite;
+    internal static Vector4 DimColor => Config.UniqueHud ? ColorSchemes[HudData.CurrentSlot, 1] : DalamudGrey3;
 
     internal static void ColumnCentredText(string text)
     {
