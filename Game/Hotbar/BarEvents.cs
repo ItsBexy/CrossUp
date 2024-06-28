@@ -123,11 +123,11 @@ namespace CrossUp.Game.Hotbar
 
                     if (args.AddonName == LR.BorrowBar.Base.AddonName)
                     {
-                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CoolDownPartIDs.LR);
+                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CooldownPartIdsLR);
                     }
                     else if (args.AddonName == RL.BorrowBar.Base.AddonName)
                     {
-                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CoolDownPartIDs.RL);
+                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CooldownPartIdsRL);
                     }
                 }
                 catch (Exception ex)
@@ -136,14 +136,8 @@ namespace CrossUp.Game.Hotbar
                 }
             }
 
-            /// <summary>
-            /// Records the last known states of the PartID of all the cooldown image nodes on each borrowed bar. 80 represents the "cooldown complete" flash.
-            /// </summary>
-            private static class CoolDownPartIDs
-            {
-                public static ushort[] LR = new ushort[12];
-                public static ushort[] RL = new ushort[12];
-            }
+            private static ushort[] CooldownPartIdsRL = new ushort[12];
+            private static ushort[] CooldownPartIdsLR = new ushort[12];
 
             /// <summary>
             /// Fix for a momentary visual flash that would occur when switching bars while cooldowns are ticking.<br/><br/>
@@ -155,10 +149,11 @@ namespace CrossUp.Game.Hotbar
                 {
                     var cdNode = bar[i + 8u][3u][2u][14u];
                     var cdPartID = cdNode.Node->GetAsAtkImageNode()->PartId;
-                    if (cdNode.Node->IsVisible && cdPartID == 80 && cdPartIDs[i] < 75) cdNode.SetVis(false);
+                    if (cdNode.Node->IsVisible() && cdPartID == 80 && cdPartIDs[i] < 75) cdNode.SetVis(false);
                     cdPartIDs[i] = cdPartID;
                 }
             }
+
         }
 
         internal partial class MainMenu

@@ -29,8 +29,8 @@ public class CrossUpConfig : IPluginConfiguration
     public int[,] MappingsEx           { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
     public int[,] MappingsW            { get; set; } = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1, 1, 1 } };
 
-    [NonSerialized] private DalamudPluginInterface? PluginInterface;
-    public void Initialize(DalamudPluginInterface pluginInterface) => PluginInterface = pluginInterface;
+    [NonSerialized] private IDalamudPluginInterface? PluginInterface;
+    public void Initialize(IDalamudPluginInterface pluginInterface) => PluginInterface = pluginInterface;
     public void Save() => PluginInterface!.SavePluginConfig(this);
 }
 

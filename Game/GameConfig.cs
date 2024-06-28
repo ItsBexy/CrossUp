@@ -71,7 +71,7 @@ public static class GameConfig
         /// <summary><term>Checkbox</term> User has enabled different settings for PvP vs PvE</summary>
         internal static readonly GameOption SepPvP = new(UiConfigOption.HotbarCrossSetPvpModeActive);
 
-  
+
         /// <summary><term>Dropdowns</term> Mappings for Additional Cross Hotbars<br/>Index: [<term>0</term> PvE, <term>1</term> PvP] <br/><br/>
         /// Returns:<br/>
         /// <term>0</term> Cross Hotbar 1 (Left)<br/>

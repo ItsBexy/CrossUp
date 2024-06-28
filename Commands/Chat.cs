@@ -145,13 +145,11 @@ internal sealed class ChatCmd : IDisposable
             }
         }
 
-        private static bool TextToBool(string str, bool toggleRef = false)
-        {
-            return str is "true" or "on" or "show" ||
-                   TryParse(str, out var val) && val > 0 ||
-                   str is not ("false" or "off" or "hide" or "hidden" or "0")
-                   && !toggleRef;
-        }
+        private static bool TextToBool(string str, bool toggleRef = false) =>
+            str is "true" or "on" or "show" ||
+            TryParse(str, out var val) && val > 0 ||
+            str is not ("false" or "off" or "hide" or "hidden" or "0")
+            && !toggleRef;
 
         private static Vector3 HexToColor3(string hex)
         {

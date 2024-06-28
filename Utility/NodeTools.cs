@@ -47,10 +47,10 @@ namespace CrossUp.Utility
             if (FromEvent) return !posCheck || UnitBase->X != 0 || UnitBase->Y != 0;
 
             var unitBase = (AtkUnitBase*)GameGui.GetAddonByName(AddonName);
-            return unitBase != null && 
-                   unitBase->UldManager.NodeListSize > 0 && 
-                   unitBase->RootNode != null && 
-                   unitBase->RootNode->ChildNode != null && 
+            return unitBase != null &&
+                   unitBase->UldManager.NodeListSize > 0 &&
+                   unitBase->RootNode != null &&
+                   unitBase->RootNode->ChildNode != null &&
                    (!posCheck || unitBase->X != 0 || unitBase->Y != 0);
         }
 
@@ -190,7 +190,7 @@ namespace CrossUp.Utility
                     if (Node == null) return Warning($"Node is null and has no children \n{new StackTrace()}");
 
                     if ((comp = Node->GetAsAtkComponentNode()) == null || (uld = comp->Component->UldManager).NodeListSize < i) return Warning($"No Child node found for NodeWrapper at index {i}\n{new StackTrace()}");
-               
+
                     return uld.NodeList[i];
                 }
                 catch (Exception)

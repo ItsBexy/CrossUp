@@ -39,7 +39,7 @@ internal class Job
     {
         Log.Debug($"Job Update: {ClientState.LocalPlayer?.ClassJob.Id} {Abbr} ({(IsPvP ? "PvP" : "PvE")})");
         if (!SeparateEx.Ready) return;
-        
+
         Actions.Store(Bars.LR.ID);
         Actions.Store(Bars.RL.ID);
     }

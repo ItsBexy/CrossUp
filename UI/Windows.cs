@@ -18,6 +18,7 @@ internal sealed class CrossUpUI : IDisposable
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi += SettingsWindow.Toggle;
+        PluginInterface.UiBuilder.OpenMainUi += SettingsWindow.Toggle;
     }
 
     public void Dispose()
@@ -26,19 +27,18 @@ internal sealed class CrossUpUI : IDisposable
 
         PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi -= SettingsWindow.Toggle;
+        PluginInterface.UiBuilder.OpenMainUi -= SettingsWindow.Toggle;
     }
 }
 
 internal sealed class SettingsWindow : Window
 {
-    public SettingsWindow(string name = "CrossUp##CrossUpSettings", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
+    public SettingsWindow(string name = "CrossUp##CrossUpSettings", ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow) =>
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new(500f, 450f),
             MaximumSize = new(1000f)
         };
-    }
 
     public override void Draw()
     {

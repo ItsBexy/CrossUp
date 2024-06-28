@@ -7,7 +7,6 @@ using CrossUp.Game.Hotbar;
 using CrossUp.UI;
 using CrossUp.UI.Localization;
 using CrossUp.Utility;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using static CrossUp.Utility.Service;
 
@@ -20,7 +19,7 @@ internal sealed class CrossUp : IDalamudPlugin
     // ReSharper disable once UnusedMember.Global
     public string Name => "CrossUp";
 
-    internal static DalamudPluginInterface PluginInterface { get; private set; }
+    internal static IDalamudPluginInterface PluginInterface { get; private set; }
     internal static CrossUpUI UI                           { get; private set; }
     internal static CrossUpConfig Config                   { get; private set; }
     internal static ConfigProfile Profile => Config.Profiles[Config.UniqueHud ? HudData.CurrentSlot : 0];
@@ -31,7 +30,7 @@ internal sealed class CrossUp : IDalamudPlugin
     private static IPC IPC         { get; set; }
     private static CrossUpLoc Loc  { get; set; }
 
-    public CrossUp([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface)
+    public CrossUp(IDalamudPluginInterface pluginInterface)
     {
         PluginInterface = pluginInterface;
         PluginInterface.Create<Service>();
@@ -56,7 +55,7 @@ internal sealed class CrossUp : IDalamudPlugin
         try
         {
             IsSetUp = true;
-            
+
             SeparateEx.EnableIfReady();
             Layout.Update(true);
             Layout.ScheduleNudges(10,750);

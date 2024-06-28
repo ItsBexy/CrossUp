@@ -15,7 +15,7 @@ internal sealed class HudData : IDisposable
 {
     private unsafe delegate nint SetHudLayout(AddonConfig* addonConfig, uint layoutIndex, bool unk1 = false, bool unk2 = true);
 
-    [Signature("E8 ?? ?? ?? ?? 33 C0 EB 15", DetourName = nameof(OnSetHudLayout))]
+    [Signature("E8 ?? ?? ?? ?? 33 C0 EB 12", DetourName = nameof(OnSetHudLayout))]
     private readonly Hook<SetHudLayout>? SetHudLayoutHook = null;
 
     public HudData()
@@ -26,8 +26,8 @@ internal sealed class HudData : IDisposable
 
     public void Dispose() => SetHudLayoutHook?.Dispose();
 
-    private static readonly unsafe UIModule* UIModule = Framework.Instance()->GetUiModule();
-    private static readonly unsafe AgentHudLayout* HudLayout = UIModule->GetAgentModule()->GetAgentHudLayout();
+    private static readonly unsafe UIModule* UIModule = Framework.Instance()->GetUIModule();
+    private static readonly unsafe AgentHUDLayout* HudLayout = UIModule->GetAgentModule()->GetAgentHUDLayout();
 
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
     public unsafe nint OnSetHudLayout(AddonConfig* addonConfig, uint hudSlot, bool unk1 = false, bool unk2 = true)
@@ -58,7 +58,7 @@ internal sealed class HudData : IDisposable
         for (var i = 1; i < hudScreen.NodeListCount; i++)
         {
             var node = hudNodes[i];
-            if (!node->IsVisible ||
+            if (!node->IsVisible() ||
                 Math.Abs(node->Y - root->Y) > 1 ||
                 Math.Abs(node->Width - root->Width * scale) > 1 ||
                 Math.Abs(node->Height - root->Height * scale) > 1 ||

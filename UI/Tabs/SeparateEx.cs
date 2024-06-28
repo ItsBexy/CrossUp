@@ -171,7 +171,7 @@ internal class SeparateEx
                     var labelColor = visible ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
                     ImGui.TextColored(labelColor, Strings.SeparateEx.HotbarN(i + 1));
                 }
-                
+
 
             }
 

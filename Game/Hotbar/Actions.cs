@@ -1,43 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using CrossUp.Features.Layout;
+﻿using CrossUp.Features.Layout;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using static CrossUp.Utility.Service;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace CrossUp.Game.Hotbar;
 
 /// <summary>Methods pertaining to hotbar actions</summary>
 internal static unsafe class Actions
 {
-
-    public static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule();
+    public static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
     internal readonly struct Action
     {
         internal readonly uint CommandId;
         internal readonly HotbarSlotType CommandType;
-        private readonly HotBarSlot? Slot;
+        private readonly HotbarSlot? Slot;
 
-        private Action(uint id, HotbarSlotType type, HotBarSlot? slot = null)
+        private Action(uint id, HotbarSlotType type, HotbarSlot? slot = null)
         {
             CommandId = id;
             CommandType = type;
             Slot = slot;
         }
 
-        internal bool Matches(HotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
-        internal bool Matches(SavedHotBarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
+        internal bool Matches(HotbarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
+        internal bool Matches(SavedHotbarSlot slot) => CommandId == slot.CommandId && CommandType == slot.CommandType;
 
-        public static implicit operator Action(SavedHotBarSlot s) => new(s.CommandId, s.CommandType);
-        public static implicit operator Action(HotBarSlot h) => new(h.CommandId, h.CommandType, h);
-        public static implicit operator HotBarSlot(Action a) => new() { CommandId = a.CommandId, CommandType = a.CommandType };
-        public static implicit operator HotBarSlot*(Action a)
+        public static implicit operator Action(SavedHotbarSlot s) => new(s.CommandId, s.CommandType);
+        public static implicit operator Action(HotbarSlot h) => new(h.CommandId, h.CommandType, h);
+        public static implicit operator HotbarSlot(Action a) => new() { CommandId = a.CommandId, CommandType = a.CommandType };
+        public static implicit operator HotbarSlot*(Action a)
         {
             var h = a.Slot ?? a;
-            return (HotBarSlot*)Unsafe.AsPointer(ref h);
+            return (HotbarSlot*)Unsafe.AsPointer(ref h);
         }
     }
 
@@ -50,8 +50,8 @@ internal static unsafe class Actions
         var contents = new Action[slotCount];
         try
         {
-            ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotBar : ref RaptureModule->HotBarsSpan[barID];
-            var span = hotbar.SlotsSpan;
+            ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotbar : ref RaptureModule->Hotbars[barID];
+            var span = hotbar.Slots;
 
             if (span == null) return contents;
 
@@ -70,12 +70,12 @@ internal static unsafe class Actions
         }
     }
 
-    private static Span<SavedHotBarSlot> GetSavedSpan(int job, int barID)
+    private static Span<SavedHotbarSlot> GetSavedSpan(int job, int barID)
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
-        var savedBars = RaptureModule->SavedHotBarsSpan;
-        ref var savedBar = ref savedBars[adjustedJob].HotBarsSpan[barID];
-        return savedBar.SlotsSpan;
+        var savedBars = RaptureModule->SavedHotbars;
+        ref var savedBar = ref savedBars[adjustedJob].HotBars[barID];
+        return savedBar.Slots;
     }
 
     /// <summary>Retrieves the saved hotbar contents for a specific job</summary>
@@ -113,7 +113,7 @@ internal static unsafe class Actions
             {
                 ref var savedSlot = ref span[i + targetStart];
                 var source = sourceActions[i + sourceStart];
-                
+
                 if (source.Matches(savedSlot)) continue;
 
                 RaptureModule->WriteSavedSlot((uint)job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
@@ -132,11 +132,11 @@ internal static unsafe class Actions
     {
         try
         {
-            ref var targetBar = ref RaptureModule->HotBarsSpan[targetBarID];
+            ref var targetBar = ref RaptureModule->Hotbars[targetBarID];
 
             for (var i = 0; i < count; i++)
             {
-                ref var targetSlot = ref targetBar.SlotsSpan[i + targetStart];
+                ref var targetSlot = ref targetBar.Slots[i + targetStart];
                 var source = sourceButtons[i + sourceStart];
 
                 if (source.Matches(targetSlot)) continue;

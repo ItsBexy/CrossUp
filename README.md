@@ -1,4 +1,4 @@
-# CrossUp (Test Release)
+# CrossUp
 
 This plugin adds several customization options to the Cross Hotbar, FFXIV's main control interface for gamepad users
 

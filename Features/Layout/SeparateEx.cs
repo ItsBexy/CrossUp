@@ -5,8 +5,10 @@ using CrossUp.Game.Hotbar;
 using CrossUp.Utility;
 using Dalamud.Game.Addon.Lifecycle;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using static CrossUp.CrossUp;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
+
+// ReSharper disable RedundantEnumCaseLabelForDefaultSection
 
 namespace CrossUp.Features.Layout
 {
@@ -89,7 +91,7 @@ namespace CrossUp.Features.Layout
                                   .SetVis(true)
                                   .SetSize(295, 120)
                                   .SetPos(anchorX + (rlX + split) * scale, anchorY + rlY * scale);
-                
+
             Bars.LR.BorrowBar.BarNumText.SetScale(0F);
             Bars.RL.BorrowBar.BarNumText.SetScale(0F);
 
@@ -197,7 +199,7 @@ namespace CrossUp.Features.Layout
                         break;
                 }
             }
-            
+
             var alpha = select == ActionCrossSelect.None ? Bars.Cross.AddonCross->AlphaStandard : Bars.Cross.AddonCross->AlphaInactive;
 
             StyleSlots(Bars.LR.BorrowBar, alpha);

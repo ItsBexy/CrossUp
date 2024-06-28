@@ -30,7 +30,7 @@ internal sealed class IPC : IDisposable
     public IPC()
     {
         Dispose();
-            
+
         Provider.Available = PluginInterface.GetIpcProvider<bool>("CrossUp.Available");
         Provider.Available.RegisterFunc(static () => true);
 

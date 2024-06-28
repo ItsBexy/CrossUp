@@ -2,8 +2,8 @@
 using System.Numerics;
 using CrossUp.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using static CrossUp.CrossUp;
 using static CrossUp.Game.Hotbar.Actions;
+using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
 
 namespace CrossUp.Game.Hotbar;
@@ -63,6 +63,9 @@ internal static unsafe partial class Bars
             internal static void Check()
             {
                 var selected = AddonCross->Selected;
+                if (selected == ActionCrossSelect.DoubleCrossLeft)
+                {
+                    selected = ActionCrossSelect.None;}
                 if (selected == Current) return;
                 Previous = Current;
                 Current = selected;
@@ -86,7 +89,7 @@ internal static unsafe partial class Bars
 
         internal static class ChangeSetDisplay
         {
-            internal static NodeWrapper Container => new(Base[2u], pos: new(146, 0));
+            internal static NodeWrapper ChangeSetContainer => new(Base[2u], pos: new(146, 0));
 
             internal static IEnumerable<NodeWrapper> Nums => new[]
             {
@@ -103,7 +106,7 @@ internal static unsafe partial class Bars
             internal static NodeWrapper Text => Base[3u];
         }
 
-        internal static Action[] Actions => GetByBarID(AddonCross->PetBar ? 19 : SetID.Current, 16);
+        internal static Action[] Actions => GetByBarID(AddonCross->DisplayPetBarCross ? 19 : SetID.Current, 16);
 
         public static class SetID
         {
@@ -122,12 +125,11 @@ internal static unsafe partial class Bars
 
     internal class WXHB
     {
-        internal static bool Exists => LL.Exists && RR.Exists;
+        internal static bool Exists => LL.Base.Exists() && RR.Base.Exists();
 
         internal class LL
         {
             internal static BaseWrapper Base = new("_ActionDoubleCrossL");
-            internal static bool Exists => Base.Exists();
             internal static NodeWrapper SelectBG => new(Base[8u], size: new(304, 140));
             internal static NodeWrapper MiniSelect => new(Base[7u], size: new(166, 140));
         }
@@ -135,7 +137,6 @@ internal static unsafe partial class Bars
         internal class RR
         {
             internal static BaseWrapper Base = new("_ActionDoubleCrossR");
-            internal static bool Exists => Base.Exists();
             internal static NodeWrapper SelectBG => new(Base[8u], size: new(304, 140));
             internal static NodeWrapper MiniSelect => new(Base[7u], size: new(166, 140));
         }

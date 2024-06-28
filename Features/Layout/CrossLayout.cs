@@ -4,6 +4,7 @@ using System;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
+// ReSharper disable RedundantEnumCaseLabelForDefaultSection
 
 namespace CrossUp.Features.Layout
 {
@@ -24,7 +25,7 @@ namespace CrossUp.Features.Layout
             Bars.Cross.Padlock[2u].SetVis(!Profile.HidePadlock);
             Bars.Cross.SetDisplay.SetVis(!Profile.HideSetText)
                                  .SetRelativePos(Profile.SetTextOffset.X + split, Profile.SetTextOffset.Y);
-            Bars.Cross.ChangeSetDisplay.Container.SetRelativePos(Profile.ChangeSetOffset.X + split, Profile.ChangeSetOffset.Y);
+            Bars.Cross.ChangeSetDisplay.ChangeSetContainer.SetRelativePos(Profile.ChangeSetOffset.X + split, Profile.ChangeSetOffset.Y);
             Bars.Cross.LTtext.SetScale(Profile.HideTriggerText ? 0F : 1F);
             Bars.Cross.RTtext.SetScale(Profile.HideTriggerText ? 0F : 1F);
 
@@ -134,7 +135,7 @@ namespace CrossUp.Features.Layout
             Bars.Cross.Padlock.SetRelativePos();
             Bars.Cross.Padlock[2u].SetVis(true);
             Bars.Cross.SetDisplay.SetVis(true).SetRelativePos();
-            Bars.Cross.ChangeSetDisplay.Container.SetRelativePos();
+            Bars.Cross.ChangeSetDisplay.ChangeSetContainer.SetRelativePos();
             Bars.Cross.LTtext.SetScale();
             Bars.Cross.RTtext.SetScale();
             Bars.Cross.MiniSelectL.SetSize();

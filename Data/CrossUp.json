@@ -1,15 +1,13 @@
 {
-  "Author": "ItsBexy",
-  "Name": "CrossUp",
-  "Punchline": "Customize the Cross Hotbar!",
-  "Description": "This plugin provides customizations for the look and feel of the Cross Hotbar\n\n-Split up the left/right hotbars\nDisplay Expanded Hold Controls Separately\n-Customize colors and element positions\n-Greater control over which sets your extra bars are mapped to",
-  "InternalName": "crossUp",
-  "AssemblyVersion": "1.0.1.6",
-  "Tags": [
-    "hotbar",
-    "UI",
-    "gamepad",
-    "controller",
-    "HUD"
-  ]
+  "version": "1.7.0.0",
+  "dependencies": {
+    "net8.0": {
+      "DalamudPackager": {
+        "type": "Direct",
+        "requested": "[2.1.13, )",
+        "resolved": "2.1.13",
+        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+      }
+    }
+  }
 }
