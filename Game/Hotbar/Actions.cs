@@ -74,7 +74,7 @@ internal static unsafe class Actions
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
         var savedBars = RaptureModule->SavedHotbars;
-        ref var savedBar = ref savedBars[adjustedJob].HotBars[barID];
+        ref var savedBar = ref savedBars[adjustedJob].Hotbars[barID];
         return savedBar.Slots;
     }
 
