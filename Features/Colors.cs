@@ -112,8 +112,8 @@ internal class Color
             for (uint bID = 2; bID <= 5; bID++)
             {
                 var iconNode = Bars.Cross.Buttons[set][bID][2u];
-                iconNode[8u].SetColor(glowA);
-                iconNode[4u].SetColor(glowB);
+                iconNode[11u].SetColor(glowA);
+                iconNode[7u].SetColor(glowB);
             }
         }
 
@@ -123,8 +123,8 @@ internal class Color
             for (uint bID = 2; bID <= 5; bID++)
             {
                 var iconNode = Bars.WXHB.Buttons[set][bID][2u];
-                iconNode[8u].SetColor(glowA);
-                iconNode[4u].SetColor(glowB);
+                iconNode[11u].SetColor(glowA);
+                iconNode[7u].SetColor(glowB);
             }
         }
 
@@ -133,12 +133,12 @@ internal class Color
             for (var i = 0; i < 12; i++)
             {
                 var iconNodeLR = Bars.LR.Buttons[i][3u][2u];
-                iconNodeLR[8u].SetColor(glowA);
-                iconNodeLR[4u].SetColor(glowB);
+                iconNodeLR[11u].SetColor(glowA);
+                iconNodeLR[7u].SetColor(glowB);
 
                 var iconNodeRL = Bars.RL.Buttons[i][3u][2u];
-                iconNodeRL[8u].SetColor(glowA);
-                iconNodeRL[4u].SetColor(glowB);
+                iconNodeRL[11u].SetColor(glowA);
+                iconNodeRL[7u].SetColor(glowB);
             }
         }
 

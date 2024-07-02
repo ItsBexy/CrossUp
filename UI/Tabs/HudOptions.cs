@@ -60,7 +60,6 @@ internal class HudOptions
             if (current) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
             if (current) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
 
-
             if (ImGui.Button(Strings.NumSymbols[i]))
             {
                 ChatHelper.SendMessage($"/hudlayout {i}");
