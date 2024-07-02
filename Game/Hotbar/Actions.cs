@@ -12,7 +12,7 @@ namespace CrossUp.Game.Hotbar;
 /// <summary>Methods pertaining to hotbar actions</summary>
 internal static unsafe class Actions
 {
-    public static readonly RaptureHotbarModule* RaptureModule = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule();
+    public static RaptureHotbarModule* RaptureModule => Framework.Instance()->GetUIModule()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
     internal readonly struct Action
@@ -73,8 +73,9 @@ internal static unsafe class Actions
     private static Span<SavedHotbarSlot> GetSavedSpan(int job, int barID)
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
-        var savedBars = RaptureModule->SavedHotbars;
-        ref var savedBar = ref savedBars[adjustedJob].Hotbars[barID];
+
+        ref var savedBar = ref RaptureModule->SavedHotbars[adjustedJob].Hotbars[barID];
+
         return savedBar.Slots;
     }
 
@@ -89,7 +90,7 @@ internal static unsafe class Actions
 
             for (var i = 0; i < slotCount; i++)
             {
-                ref var savedSlot = ref span[i];
+                var savedSlot = span[i];
                 contents[i] = savedSlot;
             }
 
@@ -107,19 +108,19 @@ internal static unsafe class Actions
     {
         try
         {
-            var span = GetSavedSpan(job, targetID);
+             var span = GetSavedSpan(job, targetID);
 
-            for (var i = 0; i < count; i++)
-            {
-                ref var savedSlot = ref span[i + targetStart];
-                var source = sourceActions[i + sourceStart];
+             for (var i = 0; i < count; i++)
+             {
+                 var savedSlot = span[i + targetStart];
+                 var source = sourceActions[i + sourceStart];
 
-                if (source.Matches(savedSlot)) continue;
+                 if (source.Matches(savedSlot)) continue;
 
-                RaptureModule->WriteSavedSlot((uint)job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
+                 RaptureModule->WriteSavedSlot((uint)job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
 
-                Log.Verbose($"Saving {source.CommandType} {source.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
-            }
+                 Log.Verbose($"Saving {source.CommandType} {source.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
+             }
         }
         catch (Exception ex)
         {
@@ -138,6 +139,7 @@ internal static unsafe class Actions
             {
                 ref var targetSlot = ref targetBar.Slots[i + targetStart];
                 var source = sourceButtons[i + sourceStart];
+
 
                 if (source.Matches(targetSlot)) continue;
 
