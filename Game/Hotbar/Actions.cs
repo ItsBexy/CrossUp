@@ -1,5 +1,6 @@
 ﻿using CrossUp.Features.Layout;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace CrossUp.Game.Hotbar;
 /// <summary>Methods pertaining to hotbar actions</summary>
 internal static unsafe class Actions
 {
-    public static RaptureHotbarModule* RaptureModule => Framework.Instance()->GetUIModule()->GetRaptureHotbarModule();
+    public static RaptureHotbarModule* RaptureModule => UIModule.Instance()->GetRaptureHotbarModule();
 
     /// <summary>An action that can be assigned to a hotbar. Can include a reference to a specific Hotbar slot.</summary>
     internal readonly struct Action

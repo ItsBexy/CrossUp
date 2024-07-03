@@ -283,10 +283,9 @@ namespace CrossUp.Features.Layout
         private static void ResetBar(int barID, int job)
         {
             if (!Bars.ActionBars[barID].Exists) return;
-
-            // TODO: fix once I can retrieve accurate data
-         /* var savedActions = Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID);
-            Actions.Copy(savedActions, 0, barID, 0, 12);*/
+            
+            var savedActions = Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID);
+            Actions.Copy(savedActions, 0, barID, 0, 12);
 
             Bars.ActionBars[barID].Root.SetPos(Bars.ActionBars[barID].Base.X, Bars.ActionBars[barID].Base.Y)
                                        .SetSize()

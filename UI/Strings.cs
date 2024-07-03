@@ -52,7 +52,7 @@ internal static class Strings
         public static string DisplayExSeparately       => Localize("DisplayExSeparately", "Display Expanded Hold Controls Separately");
         public static string BarPosition()             => Localize("BarPosition", "Bar Position");
         public static string BarPosition(string s)     => string.Format(Localize("BarPositionSpecific", "{0} Bar Position"), s);
-        public static string SepExWarning              => Localize("SepExWarning", "NOTE: This feature functions by borrowing the buttons from two of your standard mouse/keyboard hotbars.\n\nATTENTION: as of version 1.7.0.3, the plugin must overwrite the contents of your borrowed bars in order to avoid more severe errors. Sorry about that!");
+        public static string SepExWarning              => Localize("SepExWarning", "NOTE: This feature functions by borrowing the buttons from two of your standard mouse/keyboard hotbars. The hotbars you choose will not be overwritten, but they will be unavailable while the feature is active.");
         public static string ShowOnlyOneBar            => Localize("ShowOnlyOneBar", "Show Only One Bar");
         public static string ShowBoth                  => Localize("ShowBoth", "Show Both");
         public static string SelectTwoBars             => Localize("SelectTwoBars", "Select 2 Bars:");
