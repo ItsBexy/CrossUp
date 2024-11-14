@@ -162,6 +162,7 @@ internal class LookAndFeel
             ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
             if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HidePad", ref hide)) Apply();
             ImGui.PopStyleColor(1);
+            return;
 
             void Apply() => InternalCmd.Padlock(!hide, x, y);
         }
@@ -197,6 +198,7 @@ internal class LookAndFeel
             ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
             if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HideSetText", ref hide)) Apply();
             ImGui.PopStyleColor(1);
+            return;
 
             void Apply() => InternalCmd.SetNumText(!hide, x, y);
         }
@@ -225,6 +227,7 @@ internal class LookAndFeel
             if (ImGui.InputInt("##ChangeSetY", ref y)) Apply();
 
             Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
+            return;
 
             void Apply() => InternalCmd.ChangeSet(x, y);
         }

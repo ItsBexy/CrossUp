@@ -8,7 +8,7 @@ namespace CrossUp.Game;
 /// <summary>Class for retrieving/setting character configuration options</summary>
 public static class GameConfig
 {
-    public readonly struct GameOption
+    internal readonly record struct GameOption
     {
         private readonly dynamic Option;
 
@@ -98,16 +98,20 @@ public static class GameConfig
         internal static class ExMaps
         {
             /// <summary>L->R Expanded Hold Controls</summary>
-            internal static readonly GameOption[] LR = { new(UiConfigOption.HotbarCrossAdvancedSettingRight), new(UiConfigOption.HotbarCrossAdvancedSettingRightPvp) };
+            internal static readonly GameOption[] LR = [new(UiConfigOption.HotbarCrossAdvancedSettingRight), new(UiConfigOption.HotbarCrossAdvancedSettingRightPvp)
+            ];
 
             /// <summary>R->L Expanded Hold Controls</summary>
-            internal static readonly GameOption[] RL = { new(UiConfigOption.HotbarCrossAdvancedSettingLeft), new(UiConfigOption.HotbarCrossAdvancedSettingLeftPvp) };
+            internal static readonly GameOption[] RL = [new(UiConfigOption.HotbarCrossAdvancedSettingLeft), new(UiConfigOption.HotbarCrossAdvancedSettingLeftPvp)
+            ];
 
             /// <summary>Left WXHB</summary>
-            internal static readonly GameOption[] LL = { new(UiConfigOption.HotbarWXHBSetLeft), new(UiConfigOption.HotbarWXHBSetLeftPvP) };
+            internal static readonly GameOption[] LL = [new(UiConfigOption.HotbarWXHBSetLeft), new(UiConfigOption.HotbarWXHBSetLeftPvP)
+            ];
 
             /// <summary>Right WXHB</summary>
-            internal static readonly GameOption[] RR = { new(UiConfigOption.HotbarWXHBSetRight), new(UiConfigOption.HotbarWXHBSetRightPvP) };
+            internal static readonly GameOption[] RR = [new(UiConfigOption.HotbarWXHBSetRight), new(UiConfigOption.HotbarWXHBSetRightPvP)
+            ];
         }
 
         /// <summary><term>Sliders</term> Transparency settings for Cross Hotbar buttons<br/><br/>Returns 0-100 (Converted by game to alpha 0-255)</summary>
@@ -126,7 +130,7 @@ public static class GameConfig
         /// <term>0</term> Job-specific<br/>
         /// <term>1</term> Shared</summary>
         internal static readonly GameOption[] Shared =
-        {
+        [
             new(UiConfigOption.HotbarCommon01),
             new(UiConfigOption.HotbarCommon02),
             new(UiConfigOption.HotbarCommon03),
@@ -146,7 +150,7 @@ public static class GameConfig
             new(UiConfigOption.HotbarCrossCommon06),
             new(UiConfigOption.HotbarCrossCommon07),
             new(UiConfigOption.HotbarCrossCommon08)
-        };
+        ];
 
         /// <summary>
         /// <term>Bitmask</term> Represents the visibility setting for each action bar. Use <see cref="GetVis"/> and <see cref="SetVis"/> to read / set the visibility of individual bars.

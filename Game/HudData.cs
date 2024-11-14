@@ -50,7 +50,7 @@ internal sealed class HudData : IDisposable
         var hudScreen = new BaseWrapper("_HudLayoutScreen");
         var root = Bars.Cross.Root.Node;
 
-        if (hudScreen == null || root == null) return false;
+        if (hudScreen.UnitBase == null || root == null) return false;
 
         var scale = root->ScaleX;
         var hudNodes = hudScreen.NodeList;

@@ -23,8 +23,8 @@ internal class SeparateEx
         var onlyOne = Profile.OnlyOneEx;
 
         bool[] borrowBars =
-        {
-                false,
+        [
+            false,
                 Config.LRborrow == 1 || Config.RLborrow == 1,
                 Config.LRborrow == 2 || Config.RLborrow == 2,
                 Config.LRborrow == 3 || Config.RLborrow == 3,
@@ -34,7 +34,7 @@ internal class SeparateEx
                 Config.LRborrow == 7 || Config.RLborrow == 7,
                 Config.LRborrow == 8 || Config.RLborrow == 8,
                 Config.LRborrow == 9 || Config.RLborrow == 9
-            };
+        ];
 
         var borrowCount = 0;
         for (var i = 1; i < 10; i++) if (borrowBars[i]) borrowCount++;
@@ -147,7 +147,6 @@ internal class SeparateEx
 
                                 Features.Layout.SeparateEx.Reset();
                                 Features.Layout.SeparateEx.EnableIfReady();
-                                Config.Save();
                             }
                             else
                             {
@@ -156,8 +155,9 @@ internal class SeparateEx
 
                                 Features.Layout.SeparateEx.Reset();
                                 Layout.Update();
-                                Config.Save();
                             }
+
+                            Config.Save();
                         }
                     }
                     else

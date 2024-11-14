@@ -1,9 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using CrossUp.Features;
 using CrossUp.Game.Hotbar;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.ClientState.Conditions;
+using System;
+using System.Threading.Tasks;
 using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
 
@@ -11,7 +11,19 @@ namespace CrossUp.Game
 {
     internal sealed class Events : IDisposable
     {
-        private readonly string[] AllHotbars = { "_ActionCross", "_ActionBar", "_ActionBar01", "_ActionBar02", "_ActionBar03", "_ActionBar04", "_ActionBar05", "_ActionBar06", "_ActionBar07", "_ActionBar08", "_ActionBar09" };
+        private readonly string[] AllHotbars = [
+            "_ActionCross",
+            "_ActionBar",
+            "_ActionBar01",
+            "_ActionBar02",
+            "_ActionBar03",
+            "_ActionBar04",
+            "_ActionBar05",
+            "_ActionBar06",
+            "_ActionBar07",
+            "_ActionBar08",
+            "_ActionBar09"
+        ];
 
         public Events()
         {

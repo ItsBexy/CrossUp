@@ -80,7 +80,7 @@ namespace CrossUp.Features.Layout
 
             var anchorX = (int)(Bars.Cross.Root.Node->X + 146 * scale);
             var anchorY = (int)(Bars.Cross.Root.Node->Y + 70 * scale);
-            var (lrX, lrY, rlX, rlY) = coords;
+            (int lrX, int lrY, int rlX, int rlY) = coords;
 
             Bars.LR.BorrowBar.Root.SetScale(scale)
                                   .SetVis(true)
@@ -280,10 +280,10 @@ namespace CrossUp.Features.Layout
         }
 
         /// <summary>Put a hotbar back the way we found it based on HUD layout settings and saved actions</summary>
-        private static void ResetBar(int barID, int job)
+        private static void ResetBar(int barID, uint job)
         {
             if (!Bars.ActionBars[barID].Exists) return;
-            
+
             var savedActions = Actions.GetSaved(GameConfig.Hotbar.Shared[barID] ? 0 : job, barID);
             Actions.Copy(savedActions, 0, barID, 0, 12);
 

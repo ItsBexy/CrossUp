@@ -33,7 +33,7 @@ namespace CrossUp.Features.Layout
 
             if (!forceArrange && select == previous) return;
 
-            var (lrX, lrY, rlX, rlY) = coords;
+            (int lrX, int lrY, int rlX, int rlY) = coords;
             var miniSize = (ushort)(Profile.SelectStyle == 2 || (mixBar && split > 0) ? 0 : 166);
             switch (select)
             {

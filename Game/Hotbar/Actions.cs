@@ -1,5 +1,4 @@
 ﻿using CrossUp.Features.Layout;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
@@ -71,17 +70,17 @@ internal static unsafe class Actions
         }
     }
 
-    private static Span<SavedHotbarSlot> GetSavedSpan(int job, int barID)
+    private static Span<SavedHotbarSlot> GetSavedSpan(uint job, int barID)
     {
         var adjustedJob = Job.IsPvP ? Job.PvpID(job) : job;
 
-        ref var savedBar = ref RaptureModule->SavedHotbars[adjustedJob].Hotbars[barID];
+        ref var savedBar = ref RaptureModule->SavedHotbars[(int)adjustedJob].Hotbars[barID];
 
         return savedBar.Slots;
     }
 
     /// <summary>Retrieves the saved hotbar contents for a specific job</summary>
-    internal static Action[] GetSaved(int job, int barID, int slotCount = 12)
+    internal static Action[] GetSaved(uint job, int barID, int slotCount = 12)
     {
         var contents = new Action[slotCount];
 
@@ -105,7 +104,7 @@ internal static unsafe class Actions
     }
 
     /// <summary>Writes a list of actions to the user's saved hotbar settings</summary>
-    private static void Save(IList<Action> sourceActions, int sourceStart, int targetID, int targetStart, int count, int job)
+    private static void Save(IList<Action> sourceActions, int sourceStart, int targetID, int targetStart, int count, uint job)
     {
         try
         {
@@ -118,7 +117,7 @@ internal static unsafe class Actions
 
                  if (source.Matches(savedSlot)) continue;
 
-                 RaptureModule->WriteSavedSlot((uint)job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
+                 RaptureModule->WriteSavedSlot(job, (uint)targetID, (uint)(i + targetStart), source, false, Job.IsPvP);
 
                  Log.Verbose($"Saving {source.CommandType} {source.CommandId} to Bar #{targetID} ({(targetID > 9 ? $"Cross Hotbar Set {targetID - 9}" : $"Hotbar {targetID + 1}")}) Slot {i + targetStart}");
              }

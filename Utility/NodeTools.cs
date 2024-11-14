@@ -20,27 +20,17 @@ namespace CrossUp.Utility
     /// [int <b>i</b>] - Returns a node by its index in UldManager.NodeList<br/>
     /// [uint <b>id</b>]  - Returns a node by its ID
     /// </summary>
-    public sealed unsafe class BaseWrapper
+    public sealed unsafe class BaseWrapper(AtkUnitBase* unitBase, string addonName, bool fromEvent = false)
     {
         /// <param name="addonName">The internal name of a UI Addon</param>
         /// <param name="fromEvent">Whether this unitBase was triggered by an AddonLifeCycle listener (bypasses null-checks)</param>
-        public BaseWrapper(string addonName, bool fromEvent = false)
+        public BaseWrapper(string addonName, bool fromEvent = false) : this((AtkUnitBase*)GameGui.GetAddonByName(addonName), addonName, fromEvent)
         {
-            UnitBase = (AtkUnitBase*)GameGui.GetAddonByName(addonName);
-            AddonName = addonName;
-            FromEvent = fromEvent;
         }
 
-        public BaseWrapper(AtkUnitBase* unitBase, string addonName, bool fromEvent = false)
-        {
-            UnitBase = unitBase;
-            AddonName = addonName;
-            FromEvent = fromEvent;
-        }
-
-        public string AddonName { get; }
-        public readonly AtkUnitBase* UnitBase;
-        public readonly bool FromEvent;
+        public string AddonName { get; } = addonName;
+        public readonly AtkUnitBase* UnitBase = unitBase;
+        public readonly bool FromEvent = fromEvent;
 
         public bool Exists(bool posCheck = true)
         {

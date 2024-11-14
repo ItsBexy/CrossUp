@@ -17,7 +17,7 @@ public class CrossUpConfig : IPluginConfiguration
 
     // unique configs per HUD Slot
     public bool UniqueHud              { get; set; }
-    public ConfigProfile[] Profiles    { get; set; } = { new(), new(), new(), new(), new() };
+    public ConfigProfile[] Profiles    { get; set; } = [new(), new(), new(), new(), new()];
 
     // Separate Expanded Hold Configs
     public int LRborrow                { get; set; } = -1;

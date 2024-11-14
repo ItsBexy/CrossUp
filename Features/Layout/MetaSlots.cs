@@ -122,7 +122,7 @@ namespace CrossUp.Features.Layout
             }
 
             internal static readonly MetaSlot[] LR =
-            {
+            [
                 new(pos: new(0, 24),   origin: new(102, 39)),
                 new(pos: new(42, 0),   origin: new(60, 63)),
                 new(pos: new(84, 24),  origin: new(18, 39)),
@@ -132,10 +132,10 @@ namespace CrossUp.Features.Layout
                 new(pos: new(180, 0),  origin: new(12, 63)),
                 new(pos: new(222, 24), origin: new(-30, 39)),
                 new(pos: new(180, 48), origin: new(12, 15))
-            };
+            ];
 
             internal static readonly MetaSlot[] RL =
-            {
+            [
                 new(pos: new(0, 24),   origin: new(102, 39)),
                 new(pos: new(42, 0),   origin: new(60, 63)),
                 new(pos: new(84, 24),  origin: new(18, 39)),
@@ -145,39 +145,35 @@ namespace CrossUp.Features.Layout
                 new(pos: new(180, 0),  origin: new(12, 63)),
                 new(pos: new(222, 24), origin: new(-30, 39)),
                 new(pos: new(180, 48), origin: new(12, 15))
-            };
+            ];
 
             internal static readonly MetaSlot[][] Cross =
-            {
-                new MetaSlot[]
-                {
+            [
+                [
                     new(pos: new(-142, 24), origin: new(94, 39)),
                     new(pos: new(-100, 0),  origin: new(52, 63)),
                     new(pos: new(-58, 24),  origin: new(10, 39)),
                     new(pos: new(-100, 48), origin: new(52, 15))
-                },
-                new MetaSlot[]
-                {
+                ],
+                [
                     new(pos: new(-4, 24),   origin: new(62, 39)),
                     new(pos: new(38, 0),    origin: new(20, 63)),
                     new(pos: new(80, 24),   origin: new(-22, 39)),
                     new(pos: new(38, 48),   origin: new(20, 15))
-                },
-                new MetaSlot[]
-                {
+                ],
+                [
                     new(pos: new(142, 24),  origin: new(94, 39)),
                     new(pos: new(184, 0),   origin: new(52, 63)),
                     new(pos: new(226, 24),  origin: new(10, 39)),
                     new(pos: new(184, 48),  origin: new(52, 15))
-                },
-                new MetaSlot[]
-                {
+                ],
+                [
                     new(pos: new(280, 24),  origin: new(62, 39)),
                     new(pos: new(322, 0),   origin: new(20, 63)),
                     new(pos: new(364, 24),  origin: new(-22, 39)),
                     new(pos: new(322, 48),  origin: new(20, 15))
-                }
-            };
+                ]
+            ];
         }
     }
 }

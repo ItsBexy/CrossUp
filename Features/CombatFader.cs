@@ -19,14 +19,18 @@ internal class CombatFader
         {
             var progress = (float)decimal.Divide((DateTime.Now - Start).Milliseconds, Duration.Milliseconds);
 
-            if (!(progress >= 1) && GameConfig.Cross.Transparency.Standard != To!)
+            if (!(progress >= 1) && To != null && GameConfig.Cross.Transparency.Standard != To)
             {
-                GameConfig.Cross.Transparency.Standard.Set((int)(progress < 1 ? (To! - From) * progress + From : To!));
+                    GameConfig.Cross.Transparency.Standard.Set((int)(progress < 1 ? (To.Value - From) * progress + From : To.Value));
             }
             else
             {
                 Active = false;
-                GameConfig.Cross.Transparency.Standard.Set((int)To!);
+                if (To != null)
+                {
+                    GameConfig.Cross.Transparency.Standard.Set((int)To);
+                }
+
                 To = null;
             }
         }

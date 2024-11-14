@@ -147,5 +147,5 @@ internal static class Strings
         }
     }
 
-    public static readonly string[] NumSymbols = { "", "", "", "", "" };
+    public static readonly string[] NumSymbols = ["", "", "", "", ""];
 }

@@ -145,18 +145,16 @@ namespace CrossUp.Game.Hotbar
             /// </summary>
             private static void FlashCheck(BaseWrapper bar, ref ushort[] cdPartIDs)
             {
-                //TODO: Fix and restore at some point
-                return;
-#pragma warning disable CS0162
+                //TODO: apparently I temporarily removed this but I don't know the reason so let's see if it gets breaky again?
+
                 for (uint i = 0; i < 12; i++)
                 {
                     var cdNode = bar[i + 8u][3u][2u][17u];
                     var cdPartID = ((AtkImageNode*)cdNode.Node)->PartId;
-                    if (cdNode.Node->IsVisible() && cdPartID == 80 && cdPartIDs[i] < 75)
-                        cdNode.SetVis(false);
+                    if (cdNode.Node->IsVisible() && cdPartID == 80 && cdPartIDs[i] < 75) cdNode.SetVis(false);
                     cdPartIDs[i] = cdPartID;
                 }
-#pragma warning restore CS0162
+
             }
 
         }

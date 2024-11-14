@@ -91,8 +91,8 @@ internal static unsafe partial class Bars
         {
             internal static NodeWrapper ChangeSetContainer => new(Base[2u], pos: new(146, 0));
 
-            internal static IEnumerable<NodeWrapper> Nums => new[]
-            {
+            internal static IEnumerable<NodeWrapper> Nums =>
+            [
                 Base[14u],
                 Base[15u],
                 Base[16u],
@@ -101,7 +101,7 @@ internal static unsafe partial class Bars
                 Base[11u],
                 Base[10u],
                 Base[9u]
-            };
+            ];
 
             internal static NodeWrapper Text => Base[3u];
         }
@@ -184,7 +184,8 @@ internal static unsafe partial class Bars
     }
 
     /// <summary>All Mouse/KB hotbars</summary>
-    internal static readonly ActionBar[] ActionBars = { new(0), new(1), new(2), new(3), new(4), new(5), new(6), new(7), new(8), new(9) };
+    internal static readonly ActionBar[] ActionBars = [new(0), new(1), new(2), new(3), new(4), new(5), new(6), new(7), new(8), new(9)
+    ];
 
     /// <summary>A Mouse/KB hotbar</summary>
     internal sealed partial class ActionBar
@@ -220,14 +221,14 @@ internal static unsafe partial class Bars
 
     /// <summary>Original sizes for the Mouse/KB bars, by [int gridType]</summary>
     private static readonly Vector2[] DefaultBarSizes =
-    {
+    [
         new(624, 72),
         new(331, 121),
         new(241, 170),
         new(162, 260),
         new(117, 358),
         new(72, 618)
-    };
+    ];
 
     /// <summary>Original button positions for the Mouse/KB bars, by [int gridType]</summary>
     private static readonly Vector2[,] DefaultBarGrids =

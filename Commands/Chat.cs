@@ -155,14 +155,14 @@ internal sealed class ChatCmd : IDisposable
         {
             if (hex[0].ToString() == "#") hex = hex[1..];
 
-            static float ToFloat(string hex, int start) =>
-                (float)Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
-
             var r = ToFloat(hex, 0);
             var g = ToFloat(hex, 2);
             var b = ToFloat(hex, 4);
 
             return new Vector3(r, g, b);
+
+            static float ToFloat(string hex, int start) =>
+                (float)Parse(hex.Substring(start, 2), NumberStyles.HexNumber) / 255;
         }
 
         private static void SplitBar(IReadOnlyList<string> argList)
