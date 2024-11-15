@@ -26,7 +26,7 @@ namespace CrossUp.Game.Hotbar
 
                 switch (reArgs.AtkEventType)
                 {
-                    case 50 or 54 when SeparateEx.Ready && GameConfig.Cross.Enabled:
+                    case 53 or 57 when SeparateEx.Ready && GameConfig.Cross.Enabled:
                     {
                         var barID = barBase->RaptureHotbarId;
                         Log.Debug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next Update event");
@@ -34,7 +34,7 @@ namespace CrossUp.Game.Hotbar
                         DragDrop = true;
                         break;
                     }
-                    case 47 when IsSetUp:
+                    case 50 when IsSetUp:
                         CrossLayout.UnassignedSlotVis(true);
                         break;
                 }
@@ -93,14 +93,24 @@ namespace CrossUp.Game.Hotbar
                 var barBase = (AddonActionBarBase*)args.Addon;
                 try
                 {
+                    if (Job.HasChanged)
+                    {
+                        Job.HandleJobChange();
+                        DragDrop = false;
+                    }
+
+                    if (SetID.HasChanged())
+                    {
+                        SetSwitching.HandleSetChange(barBase->RaptureHotbarId);
+                        DragDrop = false;
+                    }
+
                     if (DragDrop)
                     {
                         Hotbar.Actions.HandleDragDrop();
                         DragDrop = false;
                     }
 
-                    if (Job.HasChanged) Job.HandleJobChange();
-                    if (SetID.HasChanged()) SetSwitching.HandleSetChange(barBase->RaptureHotbarId);
                     Layout.Update(EnableStateChanged);
                 }
                 catch (Exception ex)
