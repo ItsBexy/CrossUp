@@ -3,6 +3,7 @@ using CrossUp.Commands;
 using CrossUp.Features;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using static CrossUp.CrossUp;
 
@@ -12,63 +13,61 @@ internal class LookAndFeel
 {
     public static void DrawTab()
     {
-        if (!ImGui.BeginTabItem(Strings.LookAndFeel.TabTitle)) return;
+        using var lfTab = ImRaii.TabItem(Strings.LookAndFeel.TabTitle);
+
+        if (!lfTab) return;
 
         ImGui.Spacing();
 
-        if (ImGui.BeginTabBar("LookFeelSubTabs"))
+        using (ImRaii.TabBar("LookFeelSubTabs"))
         {
-            if (ImGui.BeginTabItem(Strings.LookAndFeel.CrossHotbarLayout))
+            using (var layoutTab = ImRaii.TabItem(Strings.LookAndFeel.CrossHotbarLayout))
             {
-                ImGui.Spacing();
-                ImGui.Indent(10);
-
-                if (ImGui.BeginTable("Layout", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+                if (layoutTab)
                 {
-                    ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
-                    ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed);
-                    ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
-                    ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.Spacing();
+                    ImGui.Indent(10);
 
-                    Rows.LRsplit();
-                    Rows.Padlock();
-                    Rows.SetNumText();
-                    Rows.ChangeSetDisplay();
-                    Rows.TriggerText();
-                    Rows.UnassignedSlots();
-                    Rows.CombatFade();
+                    using (ImRaii.Table("Layout", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+                    {
+                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
+                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed);
+                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
+                        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed);
 
-                    ImGui.EndTable();
+                        Rows.LRsplit();
+                        Rows.Padlock();
+                        Rows.SetNumText();
+                        Rows.ChangeSetDisplay();
+                        Rows.TriggerText();
+                        Rows.UnassignedSlots();
+                        Rows.CombatFade();
+                    }
                 }
-
-                ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(Strings.LookAndFeel.Colors))
+            using (var colorTab = ImRaii.TabItem(Strings.LookAndFeel.Colors))
             {
-                ImGui.Spacing();
-                ImGui.Indent(10);
-
-                if (ImGui.BeginTable("Colors", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+                if (colorTab)
                 {
-                    ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
-                    ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.Spacing();
+                    ImGui.Indent(10);
 
-                    Rows.BarHighlightColor();
-                    Rows.ButtonColor();
-                    Rows.TextColor();
+                    using (ImRaii.Table("Colors", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+                    {
+                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
+                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
 
-                    ImGui.EndTable();
+                        Rows.BarHighlightColor();
+                        Rows.ButtonColor();
+                        Rows.TextColor();
+                    }
                 }
-
-                ImGui.EndTabItem();
             }
 
-            ImGui.EndTabBar();
         }
 
         HudOptions.ProfileIndicator();
-        ImGui.EndTabItem();
     }
 
     private static class Rows
@@ -99,9 +98,7 @@ internal class LookAndFeel
                 ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.SplitDistance);
                 ImGui.TableNextColumn();
 
-                ImGui.PushID("resetSplit");
-                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.SplitDist(100);
-                ImGui.PopID();
+                if (ImGuiComponents.IconButton("resetSplit", FontAwesomeIcon.UndoAlt)) InternalCmd.SplitDist(100);
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * Helpers.Scale);
@@ -114,9 +111,7 @@ internal class LookAndFeel
 
                 ImGui.TableNextColumn();
 
-                ImGui.PushID("resetCenter");
-                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.Center(0);
-                ImGui.PopID();
+                if (ImGuiComponents.IconButton("resetCenter", FontAwesomeIcon.UndoAlt)) InternalCmd.Center(0);
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(90 * Helpers.Scale);
@@ -159,9 +154,10 @@ internal class LookAndFeel
             Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
 
             ImGui.TableNextColumn();
-            ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-            if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HidePad", ref hide)) Apply();
-            ImGui.PopStyleColor(1);
+            using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+            {
+                if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HidePad", ref hide)) Apply();
+            }
             return;
 
             void Apply() => InternalCmd.Padlock(!hide, x, y);
@@ -178,9 +174,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetSetText");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.SetNumText(true, 0, 0);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetSetText", FontAwesomeIcon.UndoAlt)) InternalCmd.SetNumText(true, 0, 0);
 
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(90 * Helpers.Scale);
@@ -195,9 +189,11 @@ internal class LookAndFeel
             Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
 
             ImGui.TableNextColumn();
-            ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-            if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HideSetText", ref hide)) Apply();
-            ImGui.PopStyleColor(1);
+
+            using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+            {
+                if (ImGui.Checkbox($"{Strings.LookAndFeel.Hide}##HideSetText", ref hide)) Apply();
+            }
             return;
 
             void Apply() => InternalCmd.SetNumText(!hide, x, y);
@@ -212,9 +208,7 @@ internal class LookAndFeel
             ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.ChangeSetDisplay);
 
             ImGui.TableNextColumn();
-            ImGui.PushID("resetChangeSet");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.ChangeSet(0, 0);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetChangeSet", FontAwesomeIcon.UndoAlt)) InternalCmd.ChangeSet(0, 0);
 
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(90 * Helpers.Scale);
@@ -271,19 +265,21 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.BeginGroup();
-            ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
-            ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
-            ImGui.EndGroup();
+            using (ImRaii.Group())
+            {
+                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
+                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
+            }
 
             ImGui.SameLine();
 
-            ImGui.BeginGroup();
-            ImGui.SetNextItemWidth(100 * Helpers.Scale);
-            if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
-            ImGui.SetNextItemWidth(100 * Helpers.Scale);
-            if (ImGui.SliderInt("##NonCombatTransparency", ref tOut, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
-            ImGui.EndGroup();
+            using (ImRaii.Group())
+            {
+                ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
+                ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                if (ImGui.SliderInt("##NonCombatTransparency", ref tOut, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
+            }
         }
 
         public static void BarHighlightColor()
@@ -301,9 +297,7 @@ internal class LookAndFeel
             ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.BackdropColor);
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetBG");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.SelectBG(0, 0, Color.Preset.MultiplyNeutral);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetBG", FontAwesomeIcon.UndoAlt)) InternalCmd.SelectBG(0, 0, Color.Preset.MultiplyNeutral);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);
@@ -345,9 +339,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetGlowA");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.ButtonGlow(Color.Preset.White);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetGlowA", FontAwesomeIcon.UndoAlt)) InternalCmd.ButtonGlow(Color.Preset.White);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);
@@ -358,9 +350,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetGlowB");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.ButtonPulse(Color.Preset.White);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetGlowB", FontAwesomeIcon.UndoAlt)) InternalCmd.ButtonPulse(Color.Preset.White);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);
@@ -383,9 +373,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetTextColor");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.TextColor(Color.Preset.White, textGlow);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetTextColor", FontAwesomeIcon.UndoAlt)) InternalCmd.TextColor(Color.Preset.White, textGlow);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);
@@ -396,9 +384,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetTextGlow");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.TextColor(textColor, Color.Preset.TextGlow);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetTextGlow", FontAwesomeIcon.UndoAlt)) InternalCmd.TextColor(textColor, Color.Preset.TextGlow);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);
@@ -410,9 +396,7 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            ImGui.PushID("resetBorder");
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.BorderColor(Color.Preset.White);
-            ImGui.PopID();
+            if (ImGuiComponents.IconButton("resetBorder", FontAwesomeIcon.UndoAlt)) InternalCmd.BorderColor(Color.Preset.White);
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(100 * Helpers.Scale);

@@ -4,6 +4,7 @@ using CrossUp.Game;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using static CrossUp.CrossUp;
 
@@ -13,7 +14,8 @@ internal class SeparateEx
 {
     public static void DrawTab()
     {
-        if (!ImGui.BeginTabItem(Strings.SeparateEx.TabTitle)) return;
+        using var ti = ImRaii.TabItem(Strings.SeparateEx.TabTitle);
+        if (!ti) return;
 
         var sepExBar = Profile.SepExBar;
         var lrX = (int)Profile.LRpos.X;
@@ -42,7 +44,7 @@ internal class SeparateEx
         Helpers.Spacing(2);
         ImGui.Indent(10);
 
-        if (ImGui.BeginTable("BarBorrowDesc", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+        using (ImRaii.Table("BarBorrowDesc", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
         {
             ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed);
             ImGui.TableSetupColumn("gap", ImGuiTableColumnFlags.WidthFixed, 20f * Helpers.Scale);
@@ -51,39 +53,41 @@ internal class SeparateEx
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
 
-            ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-            if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) InternalCmd.ExBarOn(sepExBar);
-            ImGui.PopStyleColor(1);
+            using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+            {
+                if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) InternalCmd.ExBarOn(sepExBar);
+            }
 
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2);
-            ImGui.PushTextWrapPos();
-            ImGui.TextWrapped(Strings.SeparateEx.SepExWarning);
-            ImGui.PopTextWrapPos();
-            ImGui.PopStyleColor();
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2))
+            {
+                ImGui.TextWrapped(Strings.SeparateEx.SepExWarning);
+            }
 
             Helpers.BumpCursorY(20f * Helpers.Scale);
 
             if (sepExBar)
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-                if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) InternalCmd.ExBarOnlyOne(true);
-                if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) InternalCmd.ExBarOnlyOne(false);
-                ImGui.PopStyleColor(1);
-
+                using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+                {
+                    if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) InternalCmd.ExBarOnlyOne(true);
+                    if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) InternalCmd.ExBarOnlyOne(false);
+                }
 
                 Helpers.BumpCursorY(20f * Helpers.Scale);
-                ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-                ImGui.Text(onlyOne ? Strings.SeparateEx.BarPosition() : Strings.SeparateEx.BarPosition("L→R"));
-                ImGui.PopStyleColor(1);
+
+                using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+                {
+                    ImGui.Text(onlyOne ? Strings.SeparateEx.BarPosition() : Strings.SeparateEx.BarPosition("L→R"));
+                }
 
                 ImGui.SameLine();
                 Helpers.BumpCursorX((onlyOne ? 35f : 5f) * Helpers.Scale);
-                ImGui.PushID("resetLRpos");
-                if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.LRpos(-214, -88);
-                ImGui.PopID();
+
+                if (ImGuiComponents.IconButton("resetLRpos", FontAwesomeIcon.UndoAlt)) InternalCmd.LRpos(-214, -88);
 
                 ImGui.SameLine();
-                ImGui.BeginGroup();
+
+                using (ImRaii.Group())
                 {
                     ImGui.SetNextItemWidth(100 * Helpers.Scale);
                     if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
@@ -95,24 +99,22 @@ internal class SeparateEx
 
                     ImGui.SameLine();
                     Helpers.BumpCursorX(4f * Helpers.Scale);
-                    Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV);
+                    Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
                 }
-                ImGui.EndGroup();
 
                 if (!onlyOne)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Helpers.HighlightColor);
-                    ImGui.Text(Strings.SeparateEx.BarPosition("R→L"));
-                    ImGui.PopStyleColor(1);
+                    using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+                    {
+                        ImGui.Text(Strings.SeparateEx.BarPosition("R→L"));
+                    }
 
                     ImGui.SameLine();
                     Helpers.BumpCursorX(5f * Helpers.Scale);
-                    ImGui.PushID("resetRLpos");
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.UndoAlt)) InternalCmd.RLpos(214, -88);
-                    ImGui.PopID();
+                    if (ImGuiComponents.IconButton("resetRLpos", FontAwesomeIcon.UndoAlt)) InternalCmd.RLpos(214, -88);
 
                     ImGui.SameLine();
-                    ImGui.BeginGroup();
+                    using (ImRaii.Group())
                     {
                         ImGui.SetNextItemWidth(100 * Helpers.Scale);
                         if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
@@ -122,9 +124,8 @@ internal class SeparateEx
 
                         ImGui.SameLine();
                         Helpers.BumpCursorX(4f * Helpers.Scale);
-                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV);
+                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV,true);
                     }
-                    ImGui.EndGroup();
                 }
 
                 ImGui.TableNextColumn();
@@ -174,11 +175,8 @@ internal class SeparateEx
 
 
             }
-
-            ImGui.EndTable();
         }
 
         HudOptions.ProfileIndicator();
-        ImGui.EndTabItem();
     }
 }

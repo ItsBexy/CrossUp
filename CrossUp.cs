@@ -41,9 +41,9 @@ internal sealed class CrossUp : IDalamudPlugin
         Events  = new();
         UI      = new();
         HudData = new();
+        Loc     = new();
         ChatCmd = new();
         IPC     = new();
-        Loc     = new();
     }
 
     /// <summary>Indicates that hotbar addons exist, the player is logged in, and the plugin's features can properly run.</summary>

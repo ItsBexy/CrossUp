@@ -2,6 +2,7 @@
 using CrossUp.Game;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using static CrossUp.CrossUp;
 using static Dalamud.Interface.Colors.ImGuiColors;
@@ -67,22 +68,13 @@ internal class Helpers
     internal static void BumpCursorX(float val) => ImGui.SetCursorPosX(ImGui.GetCursorPosX() + val);
     internal static void BumpCursorY(float val) => ImGui.SetCursorPosY(ImGui.GetCursorPosY() + val);
 
-    internal static void WriteIcon(FontAwesomeIcon icon, bool sameLine = false)
+    internal static void WriteIcon(FontAwesomeIcon icon, bool sameLine = false, float offset = 5)
     {
-        if (sameLine) ImGui.SameLine();
-        ImGui.PushFont(UiBuilder.IconFont);
-        ImGui.Text($"{icon.ToIconString()}");
-        ImGui.PopFont();
-    }
-
-    internal static bool BeginIconTabItem(string label, FontAwesomeIcon icon, float width, string tooltip)
-    {
-        ImGui.PushFont(UiBuilder.IconFont);
-        ImGui.SetNextItemWidth(width);
-        var result = ImGui.BeginTabItem($"{icon.ToIconString()}##{label}");
-        ImGui.PopFont();
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip(tooltip);
-        return result;
+        if (sameLine) ImGui.SameLine(0,offset);
+        using (ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            ImGui.Text($"{icon.ToIconString()}");
+        }
     }
 
     internal static void Spacing(int n)

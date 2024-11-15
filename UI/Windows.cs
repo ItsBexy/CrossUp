@@ -1,5 +1,6 @@
 ﻿using System;
 using CrossUp.UI.Tabs;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using static CrossUp.CrossUp;
@@ -42,14 +43,13 @@ internal sealed class SettingsWindow : Window
 
     public override void Draw()
     {
-        if (!ImGui.BeginTabBar("Nav")) return;
-
-        LookAndFeel.DrawTab();
-        SeparateEx.DrawTab();
-        SetSwitching.DrawTab();
-        HudOptions.DrawTab();
-        TextCommands.DrawTab();
-
-        ImGui.EndTabBar();
+        using (ImRaii.TabBar("Nav"))
+        {
+            LookAndFeel.DrawTab();
+            SeparateEx.DrawTab();
+            SetSwitching.DrawTab();
+            HudOptions.DrawTab();
+            TextCommands.DrawTab();
+        }
     }
 }

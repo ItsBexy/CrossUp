@@ -4,6 +4,7 @@ using CrossUp.Features.Layout;
 using CrossUp.Game;
 using CrossUp.Utility;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using static CrossUp.CrossUp;
 using static CrossUp.Utility.Service;
@@ -17,7 +18,8 @@ internal class HudOptions
 
     public static void DrawTab()
     {
-        if (!ImGui.BeginTabItem(Strings.Hud.TabTitle)) return;
+        using var ti = ImRaii.TabItem(Strings.Hud.TabTitle);
+        if (!ti) return;
 
         Helpers.Spacing(2);
         ImGui.Indent(10);
@@ -51,25 +53,27 @@ internal class HudOptions
         ImGui.Text(Strings.Hud.CurrentHudSlot);
 
         ImGui.SameLine();
+
         for (var i = 1; i <= 4; i++)
         {
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
-
-            var current = HudData.CurrentSlot == i;
-            if (current) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
-            if (current) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
-
-            if (ImGui.Button(Strings.NumSymbols[i]))
+            using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
+                                   .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
             {
-                ChatHelper.SendMessage($"/hudlayout {i}");
 
-                if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
-                Layout.Update(true);
-                Color.SetAll();
+                var current = HudData.CurrentSlot == i;
+
+                if (current) col.Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1])
+                                .Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
+
+                if (ImGui.Button(Strings.NumSymbols[i]))
+                {
+                   /* ChatHelper.SendMessage($"/hudlayout {i}");
+
+                    if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
+                    Layout.Update(true);
+                    Color.SetAll();*/
+                }
             }
-
-            ImGui.PopStyleColor(current ? 4 : 2);
 
             if (i != 4) ImGui.SameLine();
         }
@@ -94,8 +98,7 @@ internal class HudOptions
 
         Helpers.BumpCursorY(20f * Helpers.Scale);
 
-
-        if (ImGui.BeginTable("hudcopy", 2, ImGuiTableFlags.SizingFixedFit))
+        using(ImRaii.Table("hudcopy", 2, ImGuiTableFlags.SizingFixedFit))
         {
             ImGui.TableSetupColumn("fromTo", ImGuiTableColumnFlags.WidthFixed, 120F * Helpers.Scale);
             ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
@@ -113,21 +116,21 @@ internal class HudOptions
             Helpers.ColumnRightAlignText($"{Strings.Hud.From.ToUpper()} ");
             ImGui.TableNextColumn();
 
-            ImGui.BeginGroup();
-            for (var i = 0; i <= 4; i++)
-            {
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
-                if (from == i) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
-                if (from == i) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
+            using (ImRaii.Group()) {
+                for (var i = 0; i <= 4; i++)
+                {
+                    using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
+                                           .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
+                    {
+                        if (from == i) col.Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0])
+                                          .Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
 
-                if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
+                        if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
+                    }
 
-                ImGui.PopStyleColor(from == i ? 4 : 2);
-                if (i != 4) ImGui.SameLine();
+                    if (i != 4) ImGui.SameLine();
+                }
             }
-
-            ImGui.EndGroup();
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
@@ -138,21 +141,23 @@ internal class HudOptions
             ImGui.TableNextColumn();
             Helpers.ColumnRightAlignText($"{Strings.Hud.To.ToUpper()} ");
             ImGui.TableNextColumn();
-            ImGui.BeginGroup();
-            for (var i = 0; i <= 4; i++)
+
+
+            using (ImRaii.Group())
             {
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
-                if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
-                if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
+                for (var i = 0; i <= 4; i++)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
+                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
+                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
 
-                if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
+                    if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
 
-                ImGui.PopStyleColor(to == i ? 4 : 2);
-                if (i != 4) ImGui.SameLine();
+                    ImGui.PopStyleColor(to == i ? 4 : 2);
+                    if (i != 4) ImGui.SameLine();
+                }
             }
-
-            ImGui.EndGroup();
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
@@ -174,12 +179,9 @@ internal class HudOptions
                     Color.SetAll();
                 }
             }
-
-            ImGui.EndTable();
         }
 
         ProfileIndicator();
-        ImGui.EndTabItem();
     }
 
     public static void ProfileIndicator()
@@ -193,12 +195,12 @@ internal class HudOptions
         ImGui.SetCursorPosX(Math.Max(30f * Helpers.Scale, windowSize.X - 30f * Helpers.Scale - textSize.X));
         ImGui.SetCursorPosY(Math.Max(400 * Helpers.Scale, windowSize.Y - 30f * Helpers.Scale - textSize.Y));
 
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[p, 1]);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[p, 1]);
-        ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[p, 1]);
-        ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[p, 0]);
-
-        ImGui.Button(text);
-        ImGui.PopStyleColor(4);
+        using (ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[p, 1])
+                     .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[p, 1])
+                     .Push(ImGuiCol.Button, Helpers.ColorSchemes[p, 1])
+                     .Push(ImGuiCol.Text, Helpers.ColorSchemes[p, 0]))
+        {
+            ImGui.Button(text);
+        }
     }
 }

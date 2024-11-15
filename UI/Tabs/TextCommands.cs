@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 
 namespace CrossUp.UI.Tabs;
@@ -9,22 +10,30 @@ internal class TextCommands
 {
     internal static void DrawTab()
     {
-        if (!Helpers.BeginIconTabItem("textcommands", FontAwesomeIcon.Terminal, 23f * Helpers.Scale, "Text Commands")) return;
+        using var f = ImRaii.PushFont(UiBuilder.IconFont);
+        using var ti = ImRaii.TabItem($"{FontAwesomeIcon.Terminal.ToIconString()}##textcommands");
+        f.Pop();
 
-        ImGui.BeginTable("textCommandList", 1, ImGuiTableFlags.ScrollY);
-        ImGui.TableNextColumn();
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Text Commands");
+        }
 
-        Helpers.Spacing(2);
-        ImGui.Indent(10);
+        if (!ti) return;
 
-        ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.TextCommands.Header.ToUpper());
+        using (ImRaii.Table("textCommandList", 1, ImGuiTableFlags.ScrollY))
+        {
+            ImGui.TableNextColumn();
 
-        Helpers.Spacing(2);
+            Helpers.Spacing(2);
+            ImGui.Indent(10);
 
-        foreach (var command in CommandList) command.Describe();
+            ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.TextCommands.Header.ToUpper());
 
-        ImGui.EndTable();
-        ImGui.EndTabItem();
+            Helpers.Spacing(2);
+
+            foreach (var command in CommandList) command.Describe();
+        }
     }
 
     private readonly struct TextCommand(string input, string description, Argument[]? arguments = null)
