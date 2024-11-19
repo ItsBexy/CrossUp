@@ -1,5 +1,4 @@
-﻿using Dalamud.Game;
-using Dalamud.IoC;
+﻿using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -16,6 +15,5 @@ internal class Service
     [PluginService] internal static ICommandManager CommandManager           { get; private set; }
     [PluginService] internal static ICondition Condition                     { get; private set; }
     [PluginService] internal static IPluginLog Log                           { get; private set; }
-    [PluginService] internal static ISigScanner SigScanner                   { get; private set; }
     [PluginService] internal static IAddonLifecycle AddonLifecycle           { get; private set; }
 }

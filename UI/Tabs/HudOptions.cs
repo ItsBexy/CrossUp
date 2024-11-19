@@ -67,11 +67,11 @@ internal class HudOptions
 
                 if (ImGui.Button(Strings.NumSymbols[i]))
                 {
-                   /* ChatHelper.SendMessage($"/hudlayout {i}");
+                    ChatHelper.SendMessage($"/hudlayout {i}");
 
                     if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
                     Layout.Update(true);
-                    Color.SetAll();*/
+                    Color.SetAll();
                 }
             }
 
@@ -98,32 +98,44 @@ internal class HudOptions
 
         Helpers.BumpCursorY(20f * Helpers.Scale);
 
-        using(ImRaii.Table("hudcopy", 2, ImGuiTableFlags.SizingFixedFit))
+        HudCopyTable(from, to);
+
+        ProfileIndicator();
+    }
+
+    private static void HudCopyTable(int from, int to)
+    {
+        using var table = ImRaii.Table("hudcopy", 2, ImGuiTableFlags.SizingFixedFit);
+        if (!table.Success) return;
+
+        ImGui.TableSetupColumn("fromTo", ImGuiTableColumnFlags.WidthFixed, 120F * Helpers.Scale);
+        ImGui.TableSetupColumn("hudControls", ImGuiTableColumnFlags.WidthFixed);
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
+
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey3);
+        Helpers.ColumnCentredText(Strings.Hud.CopySettings.ToUpper());
+        ImGui.PopStyleColor(1);
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        Helpers.ColumnRightAlignText($"{Strings.Hud.From.ToUpper()} ");
+        ImGui.TableNextColumn();
+
+        using (var gr = ImRaii.Group())
         {
-            ImGui.TableSetupColumn("fromTo", ImGuiTableColumnFlags.WidthFixed, 120F * Helpers.Scale);
-            ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.TableNextColumn();
-
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey3);
-            Helpers.ColumnCentredText(Strings.Hud.CopySettings.ToUpper());
-            ImGui.PopStyleColor(1);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            Helpers.ColumnRightAlignText($"{Strings.Hud.From.ToUpper()} ");
-            ImGui.TableNextColumn();
-
-            using (ImRaii.Group()) {
+            if (gr.Success)
+            {
                 for (var i = 0; i <= 4; i++)
                 {
                     using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
-                                           .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
+                               .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
                     {
-                        if (from == i) col.Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0])
-                                          .Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
+                        if (from == i)
+                            col.Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0])
+                                .Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
 
                         if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
                     }
@@ -131,19 +143,21 @@ internal class HudOptions
                     if (i != 4) ImGui.SameLine();
                 }
             }
+        }
 
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.TableNextColumn();
-            Helpers.ColumnCentredText("");
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
+        Helpers.ColumnCentredText("");
 
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            Helpers.ColumnRightAlignText($"{Strings.Hud.To.ToUpper()} ");
-            ImGui.TableNextColumn();
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        Helpers.ColumnRightAlignText($"{Strings.Hud.To.ToUpper()} ");
+        ImGui.TableNextColumn();
 
-
-            using (ImRaii.Group())
+        using (var gr = ImRaii.Group())
+        {
+            if (gr.Success)
             {
                 for (var i = 0; i <= 4; i++)
                 {
@@ -158,30 +172,24 @@ internal class HudOptions
                     if (i != 4) ImGui.SameLine();
                 }
             }
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.TableNextColumn();
-
-            ImGui.Spacing();
-            var label = $"   {Strings.Hud.Copy.ToUpper()}   ";
-
-            if (ImGui.Button(label))
-            {
-                if (CopyTo != CopyFrom)
-                {
-                    Config.Profiles[CopyTo] = new(Config.Profiles[CopyFrom]);
-
-                    Log.Info($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
-
-                    if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
-                    Layout.Update(true);
-                    Color.SetAll();
-                }
-            }
         }
 
-        ProfileIndicator();
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
+
+        ImGui.Spacing();
+        var label = $"   {Strings.Hud.Copy.ToUpper()}   ";
+
+        if (!ImGui.Button(label) || CopyTo == CopyFrom) return;
+
+        Config.Profiles[CopyTo] = new(Config.Profiles[CopyFrom]);
+
+        Log.Info($"Copying configs from Profile {Strings.NumSymbols[CopyFrom]} to Profile {Strings.NumSymbols[CopyTo]}");
+
+        if (!Features.Layout.SeparateEx.Ready) Features.Layout.SeparateEx.Disable();
+        Layout.Update(true);
+        Color.SetAll();
     }
 
     public static void ProfileIndicator()

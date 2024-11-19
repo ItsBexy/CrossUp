@@ -21,19 +21,19 @@ internal class TextCommands
 
         if (!ti) return;
 
-        using (ImRaii.Table("textCommandList", 1, ImGuiTableFlags.ScrollY))
-        {
-            ImGui.TableNextColumn();
+        using var table = ImRaii.Table("textCommandList", 1, ImGuiTableFlags.ScrollY);
+        if (!table.Success) return;
 
-            Helpers.Spacing(2);
-            ImGui.Indent(10);
+        ImGui.TableNextColumn();
 
-            ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.TextCommands.Header.ToUpper());
+        Helpers.Spacing(2);
+        ImGui.Indent(10);
 
-            Helpers.Spacing(2);
+        ImGui.TextColored(ImGuiColors.DalamudGrey3, Strings.TextCommands.Header.ToUpper());
 
-            foreach (var command in CommandList) command.Describe();
-        }
+        Helpers.Spacing(2);
+
+        foreach (var command in CommandList) command.Describe();
     }
 
     private readonly struct TextCommand(string input, string description, Argument[]? arguments = null)

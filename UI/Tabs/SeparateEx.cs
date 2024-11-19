@@ -44,136 +44,147 @@ internal class SeparateEx
         Helpers.Spacing(2);
         ImGui.Indent(10);
 
-        using (ImRaii.Table("BarBorrowDesc", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
+        using (var table = ImRaii.Table("BarBorrowDesc", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
         {
-            ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("gap", ImGuiTableColumnFlags.WidthFixed, 20f * Helpers.Scale);
-            ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-
-            using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+            if (table.Success)
             {
-                if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) InternalCmd.ExBarOn(sepExBar);
-            }
+                ImGui.TableSetupColumn("leftCol", ImGuiTableColumnFlags.WidthFixed);
+                ImGui.TableSetupColumn("gap", ImGuiTableColumnFlags.WidthFixed, 20f * Helpers.Scale);
+                ImGui.TableSetupColumn("rightCol", ImGuiTableColumnFlags.WidthFixed);
 
-            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2))
-            {
-                ImGui.TextWrapped(Strings.SeparateEx.SepExWarning);
-            }
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
 
-            Helpers.BumpCursorY(20f * Helpers.Scale);
-
-            if (sepExBar)
-            {
                 using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
                 {
-                    if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne)) InternalCmd.ExBarOnlyOne(true);
-                    if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) InternalCmd.ExBarOnlyOne(false);
+                    if (ImGui.Checkbox(Strings.SeparateEx.DisplayExSeparately, ref sepExBar)) InternalCmd.ExBarOn(sepExBar);
+                }
+
+                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey2))
+                {
+                    ImGui.TextWrapped(Strings.SeparateEx.SepExWarning);
                 }
 
                 Helpers.BumpCursorY(20f * Helpers.Scale);
 
-                using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
-                {
-                    ImGui.Text(onlyOne ? Strings.SeparateEx.BarPosition() : Strings.SeparateEx.BarPosition("L→R"));
-                }
-
-                ImGui.SameLine();
-                Helpers.BumpCursorX((onlyOne ? 35f : 5f) * Helpers.Scale);
-
-                if (ImGuiComponents.IconButton("resetLRpos", FontAwesomeIcon.UndoAlt)) InternalCmd.LRpos(-214, -88);
-
-                ImGui.SameLine();
-
-                using (ImRaii.Group())
-                {
-                    ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
-
-                    Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
-
-                    ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                    if (ImGui.InputInt("##LRY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
-
-                    ImGui.SameLine();
-                    Helpers.BumpCursorX(4f * Helpers.Scale);
-                    Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
-                }
-
-                if (!onlyOne)
+                if (sepExBar)
                 {
                     using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
                     {
-                        ImGui.Text(Strings.SeparateEx.BarPosition("R→L"));
+                        if (ImGui.RadioButton(Strings.SeparateEx.ShowOnlyOneBar, onlyOne))
+                            InternalCmd.ExBarOnlyOne(true);
+                        if (ImGui.RadioButton(Strings.SeparateEx.ShowBoth, !onlyOne)) InternalCmd.ExBarOnlyOne(false);
+                    }
+
+                    Helpers.BumpCursorY(20f * Helpers.Scale);
+
+                    using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+                    {
+                        ImGui.Text(onlyOne ? Strings.SeparateEx.BarPosition() : Strings.SeparateEx.BarPosition("L→R"));
                     }
 
                     ImGui.SameLine();
-                    Helpers.BumpCursorX(5f * Helpers.Scale);
-                    if (ImGuiComponents.IconButton("resetRLpos", FontAwesomeIcon.UndoAlt)) InternalCmd.RLpos(214, -88);
+                    Helpers.BumpCursorX((onlyOne ? 35f : 5f) * Helpers.Scale);
+
+                    if (ImGuiComponents.IconButton("resetLRpos", FontAwesomeIcon.UndoAlt)) InternalCmd.LRpos(-214, -88);
 
                     ImGui.SameLine();
-                    using (ImRaii.Group())
+
+                    using (var gr = ImRaii.Group())
                     {
-                        ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
-                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
-                        ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                        if (ImGui.InputInt("##RLY", ref rlY)) InternalCmd.RLpos(rlX, rlY);
-
-                        ImGui.SameLine();
-                        Helpers.BumpCursorX(4f * Helpers.Scale);
-                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV,true);
-                    }
-                }
-
-                ImGui.TableNextColumn();
-
-                ImGui.TableNextColumn();
-                ImGui.Spacing();
-                ImGui.Text(Strings.SeparateEx.SelectTwoBars.ToUpper());
-                ImGui.Spacing();
-
-                for (var i = 1; i < 10; i++)
-                {
-                    if (borrowBars[i] || borrowCount < 2)
-                    {
-                        if (ImGui.Checkbox($"##using{i + 1}", ref borrowBars[i]))
+                        if (gr.Success)
                         {
-                            if (borrowBars[i])
-                            {
-                                if (Config.LRborrow <= 0) Config.LRborrow = i;
-                                else if (Config.RLborrow <= 0) Config.RLborrow = i;
+                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                            if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
 
-                                Features.Layout.SeparateEx.Reset();
-                                Features.Layout.SeparateEx.EnableIfReady();
-                            }
-                            else
-                            {
-                                if (Config.LRborrow == i) Config.LRborrow = -1;
-                                else if (Config.RLborrow == i) Config.RLborrow = -1;
+                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
-                                Features.Layout.SeparateEx.Reset();
-                                Layout.Update();
-                            }
+                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                            if (ImGui.InputInt("##LRY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
 
-                            Config.Save();
+                            ImGui.SameLine();
+                            Helpers.BumpCursorX(4f * Helpers.Scale);
+                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
                         }
                     }
-                    else
+
+                    if (!onlyOne)
                     {
-                        var disabled = false;
-                        ImGui.Checkbox("##disabled", ref disabled);
+                        using (ImRaii.PushColor(ImGuiCol.Text, Helpers.HighlightColor))
+                        {
+                            ImGui.Text(Strings.SeparateEx.BarPosition("R→L"));
+                        }
+
+                        ImGui.SameLine();
+                        Helpers.BumpCursorX(5f * Helpers.Scale);
+                        if (ImGuiComponents.IconButton("resetRLpos", FontAwesomeIcon.UndoAlt))
+                            InternalCmd.RLpos(214, -88);
+
+                        ImGui.SameLine();
+                        using (var gr = ImRaii.Group())
+                        {
+                            if (gr.Success)
+                            {
+                                ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                                if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
+                                Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
+                                ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                                if (ImGui.InputInt("##RLY", ref rlY)) InternalCmd.RLpos(rlX, rlY);
+
+                                ImGui.SameLine();
+                                Helpers.BumpCursorX(4f * Helpers.Scale);
+                                Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
+                            }
+                        }
                     }
 
-                    ImGui.SameLine();
-                    var visible = GameConfig.Hotbar.GetVis(i);
-                    var labelColor = visible ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
-                    ImGui.TextColored(labelColor, Strings.SeparateEx.HotbarN(i + 1));
+                    ImGui.TableNextColumn();
+
+                    ImGui.TableNextColumn();
+                    ImGui.Spacing();
+                    ImGui.Text(Strings.SeparateEx.SelectTwoBars.ToUpper());
+                    ImGui.Spacing();
+
+                    for (var i = 1; i < 10; i++)
+                    {
+                        if (borrowBars[i] || borrowCount < 2)
+                        {
+                            if (ImGui.Checkbox($"##using{i + 1}", ref borrowBars[i]))
+                            {
+                                if (borrowBars[i])
+                                {
+                                    if (Config.LRborrow <= 0) Config.LRborrow = i;
+                                    else if (Config.RLborrow <= 0) Config.RLborrow = i;
+
+                                    Features.Layout.SeparateEx.Reset();
+                                    Features.Layout.SeparateEx.EnableIfReady();
+                                }
+                                else
+                                {
+                                    if (Config.LRborrow == i) Config.LRborrow = -1;
+                                    else if (Config.RLborrow == i) Config.RLborrow = -1;
+
+                                    Features.Layout.SeparateEx.Reset();
+                                    Layout.Update();
+                                }
+
+                                Config.Save();
+                            }
+                        }
+                        else
+                        {
+                            var disabled = false;
+                            ImGui.Checkbox("##disabled", ref disabled);
+                        }
+
+                        ImGui.SameLine();
+                        var visible = GameConfig.Hotbar.GetVis(i);
+                        var labelColor = visible ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudGrey3;
+                        ImGui.TextColored(labelColor, Strings.SeparateEx.HotbarN(i + 1));
+                    }
+
+
                 }
-
-
             }
         }
 

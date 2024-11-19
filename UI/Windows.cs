@@ -43,13 +43,13 @@ internal sealed class SettingsWindow : Window
 
     public override void Draw()
     {
-        using (ImRaii.TabBar("Nav"))
-        {
-            LookAndFeel.DrawTab();
-            SeparateEx.DrawTab();
-            SetSwitching.DrawTab();
-            HudOptions.DrawTab();
-            TextCommands.DrawTab();
-        }
+        using var tb = ImRaii.TabBar("Nav");
+        if (!tb.Success) return;
+
+        LookAndFeel.DrawTab();
+        SeparateEx.DrawTab();
+        SetSwitching.DrawTab();
+        HudOptions.DrawTab();
+        TextCommands.DrawTab();
     }
 }

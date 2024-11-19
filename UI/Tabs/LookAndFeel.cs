@@ -13,61 +13,66 @@ internal class LookAndFeel
 {
     public static void DrawTab()
     {
-        using var lfTab = ImRaii.TabItem(Strings.LookAndFeel.TabTitle);
+        using var ti = ImRaii.TabItem(Strings.LookAndFeel.TabTitle);
 
-        if (!lfTab) return;
+        if (!ti) return;
 
         ImGui.Spacing();
 
-        using (ImRaii.TabBar("LookFeelSubTabs"))
+        using (var tb = ImRaii.TabBar("LookFeelSubTabs"))
         {
-            using (var layoutTab = ImRaii.TabItem(Strings.LookAndFeel.CrossHotbarLayout))
+            if (tb.Success)
             {
-                if (layoutTab)
-                {
-                    ImGui.Spacing();
-                    ImGui.Indent(10);
-
-                    using (ImRaii.Table("Layout", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
-                    {
-                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
-                        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed);
-                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
-                        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed);
-
-                        Rows.LRsplit();
-                        Rows.Padlock();
-                        Rows.SetNumText();
-                        Rows.ChangeSetDisplay();
-                        Rows.TriggerText();
-                        Rows.UnassignedSlots();
-                        Rows.CombatFade();
-                    }
-                }
+                LayoutSubTab();
+                ColorSubTab();
             }
-
-            using (var colorTab = ImRaii.TabItem(Strings.LookAndFeel.Colors))
-            {
-                if (colorTab)
-                {
-                    ImGui.Spacing();
-                    ImGui.Indent(10);
-
-                    using (ImRaii.Table("Colors", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX))
-                    {
-                        ImGui.TableSetupColumn("labels", ImGuiTableColumnFlags.WidthFixed);
-                        ImGui.TableSetupColumn("controls", ImGuiTableColumnFlags.WidthFixed);
-
-                        Rows.BarHighlightColor();
-                        Rows.ButtonColor();
-                        Rows.TextColor();
-                    }
-                }
-            }
-
         }
 
         HudOptions.ProfileIndicator();
+    }
+
+    private static void ColorSubTab()
+    {
+        using var ti = ImRaii.TabItem(Strings.LookAndFeel.Colors);
+        if (!ti) return;
+
+        ImGui.Spacing();
+        ImGui.Indent(10);
+
+        using var table = ImRaii.Table("Colors", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX);
+        if (!table.Success) return;
+
+        ImGui.TableSetupColumn("colorLabels", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("colorControls", ImGuiTableColumnFlags.WidthFixed);
+
+        Rows.BarHighlightColor();
+        Rows.ButtonColor();
+        Rows.TextColor();
+    }
+
+    private static void LayoutSubTab()
+    {
+        using var ti = ImRaii.TabItem(Strings.LookAndFeel.CrossHotbarLayout);
+        if (!ti) return;
+
+        ImGui.Spacing();
+        ImGui.Indent(10);
+
+        using var table = ImRaii.Table("Layout", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX);
+        if (!table.Success) return;
+
+        ImGui.TableSetupColumn("layoutLabels", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("reset", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("layoutControls", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("hide", ImGuiTableColumnFlags.WidthFixed);
+
+        Rows.LRsplit();
+        Rows.Padlock();
+        Rows.SetNumText();
+        Rows.ChangeSetDisplay();
+        Rows.TriggerText();
+        Rows.UnassignedSlots();
+        Rows.CombatFade();
     }
 
     private static class Rows
@@ -265,16 +270,21 @@ internal class LookAndFeel
 
             ImGui.TableNextColumn();
 
-            using (ImRaii.Group())
+            using (var gr = ImRaii.Group())
             {
-                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
-                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
+                if (gr.Success)
+                {
+                    ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
+                    ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
+                }
             }
 
             ImGui.SameLine();
 
-            using (ImRaii.Group())
+            using (var gr = ImRaii.Group())
             {
+                if (!gr.Success) return;
+
                 ImGui.SetNextItemWidth(100 * Helpers.Scale);
                 if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
                 ImGui.SetNextItemWidth(100 * Helpers.Scale);
