@@ -22,7 +22,7 @@ namespace CrossUp.Game.Hotbar
             try
             {
                 var reArgs = (AddonReceiveEventArgs)args;
-                var barBase = (AddonActionBarBase*)args.Addon;
+                var barBase = (AddonActionBarBase*)args.Addon.Address;
 
                 switch (reArgs.AtkEventType)
                 {
@@ -90,7 +90,7 @@ namespace CrossUp.Game.Hotbar
             public static void OnUpdate(AddonEvent type, AddonArgs args)
             {
                 if (!IsSetUp) return;
-                var barBase = (AddonActionBarBase*)args.Addon;
+                var barBase = (AddonActionBarBase*)args.Addon.Address;
                 try
                 {
                     if (Job.HasChanged)
@@ -133,11 +133,11 @@ namespace CrossUp.Game.Hotbar
 
                     if (args.AddonName == LR.BorrowBar.Base.AddonName)
                     {
-                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CooldownPartIdsLR);
+                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon.Address, args.AddonName, true), ref CooldownPartIdsLR);
                     }
                     else if (args.AddonName == RL.BorrowBar.Base.AddonName)
                     {
-                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon, args.AddonName, true), ref CooldownPartIdsRL);
+                        FlashCheck(new BaseWrapper((AtkUnitBase*)args.Addon.Address, args.AddonName, true), ref CooldownPartIdsRL);
                     }
                 }
                 catch (Exception ex)

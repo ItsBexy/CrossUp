@@ -24,7 +24,7 @@ namespace CrossUp.Utility
     {
         /// <param name="addonName">The internal name of a UI Addon</param>
         /// <param name="fromEvent">Whether this unitBase was triggered by an AddonLifeCycle listener (bypasses null-checks)</param>
-        public BaseWrapper(string addonName, bool fromEvent = false) : this((AtkUnitBase*)GameGui.GetAddonByName(addonName), addonName, fromEvent)
+        public BaseWrapper(string addonName, bool fromEvent = false) : this((AtkUnitBase*)GameGui.GetAddonByName(addonName).Address, addonName, fromEvent)
         {
         }
 
@@ -36,7 +36,7 @@ namespace CrossUp.Utility
         {
             if (FromEvent) return !posCheck || UnitBase->X != 0 || UnitBase->Y != 0;
 
-            var unitBase = (AtkUnitBase*)GameGui.GetAddonByName(AddonName);
+            var unitBase = (AtkUnitBase*)GameGui.GetAddonByName(AddonName).Address;
             return unitBase != null &&
                    unitBase->UldManager.NodeListSize > 0 &&
                    unitBase->RootNode != null &&

@@ -51,7 +51,7 @@ namespace CrossUp.Game
         {
             if (!Profile.CombatFadeInOut) return;
 
-            var show = Condition.Any(ConditionFlag.InCombat, ConditionFlag.Crafting, ConditionFlag.PreparingToCraft, ConditionFlag.Crafting40, ConditionFlag.Fishing, ConditionFlag.Gathering, ConditionFlag.Gathering42, ConditionFlag.PvPDisplayActive);
+            var show = Condition.Any(ConditionFlag.InCombat, ConditionFlag.Crafting, ConditionFlag.PreparingToCraft, ConditionFlag.ExecutingCraftingAction, ConditionFlag.Fishing, ConditionFlag.Gathering, ConditionFlag.ExecutingGatheringAction, ConditionFlag.PvPDisplayActive);
             CombatFader.FadeTween.Begin(show);
         }
 
