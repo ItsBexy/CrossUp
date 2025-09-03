@@ -36,7 +36,7 @@ internal sealed class HudData : IDisposable
         return SetHudLayoutHook!.Original(addonConfig, hudSlot, unk1, unk2);
     }
 
-    public static unsafe int CurrentSlot => UIModule->GetAddonConfig()->ModuleData->CurrentHudLayout + 1;
+    public static unsafe int CurrentSlot => UIModule->GetAddonConfig()->ActiveDataSet->CurrentHudLayout + 1;
 
     /// <summary>Whether <see cref="AdjustXHBHudNode"/> has already run and completed</summary>
     private static bool HudChecked;

@@ -53,7 +53,7 @@ internal static unsafe class Actions
             ref var hotbar = ref barID == 19 ? ref RaptureModule->PetCrossHotbar : ref RaptureModule->Hotbars[barID];
             var span = hotbar.Slots;
 
-            if (span == null) return contents;
+            if (span.IsEmpty) return contents;
 
             for (var i = 0; i < slotCount; i++)
             {
