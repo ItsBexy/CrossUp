@@ -126,22 +126,19 @@ internal class HudOptions
 
         using (var gr = ImRaii.Group())
         {
-            if (gr.Success)
+            for (var i = 0; i <= 4; i++)
             {
-                for (var i = 0; i <= 4; i++)
+                using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
+                           .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
                 {
-                    using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
-                               .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
-                    {
-                        if (from == i)
-                            col.Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0])
-                                .Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
+                    if (from == i)
+                        col.Push(ImGuiCol.Text, Helpers.ColorSchemes[i, 0])
+                            .Push(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
 
-                        if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
-                    }
-
-                    if (i != 4) ImGui.SameLine();
+                    if (ImGui.Button($"{Strings.NumSymbols[i]}##From{i}")) CopyFrom = i;
                 }
+
+                if (i != 4) ImGui.SameLine();
             }
         }
 
@@ -157,20 +154,17 @@ internal class HudOptions
 
         using (var gr = ImRaii.Group())
         {
-            if (gr.Success)
+            for (var i = 4; i >= 0; i--)
             {
-                for (var i = 0; i <= 4; i++)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
-                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
-                    if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
+                if (to == i) ImGui.PushStyleColor(ImGuiCol.Button, Helpers.ColorSchemes[i, 1]);
+                if (to == i) ImGui.PushStyleColor(ImGuiCol.Text, Helpers.ColorSchemes[i, 0]);
 
-                    if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
+                if (ImGui.Button($"{Strings.NumSymbols[i]}##To{i}")) CopyTo = i;
 
-                    ImGui.PopStyleColor(to == i ? 4 : 2);
-                    if (i != 4) ImGui.SameLine();
-                }
+                ImGui.PopStyleColor(to == i ? 4 : 2);
+                if (i != 4) ImGui.SameLine();
             }
         }
 

@@ -2,6 +2,7 @@
 using CrossUp.Features;
 using CrossUp.Features.Layout;
 using CrossUp.Utility;
+using Dalamud.Game.Addon.Events;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -26,7 +27,7 @@ namespace CrossUp.Game.Hotbar
 
                 switch (reArgs.AtkEventType)
                 {
-                    case 53 or 57 when SeparateEx.Ready && GameConfig.Cross.Enabled:
+                    case AddonEventType.DragDropInsert or AddonEventType.DragDropDiscard when SeparateEx.Ready && GameConfig.Cross.Enabled:
                     {
                         var barID = barBase->RaptureHotbarId;
                         Log.Debug($"Drag/Drop Event on Bar #{barID} ({(barID > 9 ? $"Cross Hotbar Set {barID - 9}" : $"Hotbar {barID + 1}")}); Handling on next Update event");
@@ -34,7 +35,7 @@ namespace CrossUp.Game.Hotbar
                         DragDrop = true;
                         break;
                     }
-                    case 50 when IsSetUp:
+                    case AddonEventType.DragDropBegin when IsSetUp:
                         CrossLayout.UnassignedSlotVis(true);
                         break;
                 }
