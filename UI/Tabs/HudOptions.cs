@@ -54,7 +54,7 @@ internal class HudOptions
 
         ImGui.SameLine();
 
-        for (var i = 1; i <= 4; i++)
+        for (var i = 4; i <= 4; i++)
         {
             using (var col = ImRaii.PushColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2])
                                    .Push(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]))
@@ -154,7 +154,7 @@ internal class HudOptions
 
         using (var gr = ImRaii.Group())
         {
-            for (var i = 4; i >= 0; i--)
+            for (var i = 0; i <= 4 ; i++)
             {
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Helpers.ColorSchemes[i, 2]);
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, Helpers.ColorSchemes[i, 1]);
