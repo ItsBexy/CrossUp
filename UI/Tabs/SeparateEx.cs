@@ -92,20 +92,17 @@ internal class SeparateEx
 
                     using (var gr = ImRaii.Group())
                     {
-                        if (gr.Success)
-                        {
-                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                            if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
+                        ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                        if (ImGui.InputInt("##LRX", ref lrX)) InternalCmd.LRpos(lrX, lrY);
 
-                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
+                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
 
-                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                            if (ImGui.InputInt("##LRY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
+                        ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                        if (ImGui.InputInt("##LRY", ref lrY)) InternalCmd.LRpos(lrX, lrY);
 
-                            ImGui.SameLine();
-                            Helpers.BumpCursorX(4f * Helpers.Scale);
-                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
-                        }
+                        ImGui.SameLine();
+                        Helpers.BumpCursorX(4f * Helpers.Scale);
+                        Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
                     }
 
                     if (!onlyOne)
@@ -123,18 +120,15 @@ internal class SeparateEx
                         ImGui.SameLine();
                         using (var gr = ImRaii.Group())
                         {
-                            if (gr.Success)
-                            {
-                                ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                                if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
-                                Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
-                                ImGui.SetNextItemWidth(100 * Helpers.Scale);
-                                if (ImGui.InputInt("##RLY", ref rlY)) InternalCmd.RLpos(rlX, rlY);
+                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                            if (ImGui.InputInt("##RLX", ref rlX)) InternalCmd.RLpos(rlX, rlY);
+                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltH, true);
+                            ImGui.SetNextItemWidth(100 * Helpers.Scale);
+                            if (ImGui.InputInt("##RLY", ref rlY)) InternalCmd.RLpos(rlX, rlY);
 
-                                ImGui.SameLine();
-                                Helpers.BumpCursorX(4f * Helpers.Scale);
-                                Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
-                            }
+                            ImGui.SameLine();
+                            Helpers.BumpCursorX(4f * Helpers.Scale);
+                            Helpers.WriteIcon(FontAwesomeIcon.ArrowsAltV, true);
                         }
                     }
 

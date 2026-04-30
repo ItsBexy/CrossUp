@@ -272,19 +272,14 @@ internal class LookAndFeel
 
             using (var gr = ImRaii.Group())
             {
-                if (gr.Success)
-                {
-                    ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
-                    ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
-                }
+                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.InCombat);
+                ImGui.TextColored(Helpers.HighlightColor, Strings.LookAndFeel.OutOfCombat);
             }
 
             ImGui.SameLine();
 
             using (var gr = ImRaii.Group())
             {
-                if (!gr.Success) return;
-
                 ImGui.SetNextItemWidth(100 * Helpers.Scale);
                 if (ImGui.SliderInt("##CombatTransparency", ref tIn, 0, 100)) InternalCmd.CombatFade(fade, tIn, tOut);
                 ImGui.SetNextItemWidth(100 * Helpers.Scale);

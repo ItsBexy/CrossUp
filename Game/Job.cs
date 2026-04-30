@@ -7,13 +7,13 @@ namespace CrossUp.Game;
 internal class Job
 {
     /// <summary>Gets player's current Job ID</summary>
-    internal static uint Current => LastKnown = ClientState.LocalPlayer?.ClassJob.RowId ?? 0u;
+    internal static uint Current => LastKnown = ObjectTable.LocalPlayer?.ClassJob.RowId ?? 0u;
 
     /// <summary>The player's last known job</summary>
     private static uint LastKnown;
 
     /// <summary>The Job abbreviation</summary>
-    private static string Abbr => ClientState.LocalPlayer?.ClassJob.Value.Abbreviation.ToString() ?? "???";
+    private static string Abbr => ObjectTable.LocalPlayer?.ClassJob.Value.Abbreviation.ToString() ?? "???";
 
     /// <summary>The current PvP state</summary>
     public static bool IsPvP => WasPvP = ClientState.IsPvP || ClientState.TerritoryType == 250;
@@ -30,7 +30,7 @@ internal class Job
     /// <summary>Updates the stored bars when the player changes jobs</summary>
     public static void HandleJobChange()
     {
-        Log.Debug($"Job Update: {ClientState.LocalPlayer?.ClassJob.RowId} {Abbr} ({(IsPvP ? "PvP" : "PvE")})");
+        Log.Debug($"Job Update: {ObjectTable.LocalPlayer?.ClassJob.RowId} {Abbr} ({(IsPvP ? "PvP" : "PvE")})");
         if (!SeparateEx.Ready) return;
 
         Actions.Store(Bars.LR.ID);
