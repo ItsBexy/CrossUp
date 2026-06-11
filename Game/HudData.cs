@@ -13,7 +13,7 @@ namespace CrossUp.Game;
 
 internal sealed class HudData : IDisposable
 {
-    private unsafe delegate nint SetHudLayout(AddonConfig* addonConfig, uint layoutIndex, bool unk1 = false, bool unk2 = true);
+    private unsafe delegate void SetHudLayout(AddonConfig* addonConfig, uint layoutIndex, bool unk1 = false, bool unk2 = true);
 
     [Signature("E8 ?? ?? ?? ?? 33 C0 EB 12", DetourName = nameof(OnSetHudLayout))]
     private readonly Hook<SetHudLayout>? SetHudLayoutHook = null;
@@ -30,10 +30,10 @@ internal sealed class HudData : IDisposable
     private static readonly unsafe AgentHUDLayout* HudLayout = UIModule->GetAgentModule()->GetAgentHUDLayout();
 
     /// <summary>Responds to the HUD layout being changed/set/saved</summary>
-    public unsafe nint OnSetHudLayout(AddonConfig* addonConfig, uint hudSlot, bool unk1 = false, bool unk2 = true)
+    public unsafe void OnSetHudLayout(AddonConfig* addonConfig, uint hudSlot, bool unk1 = false, bool unk2 = true)
     {
         if (CrossUp.IsSetUp) Layout.ScheduleNudges(3, 10);
-        return SetHudLayoutHook!.Original(addonConfig, hudSlot, unk1, unk2);
+        SetHudLayoutHook!.Original(addonConfig, hudSlot, unk1, unk2);
     }
 
     public static unsafe int CurrentSlot => UIModule->GetAddonConfig()->ActiveDataSet->CurrentHudLayout + 1;
